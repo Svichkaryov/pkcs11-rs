@@ -191,6 +191,7 @@ impl TryFrom<CK_HW_FEATURE_TYPE> for HwFeatureType {
 #[repr(transparent)]
 pub struct KeyType(CK_KEY_TYPE);
 
+// TODO: add missing types
 /// Identifies the classes (or types) of objects that Cryptoki recognizes.
 impl KeyType {
     /// RSA key.
@@ -275,10 +276,6 @@ impl KeyType {
     pub const GOSTR3411: KeyType = KeyType(CKK_GOSTR3411);
     /// GOST28147 key.
     pub const GOST28147: KeyType = KeyType(CKK_GOST28147);
-    /// GOST28147_UA key.
-    pub const GOST28147_UA: KeyType = KeyType(CKK_GOST28147_UA);
-    /// DSTU4145 key.
-    pub const DSTU4145: KeyType = KeyType(CKK_DSTU4145);
 }
 
 impl KeyType {
@@ -353,8 +350,6 @@ impl std::fmt::Display for KeyType {
             KeyType::GOSTR3410 => write!(f, "CKK_GOSTR3410"),
             KeyType::GOSTR3411 => write!(f, "CKK_GOSTR3411"),
             KeyType::GOST28147 => write!(f, "CKK_GOST28147"),
-            KeyType::GOST28147_UA => write!(f, "CKK_GOST28147_UA"),
-            KeyType::DSTU4145 => write!(f, "CKK_DSTU4145"),
             _ if self.is_vendor_defined() => {
                 write!(f, "CKK_VENDOR_DEFINED({:#x})", self.0)
             }
@@ -409,8 +404,6 @@ impl TryFrom<CK_KEY_TYPE> for KeyType {
             CKK_GOSTR3410 => Ok(KeyType::GOSTR3410),
             CKK_GOSTR3411 => Ok(KeyType::GOSTR3411),
             CKK_GOST28147 => Ok(KeyType::GOST28147),
-            CKK_GOST28147_UA => Ok(KeyType::GOST28147_UA),
-            CKK_DSTU4145 => Ok(KeyType::DSTU4145),
             CKK_VENDOR_DEFINED..=CK_KEY_TYPE::MAX => Ok(KeyType(key_type)),
             _ => Err(Error::NotSupported),
         }
@@ -927,8 +920,6 @@ impl AttributeType {
         AttributeType(CKA_SUPPORTED_CMS_ATTRIBUTES);
     /// A list of mechanisms allowed to be used with this key.
     pub const ALLOWED_MECHANISMS: AttributeType = AttributeType(CKA_ALLOWED_MECHANISMS);
-    /// The S-Box parameter set used with GOST 28147 cipher.
-    pub const GOST_SBOXES: AttributeType = AttributeType(CKA_GOST_SBOXES);
 }
 
 impl AttributeType {
@@ -1086,7 +1077,6 @@ impl std::fmt::Display for AttributeType {
                 write!(f, "CKA_SUPPORTED_CMS_ATTRIBUTES")
             }
             AttributeType::ALLOWED_MECHANISMS => write!(f, "CKA_ALLOWED_MECHANISMS"),
-            AttributeType::GOST_SBOXES => write!(f, "CKA_GOST_SBOXES"),
             _ if self.is_vendor_defined() => {
                 write!(f, "CKA_VENDOR_DEFINED({:#x})", self.0)
             }
@@ -1204,7 +1194,6 @@ impl TryFrom<CK_ATTRIBUTE_TYPE> for AttributeType {
             CKA_DEFAULT_CMS_ATTRIBUTES => Ok(AttributeType::DEFAULT_CMS_ATTRIBUTES),
             CKA_SUPPORTED_CMS_ATTRIBUTES => Ok(AttributeType::SUPPORTED_CMS_ATTRIBUTES),
             CKA_ALLOWED_MECHANISMS => Ok(AttributeType::ALLOWED_MECHANISMS),
-            CKA_GOST_SBOXES => Ok(AttributeType::GOST_SBOXES),
             CKA_VENDOR_DEFINED..=CK_ATTRIBUTE_TYPE::MAX => {
                 Ok(AttributeType(attribute_type))
             }

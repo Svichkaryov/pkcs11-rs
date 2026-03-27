@@ -40,6 +40,10 @@ impl MechanismType {
     pub const DSA_SHA256: MechanismType = MechanismType(CKM_DSA_SHA256);
     pub const DSA_SHA384: MechanismType = MechanismType(CKM_DSA_SHA384);
     pub const DSA_SHA512: MechanismType = MechanismType(CKM_DSA_SHA512);
+    pub const DSA_SHA3_224: MechanismType = MechanismType(CKM_DSA_SHA3_224);
+    pub const DSA_SHA3_256: MechanismType = MechanismType(CKM_DSA_SHA3_256);
+    pub const DSA_SHA3_384: MechanismType = MechanismType(CKM_DSA_SHA3_384);
+    pub const DSA_SHA3_512: MechanismType = MechanismType(CKM_DSA_SHA3_512);
 
     pub const DH_PKCS_KEY_PAIR_GEN: MechanismType =
         MechanismType(CKM_DH_PKCS_KEY_PAIR_GEN);
@@ -81,6 +85,19 @@ impl MechanismType {
         MechanismType(CKM_SHA512_T_HMAC_GENERAL);
     pub const SHA512_T_KEY_DERIVATION: MechanismType =
         MechanismType(CKM_SHA512_T_KEY_DERIVATION);
+
+    pub const SHA3_256_RSA_PKCS: MechanismType = MechanismType(CKM_SHA3_256_RSA_PKCS);
+    pub const SHA3_384_RSA_PKCS: MechanismType = MechanismType(CKM_SHA3_384_RSA_PKCS);
+    pub const SHA3_512_RSA_PKCS: MechanismType = MechanismType(CKM_SHA3_512_RSA_PKCS);
+    pub const SHA3_256_RSA_PKCS_PSS: MechanismType =
+        MechanismType(CKM_SHA3_256_RSA_PKCS_PSS);
+    pub const SHA3_384_RSA_PKCS_PSS: MechanismType =
+        MechanismType(CKM_SHA3_384_RSA_PKCS_PSS);
+    pub const SHA3_512_RSA_PKCS_PSS: MechanismType =
+        MechanismType(CKM_SHA3_512_RSA_PKCS_PSS);
+    pub const SHA3_224_RSA_PKCS: MechanismType = MechanismType(CKM_SHA3_224_RSA_PKCS);
+    pub const SHA3_224_RSA_PKCS_PSS: MechanismType =
+        MechanismType(CKM_SHA3_224_RSA_PKCS_PSS);
 
     pub const RC2_KEY_GEN: MechanismType = MechanismType(CKM_RC2_KEY_GEN);
     pub const RC2_ECB: MechanismType = MechanismType(CKM_RC2_ECB);
@@ -165,6 +182,27 @@ impl MechanismType {
     pub const ACTI: MechanismType = MechanismType(CKM_ACTI);
     pub const ACTI_KEY_GEN: MechanismType = MechanismType(CKM_ACTI_KEY_GEN);
 
+    pub const SHA3_256: MechanismType = MechanismType(CKM_SHA3_256);
+    pub const SHA3_256_HMAC: MechanismType = MechanismType(CKM_SHA3_256_HMAC);
+    pub const SHA3_256_HMAC_GENERAL: MechanismType =
+        MechanismType(CKM_SHA3_256_HMAC_GENERAL);
+    pub const SHA3_256_KEY_GEN: MechanismType = MechanismType(CKM_SHA3_256_KEY_GEN);
+    pub const SHA3_224: MechanismType = MechanismType(CKM_SHA3_224);
+    pub const SHA3_224_HMAC: MechanismType = MechanismType(CKM_SHA3_224_HMAC);
+    pub const SHA3_224_HMAC_GENERAL: MechanismType =
+        MechanismType(CKM_SHA3_224_HMAC_GENERAL);
+    pub const SHA3_224_KEY_GEN: MechanismType = MechanismType(CKM_SHA3_224_KEY_GEN);
+    pub const SHA3_384: MechanismType = MechanismType(CKM_SHA3_384);
+    pub const SHA3_384_HMAC: MechanismType = MechanismType(CKM_SHA3_384_HMAC);
+    pub const SHA3_384_HMAC_GENERAL: MechanismType =
+        MechanismType(CKM_SHA3_384_HMAC_GENERAL);
+    pub const SHA3_384_KEY_GEN: MechanismType = MechanismType(CKM_SHA3_384_KEY_GEN);
+    pub const SHA3_512: MechanismType = MechanismType(CKM_SHA3_512);
+    pub const SHA3_512_HMAC: MechanismType = MechanismType(CKM_SHA3_512_HMAC);
+    pub const SHA3_512_HMAC_GENERAL: MechanismType =
+        MechanismType(CKM_SHA3_512_HMAC_GENERAL);
+    pub const SHA3_512_KEY_GEN: MechanismType = MechanismType(CKM_SHA3_512_KEY_GEN);
+
     pub const CAST_KEY_GEN: MechanismType = MechanismType(CKM_CAST_KEY_GEN);
     pub const CAST_ECB: MechanismType = MechanismType(CKM_CAST_ECB);
     pub const CAST_CBC: MechanismType = MechanismType(CKM_CAST_CBC);
@@ -240,6 +278,14 @@ impl MechanismType {
         MechanismType(CKM_SHA512_KEY_DERIVATION);
     pub const SHA224_KEY_DERIVATION: MechanismType =
         MechanismType(CKM_SHA224_KEY_DERIVATION);
+    pub const SHA3_256_KEY_DERIVATION: MechanismType =
+        MechanismType(CKM_SHA3_256_KEY_DERIVATION);
+    pub const SHA3_224_KEY_DERIVATION: MechanismType =
+        MechanismType(CKM_SHA3_224_KEY_DERIVATION);
+    pub const SHA3_384_KEY_DERIVATION: MechanismType =
+        MechanismType(CKM_SHA3_384_KEY_DERIVATION);
+    pub const SHA3_512_KEY_DERIVATION: MechanismType =
+        MechanismType(CKM_SHA3_512_KEY_DERIVATION);
 
     pub const PBE_MD2_DES_CBC: MechanismType = MechanismType(CKM_PBE_MD2_DES_CBC);
     pub const PBE_MD5_DES_CBC: MechanismType = MechanismType(CKM_PBE_MD5_DES_CBC);
@@ -366,6 +412,11 @@ impl MechanismType {
     pub const ECDSA_SHA384: MechanismType = MechanismType(CKM_ECDSA_SHA384);
     pub const ECDSA_SHA512: MechanismType = MechanismType(CKM_ECDSA_SHA512);
 
+    pub const ECDSA_SHA3_224: MechanismType = MechanismType(CKM_ECDSA_SHA3_224);
+    pub const ECDSA_SHA3_256: MechanismType = MechanismType(CKM_ECDSA_SHA3_256);
+    pub const ECDSA_SHA3_384: MechanismType = MechanismType(CKM_ECDSA_SHA3_384);
+    pub const ECDSA_SHA3_512: MechanismType = MechanismType(CKM_ECDSA_SHA3_512);
+
     pub const ECDH1_DERIVE: MechanismType = MechanismType(CKM_ECDH1_DERIVE);
     pub const ECDH1_COFACTOR_DERIVE: MechanismType =
         MechanismType(CKM_ECDH1_COFACTOR_DERIVE);
@@ -458,76 +509,6 @@ impl MechanismType {
     pub const RSA_PKCS_TPM_1_1: MechanismType = MechanismType(CKM_RSA_PKCS_TPM_1_1);
     pub const RSA_PKCS_OAEP_TPM_1_1: MechanismType =
         MechanismType(CKM_RSA_PKCS_OAEP_TPM_1_1);
-
-    // SHA3
-    pub const SHA3_256_RSA_PKCS: MechanismType = MechanismType(CKM_SHA3_256_RSA_PKCS);
-    pub const SHA3_384_RSA_PKCS: MechanismType = MechanismType(CKM_SHA3_384_RSA_PKCS);
-    pub const SHA3_512_RSA_PKCS: MechanismType = MechanismType(CKM_SHA3_512_RSA_PKCS);
-    pub const SHA3_256_RSA_PKCS_PSS: MechanismType =
-        MechanismType(CKM_SHA3_256_RSA_PKCS_PSS);
-    pub const SHA3_384_RSA_PKCS_PSS: MechanismType =
-        MechanismType(CKM_SHA3_384_RSA_PKCS_PSS);
-    pub const SHA3_512_RSA_PKCS_PSS: MechanismType =
-        MechanismType(CKM_SHA3_512_RSA_PKCS_PSS);
-    pub const SHA3_224_RSA_PKCS: MechanismType = MechanismType(CKM_SHA3_224_RSA_PKCS);
-    pub const SHA3_224_RSA_PKCS_PSS: MechanismType =
-        MechanismType(CKM_SHA3_224_RSA_PKCS_PSS);
-    pub const DSA_SHA3_224: MechanismType = MechanismType(CKM_DSA_SHA3_224);
-    pub const DSA_SHA3_256: MechanismType = MechanismType(CKM_DSA_SHA3_256);
-    pub const DSA_SHA3_384: MechanismType = MechanismType(CKM_DSA_SHA3_384);
-    pub const DSA_SHA3_512: MechanismType = MechanismType(CKM_DSA_SHA3_512);
-    pub const ECDSA_SHA3_224: MechanismType = MechanismType(CKM_ECDSA_SHA3_224);
-    pub const ECDSA_SHA3_256: MechanismType = MechanismType(CKM_ECDSA_SHA3_256);
-    pub const ECDSA_SHA3_384: MechanismType = MechanismType(CKM_ECDSA_SHA3_384);
-    pub const ECDSA_SHA3_512: MechanismType = MechanismType(CKM_ECDSA_SHA3_512);
-    pub const SHA3_256: MechanismType = MechanismType(CKM_SHA3_256);
-    pub const SHA3_256_HMAC: MechanismType = MechanismType(CKM_SHA3_256_HMAC);
-    pub const SHA3_256_HMAC_GENERAL: MechanismType =
-        MechanismType(CKM_SHA3_256_HMAC_GENERAL);
-    pub const SHA3_256_KEY_GEN: MechanismType = MechanismType(CKM_SHA3_256_KEY_GEN);
-    pub const SHA3_224: MechanismType = MechanismType(CKM_SHA3_224);
-    pub const SHA3_224_HMAC: MechanismType = MechanismType(CKM_SHA3_224_HMAC);
-    pub const SHA3_224_HMAC_GENERAL: MechanismType =
-        MechanismType(CKM_SHA3_224_HMAC_GENERAL);
-    pub const SHA3_224_KEY_GEN: MechanismType = MechanismType(CKM_SHA3_224_KEY_GEN);
-    pub const SHA3_384: MechanismType = MechanismType(CKM_SHA3_384);
-    pub const SHA3_384_HMAC: MechanismType = MechanismType(CKM_SHA3_384_HMAC);
-    pub const SHA3_384_HMAC_GENERAL: MechanismType =
-        MechanismType(CKM_SHA3_384_HMAC_GENERAL);
-    pub const SHA3_384_KEY_GEN: MechanismType = MechanismType(CKM_SHA3_384_KEY_GEN);
-    pub const SHA3_512: MechanismType = MechanismType(CKM_SHA3_512);
-    pub const SHA3_512_HMAC: MechanismType = MechanismType(CKM_SHA3_512_HMAC);
-    pub const SHA3_512_HMAC_GENERAL: MechanismType =
-        MechanismType(CKM_SHA3_512_HMAC_GENERAL);
-    pub const SHA3_512_KEY_GEN: MechanismType = MechanismType(CKM_SHA3_512_KEY_GEN);
-    pub const SHA3_256_KEY_DERIVE: MechanismType = MechanismType(CKM_SHA3_256_KEY_DERIVE);
-    pub const SHA3_224_KEY_DERIVE: MechanismType = MechanismType(CKM_SHA3_224_KEY_DERIVE);
-    pub const SHA3_384_KEY_DERIVE: MechanismType = MechanismType(CKM_SHA3_384_KEY_DERIVE);
-    pub const SHA3_512_KEY_DERIVE: MechanismType = MechanismType(CKM_SHA3_512_KEY_DERIVE);
-    // !SHA3
-
-    // pkcs11tua
-    pub const GOST28147_ECB_UA: MechanismType = MechanismType(CKM_GOST28147_ECB_UA);
-    pub const GOST28147_CNT: MechanismType = MechanismType(CKM_GOST28147_CNT);
-    pub const GOST28147_CFB: MechanismType = MechanismType(CKM_GOST28147_CFB);
-    pub const GOST28147_MAC_UA: MechanismType = MechanismType(CKM_GOST28147_MAC_UA);
-    pub const GOST28147_MAC_GENERAL: MechanismType =
-        MechanismType(CKM_GOST28147_MAC_GENERAL);
-    pub const GOST28147_WRAP: MechanismType = MechanismType(CKM_GOST28147_WRAP);
-
-    pub const GOST34311: MechanismType = MechanismType(CKM_GOST34311);
-
-    pub const DSTU4145: MechanismType = MechanismType(CKM_DSTU4145);
-    pub const GOST34311_DSTU4145: MechanismType = MechanismType(CKM_GOST34311_DSTU4145);
-
-    pub const GOST28147_KEY_GEN_UA: MechanismType =
-        MechanismType(CKM_GOST28147_KEY_GEN_UA);
-    pub const DSTU4145_KEY_PAIR_GEN: MechanismType =
-        MechanismType(CKM_DSTU4145_KEY_PAIR_GEN);
-    pub const DSTUDH_DERIVE: MechanismType = MechanismType(CKM_DSTUDH_DERIVE);
-    pub const DSTUDH_COFACTOR_DERIVE: MechanismType =
-        MechanismType(CKM_DSTUDH_COFACTOR_DERIVE);
-    // !pkcs11tua
 }
 
 impl MechanismType {
@@ -591,6 +572,10 @@ impl std::fmt::Display for MechanismType {
             MechanismType::DSA_SHA256 => write!(f, "CKM_DSA_SHA256"),
             MechanismType::DSA_SHA384 => write!(f, "CKM_DSA_SHA384"),
             MechanismType::DSA_SHA512 => write!(f, "CKM_DSA_SHA512"),
+            MechanismType::DSA_SHA3_224 => write!(f, "CKM_DSA_SHA3_224"),
+            MechanismType::DSA_SHA3_256 => write!(f, "CKM_DSA_SHA3_256"),
+            MechanismType::DSA_SHA3_384 => write!(f, "CKM_DSA_SHA3_384"),
+            MechanismType::DSA_SHA3_512 => write!(f, "CKM_DSA_SHA3_512"),
 
             MechanismType::DH_PKCS_KEY_PAIR_GEN => write!(f, "CKM_DH_PKCS_KEY_PAIR_GEN"),
             MechanismType::DH_PKCS_DERIVE => write!(f, "CKM_DH_PKCS_DERIVE"),
@@ -638,6 +623,23 @@ impl std::fmt::Display for MechanismType {
             }
             MechanismType::SHA512_T_KEY_DERIVATION => {
                 write!(f, "CKM_SHA512_T_KEY_DERIVATION")
+            }
+
+            MechanismType::SHA3_256_RSA_PKCS => write!(f, "CKM_SHA3_256_RSA_PKCS"),
+            MechanismType::SHA3_384_RSA_PKCS => write!(f, "CKM_SHA3_384_RSA_PKCS"),
+            MechanismType::SHA3_512_RSA_PKCS => write!(f, "CKM_SHA3_512_RSA_PKCS"),
+            MechanismType::SHA3_256_RSA_PKCS_PSS => {
+                write!(f, "CKM_SHA3_256_RSA_PKCS_PSS")
+            }
+            MechanismType::SHA3_384_RSA_PKCS_PSS => {
+                write!(f, "CKM_SHA3_384_RSA_PKCS_PSS")
+            }
+            MechanismType::SHA3_512_RSA_PKCS_PSS => {
+                write!(f, "CKM_SHA3_512_RSA_PKCS_PSS")
+            }
+            MechanismType::SHA3_224_RSA_PKCS => write!(f, "CKM_SHA3_224_RSA_PKCS"),
+            MechanismType::SHA3_224_RSA_PKCS_PSS => {
+                write!(f, "CKM_SHA3_224_RSA_PKCS_PSS")
             }
 
             MechanismType::RC2_KEY_GEN => write!(f, "CKM_RC2_KEY_GEN"),
@@ -724,6 +726,31 @@ impl std::fmt::Display for MechanismType {
             MechanismType::HOTP => write!(f, "CKM_HOTP"),
             MechanismType::ACTI => write!(f, "CKM_ACTI"),
             MechanismType::ACTI_KEY_GEN => write!(f, "CKM_ACTI_KEY_GEN"),
+
+            MechanismType::SHA3_256 => write!(f, "CKM_SHA3_256"),
+            MechanismType::SHA3_256_HMAC => write!(f, "CKM_SHA3_256_HMAC"),
+            MechanismType::SHA3_256_HMAC_GENERAL => {
+                write!(f, "CKM_SHA3_256_HMAC_GENERAL")
+            }
+            MechanismType::SHA3_256_KEY_GEN => write!(f, "CKM_SHA3_256_KEY_GEN"),
+            MechanismType::SHA3_224 => write!(f, "CKM_SHA3_224"),
+            MechanismType::SHA3_224_HMAC => write!(f, "CKM_SHA3_224_HMAC"),
+            MechanismType::SHA3_224_HMAC_GENERAL => {
+                write!(f, "CKM_SHA3_224_HMAC_GENERAL")
+            }
+            MechanismType::SHA3_224_KEY_GEN => write!(f, "CKM_SHA3_224_KEY_GEN"),
+            MechanismType::SHA3_384 => write!(f, "CKM_SHA3_384"),
+            MechanismType::SHA3_384_HMAC => write!(f, "CKM_SHA3_384_HMAC"),
+            MechanismType::SHA3_384_HMAC_GENERAL => {
+                write!(f, "CKM_SHA3_384_HMAC_GENERAL")
+            }
+            MechanismType::SHA3_384_KEY_GEN => write!(f, "CKM_SHA3_384_KEY_GEN"),
+            MechanismType::SHA3_512 => write!(f, "CKM_SHA3_512"),
+            MechanismType::SHA3_512_HMAC => write!(f, "CKM_SHA3_512_HMAC"),
+            MechanismType::SHA3_512_HMAC_GENERAL => {
+                write!(f, "CKM_SHA3_512_HMAC_GENERAL")
+            }
+            MechanismType::SHA3_512_KEY_GEN => write!(f, "CKM_SHA3_512_KEY_GEN"),
 
             MechanismType::CAST_KEY_GEN => write!(f, "CKM_CAST_KEY_GEN"),
             MechanismType::CAST_ECB => write!(f, "CKM_CAST_ECB"),
@@ -814,6 +841,18 @@ impl std::fmt::Display for MechanismType {
             }
             MechanismType::SHA224_KEY_DERIVATION => {
                 write!(f, "CKM_SHA224_KEY_DERIVATION")
+            }
+            MechanismType::SHA3_256_KEY_DERIVATION => {
+                write!(f, "CKM_SHA3_256_KEY_DERIVATION")
+            }
+            MechanismType::SHA3_224_KEY_DERIVATION => {
+                write!(f, "CKM_SHA3_224_KEY_DERIVATION")
+            }
+            MechanismType::SHA3_384_KEY_DERIVATION => {
+                write!(f, "CKM_SHA3_384_KEY_DERIVATION")
+            }
+            MechanismType::SHA3_512_KEY_DERIVATION => {
+                write!(f, "CKM_SHA3_512_KEY_DERIVATION")
             }
 
             MechanismType::PBE_MD2_DES_CBC => write!(f, "CKM_PBE_MD2_DES_CBC"),
@@ -957,6 +996,11 @@ impl std::fmt::Display for MechanismType {
             MechanismType::ECDSA_SHA384 => write!(f, "CKM_ECDSA_SHA384"),
             MechanismType::ECDSA_SHA512 => write!(f, "CKM_ECDSA_SHA512"),
 
+            MechanismType::ECDSA_SHA3_224 => write!(f, "CKM_ECDSA_SHA3_224"),
+            MechanismType::ECDSA_SHA3_256 => write!(f, "CKM_ECDSA_SHA3_256"),
+            MechanismType::ECDSA_SHA3_384 => write!(f, "CKM_ECDSA_SHA3_384"),
+            MechanismType::ECDSA_SHA3_512 => write!(f, "CKM_ECDSA_SHA3_512"),
+
             MechanismType::ECDH1_DERIVE => write!(f, "CKM_ECDH1_DERIVE"),
             MechanismType::ECDH1_COFACTOR_DERIVE => {
                 write!(f, "CKM_ECDH1_COFACTOR_DERIVE")
@@ -1056,85 +1100,6 @@ impl std::fmt::Display for MechanismType {
                 write!(f, "CKM_RSA_PKCS_OAEP_TPM_1_1")
             }
 
-            // SHA3
-            MechanismType::SHA3_256_RSA_PKCS => write!(f, "CKM_SHA3_256_RSA_PKCS"),
-            MechanismType::SHA3_384_RSA_PKCS => write!(f, "CKM_SHA3_384_RSA_PKCS"),
-            MechanismType::SHA3_512_RSA_PKCS => write!(f, "CKM_SHA3_512_RSA_PKCS"),
-            MechanismType::SHA3_256_RSA_PKCS_PSS => {
-                write!(f, "CKM_SHA3_256_RSA_PKCS_PSS")
-            }
-            MechanismType::SHA3_384_RSA_PKCS_PSS => {
-                write!(f, "CKM_SHA3_384_RSA_PKCS_PSS")
-            }
-            MechanismType::SHA3_512_RSA_PKCS_PSS => {
-                write!(f, "CKM_SHA3_512_RSA_PKCS_PSS")
-            }
-            MechanismType::SHA3_224_RSA_PKCS => write!(f, "CKM_SHA3_224_RSA_PKCS"),
-            MechanismType::SHA3_224_RSA_PKCS_PSS => {
-                write!(f, "CKM_SHA3_224_RSA_PKCS_PSS")
-            }
-            MechanismType::DSA_SHA3_224 => write!(f, "CKM_DSA_SHA3_224"),
-            MechanismType::DSA_SHA3_256 => write!(f, "CKM_DSA_SHA3_256"),
-            MechanismType::DSA_SHA3_384 => write!(f, "CKM_DSA_SHA3_384"),
-            MechanismType::DSA_SHA3_512 => write!(f, "CKM_DSA_SHA3_512"),
-            MechanismType::ECDSA_SHA3_224 => write!(f, "CKM_ECDSA_SHA3_224"),
-            MechanismType::ECDSA_SHA3_256 => write!(f, "CKM_ECDSA_SHA3_256"),
-            MechanismType::ECDSA_SHA3_384 => write!(f, "CKM_ECDSA_SHA3_384"),
-            MechanismType::ECDSA_SHA3_512 => write!(f, "CKM_ECDSA_SHA3_512"),
-            MechanismType::SHA3_256 => write!(f, "CKM_SHA3_256"),
-            MechanismType::SHA3_256_HMAC => write!(f, "CKM_SHA3_256_HMAC"),
-            MechanismType::SHA3_256_HMAC_GENERAL => {
-                write!(f, "CKM_SHA3_256_HMAC_GENERAL")
-            }
-            MechanismType::SHA3_256_KEY_GEN => write!(f, "CKM_SHA3_256_KEY_GEN"),
-            MechanismType::SHA3_224 => write!(f, "CKM_SHA3_224"),
-            MechanismType::SHA3_224_HMAC => write!(f, "CKM_SHA3_224_HMAC"),
-            MechanismType::SHA3_224_HMAC_GENERAL => {
-                write!(f, "CKM_SHA3_224_HMAC_GENERAL")
-            }
-            MechanismType::SHA3_224_KEY_GEN => write!(f, "CKM_SHA3_224_KEY_GEN"),
-            MechanismType::SHA3_384 => write!(f, "CKM_SHA3_384"),
-            MechanismType::SHA3_384_HMAC => write!(f, "CKM_SHA3_384_HMAC"),
-            MechanismType::SHA3_384_HMAC_GENERAL => {
-                write!(f, "CKM_SHA3_384_HMAC_GENERAL")
-            }
-            MechanismType::SHA3_384_KEY_GEN => write!(f, "CKM_SHA3_384_KEY_GEN"),
-            MechanismType::SHA3_512 => write!(f, "CKM_SHA3_512"),
-            MechanismType::SHA3_512_HMAC => write!(f, "CKM_SHA3_512_HMAC"),
-            MechanismType::SHA3_512_HMAC_GENERAL => {
-                write!(f, "CKM_SHA3_512_HMAC_GENERAL")
-            }
-            MechanismType::SHA3_512_KEY_GEN => write!(f, "CKM_SHA3_512_KEY_GEN"),
-            MechanismType::SHA3_256_KEY_DERIVE => write!(f, "CKM_SHA3_256_KEY_DERIVE"),
-            MechanismType::SHA3_224_KEY_DERIVE => write!(f, "CKM_SHA3_224_KEY_DERIVE"),
-            MechanismType::SHA3_384_KEY_DERIVE => write!(f, "CKM_SHA3_384_KEY_DERIVE"),
-            MechanismType::SHA3_512_KEY_DERIVE => write!(f, "CKM_SHA3_512_KEY_DERIVE"),
-            // !SHA3
-
-            // pkcs11tua
-            MechanismType::GOST28147_ECB_UA => write!(f, "CKM_GOST28147_ECB_UA"),
-            MechanismType::GOST28147_CNT => write!(f, "CKM_GOST28147_CNT"),
-            MechanismType::GOST28147_CFB => write!(f, "CKM_GOST28147_CFB"),
-            MechanismType::GOST28147_MAC_UA => write!(f, "CKM_GOST28147_MAC_UA"),
-            MechanismType::GOST28147_MAC_GENERAL => {
-                write!(f, "CKM_GOST28147_MAC_GENERAL")
-            }
-            MechanismType::GOST28147_WRAP => write!(f, "CKM_GOST28147_WRAP"),
-
-            MechanismType::GOST34311 => write!(f, "CKM_GOST34311"),
-
-            MechanismType::DSTU4145 => write!(f, "CKM_DSTU4145"),
-            MechanismType::GOST34311_DSTU4145 => write!(f, "CKM_GOST34311_DSTU4145"),
-
-            MechanismType::GOST28147_KEY_GEN_UA => write!(f, "CKM_GOST28147_KEY_GEN_UA"),
-            MechanismType::DSTU4145_KEY_PAIR_GEN => {
-                write!(f, "CKM_DSTU4145_KEY_PAIR_GEN")
-            }
-            MechanismType::DSTUDH_DERIVE => write!(f, "CKM_DSTUDH_DERIVE"),
-            MechanismType::DSTUDH_COFACTOR_DERIVE => {
-                write!(f, "CKM_DSTUDH_COFACTOR_DERIVE")
-            }
-            // !pkcs11tua
             _ if self.is_vendor_defined() => {
                 write!(f, "CKM_VENDOR_DEFINED({:#x})", self.0)
             }
@@ -1174,6 +1139,10 @@ impl TryFrom<CK_MECHANISM_TYPE> for MechanismType {
             CKM_DSA_SHA256 => Ok(MechanismType::DSA_SHA256),
             CKM_DSA_SHA384 => Ok(MechanismType::DSA_SHA384),
             CKM_DSA_SHA512 => Ok(MechanismType::DSA_SHA512),
+            CKM_DSA_SHA3_224 => Ok(MechanismType::DSA_SHA3_224),
+            CKM_DSA_SHA3_256 => Ok(MechanismType::DSA_SHA3_256),
+            CKM_DSA_SHA3_384 => Ok(MechanismType::DSA_SHA3_384),
+            CKM_DSA_SHA3_512 => Ok(MechanismType::DSA_SHA3_512),
 
             CKM_DH_PKCS_KEY_PAIR_GEN => Ok(MechanismType::DH_PKCS_KEY_PAIR_GEN),
             CKM_DH_PKCS_DERIVE => Ok(MechanismType::DH_PKCS_DERIVE),
@@ -1206,6 +1175,15 @@ impl TryFrom<CK_MECHANISM_TYPE> for MechanismType {
             CKM_SHA512_T_HMAC => Ok(MechanismType::SHA512_T_HMAC),
             CKM_SHA512_T_HMAC_GENERAL => Ok(MechanismType::SHA512_T_HMAC_GENERAL),
             CKM_SHA512_T_KEY_DERIVATION => Ok(MechanismType::SHA512_T_KEY_DERIVATION),
+
+            CKM_SHA3_256_RSA_PKCS => Ok(MechanismType::SHA3_256_RSA_PKCS),
+            CKM_SHA3_384_RSA_PKCS => Ok(MechanismType::SHA3_384_RSA_PKCS),
+            CKM_SHA3_512_RSA_PKCS => Ok(MechanismType::SHA3_512_RSA_PKCS),
+            CKM_SHA3_256_RSA_PKCS_PSS => Ok(MechanismType::SHA3_256_RSA_PKCS_PSS),
+            CKM_SHA3_384_RSA_PKCS_PSS => Ok(MechanismType::SHA3_384_RSA_PKCS_PSS),
+            CKM_SHA3_512_RSA_PKCS_PSS => Ok(MechanismType::SHA3_512_RSA_PKCS_PSS),
+            CKM_SHA3_224_RSA_PKCS => Ok(MechanismType::SHA3_224_RSA_PKCS),
+            CKM_SHA3_224_RSA_PKCS_PSS => Ok(MechanismType::SHA3_224_RSA_PKCS_PSS),
 
             CKM_RC2_KEY_GEN => Ok(MechanismType::RC2_KEY_GEN),
             CKM_RC2_ECB => Ok(MechanismType::RC2_ECB),
@@ -1288,6 +1266,23 @@ impl TryFrom<CK_MECHANISM_TYPE> for MechanismType {
             CKM_ACTI => Ok(MechanismType::ACTI),
             CKM_ACTI_KEY_GEN => Ok(MechanismType::ACTI_KEY_GEN),
 
+            CKM_SHA3_256 => Ok(MechanismType::SHA3_256),
+            CKM_SHA3_256_HMAC => Ok(MechanismType::SHA3_256_HMAC),
+            CKM_SHA3_256_HMAC_GENERAL => Ok(MechanismType::SHA3_256_HMAC_GENERAL),
+            CKM_SHA3_256_KEY_GEN => Ok(MechanismType::SHA3_256_KEY_GEN),
+            CKM_SHA3_224 => Ok(MechanismType::SHA3_224),
+            CKM_SHA3_224_HMAC => Ok(MechanismType::SHA3_224_HMAC),
+            CKM_SHA3_224_HMAC_GENERAL => Ok(MechanismType::SHA3_224_HMAC_GENERAL),
+            CKM_SHA3_224_KEY_GEN => Ok(MechanismType::SHA3_224_KEY_GEN),
+            CKM_SHA3_384 => Ok(MechanismType::SHA3_384),
+            CKM_SHA3_384_HMAC => Ok(MechanismType::SHA3_384_HMAC),
+            CKM_SHA3_384_HMAC_GENERAL => Ok(MechanismType::SHA3_384_HMAC_GENERAL),
+            CKM_SHA3_384_KEY_GEN => Ok(MechanismType::SHA3_384_KEY_GEN),
+            CKM_SHA3_512 => Ok(MechanismType::SHA3_512),
+            CKM_SHA3_512_HMAC => Ok(MechanismType::SHA3_512_HMAC),
+            CKM_SHA3_512_HMAC_GENERAL => Ok(MechanismType::SHA3_512_HMAC_GENERAL),
+            CKM_SHA3_512_KEY_GEN => Ok(MechanismType::SHA3_512_KEY_GEN),
+
             CKM_CAST_KEY_GEN => Ok(MechanismType::CAST_KEY_GEN),
             CKM_CAST_ECB => Ok(MechanismType::CAST_ECB),
             CKM_CAST_CBC => Ok(MechanismType::CAST_CBC),
@@ -1346,6 +1341,10 @@ impl TryFrom<CK_MECHANISM_TYPE> for MechanismType {
             CKM_SHA384_KEY_DERIVATION => Ok(MechanismType::SHA384_KEY_DERIVATION),
             CKM_SHA512_KEY_DERIVATION => Ok(MechanismType::SHA512_KEY_DERIVATION),
             CKM_SHA224_KEY_DERIVATION => Ok(MechanismType::SHA224_KEY_DERIVATION),
+            CKM_SHA3_256_KEY_DERIVATION => Ok(MechanismType::SHA3_256_KEY_DERIVATION),
+            CKM_SHA3_224_KEY_DERIVATION => Ok(MechanismType::SHA3_224_KEY_DERIVATION),
+            CKM_SHA3_384_KEY_DERIVATION => Ok(MechanismType::SHA3_384_KEY_DERIVATION),
+            CKM_SHA3_512_KEY_DERIVATION => Ok(MechanismType::SHA3_512_KEY_DERIVATION),
 
             CKM_PBE_MD2_DES_CBC => Ok(MechanismType::PBE_MD2_DES_CBC),
             CKM_PBE_MD5_DES_CBC => Ok(MechanismType::PBE_MD5_DES_CBC),
@@ -1458,6 +1457,11 @@ impl TryFrom<CK_MECHANISM_TYPE> for MechanismType {
             CKM_ECDSA_SHA384 => Ok(MechanismType::ECDSA_SHA384),
             CKM_ECDSA_SHA512 => Ok(MechanismType::ECDSA_SHA512),
 
+            CKM_ECDSA_SHA3_224 => Ok(MechanismType::ECDSA_SHA3_224),
+            CKM_ECDSA_SHA3_256 => Ok(MechanismType::ECDSA_SHA3_256),
+            CKM_ECDSA_SHA3_384 => Ok(MechanismType::ECDSA_SHA3_384),
+            CKM_ECDSA_SHA3_512 => Ok(MechanismType::ECDSA_SHA3_512),
+
             CKM_ECDH1_DERIVE => Ok(MechanismType::ECDH1_DERIVE),
             CKM_ECDH1_COFACTOR_DERIVE => Ok(MechanismType::ECDH1_COFACTOR_DERIVE),
             CKM_ECMQV_DERIVE => Ok(MechanismType::ECMQV_DERIVE),
@@ -1541,63 +1545,6 @@ impl TryFrom<CK_MECHANISM_TYPE> for MechanismType {
             CKM_RSA_PKCS_TPM_1_1 => Ok(MechanismType::RSA_PKCS_TPM_1_1),
             CKM_RSA_PKCS_OAEP_TPM_1_1 => Ok(MechanismType::RSA_PKCS_OAEP_TPM_1_1),
 
-            // SHA3
-            CKM_SHA3_256_RSA_PKCS => Ok(MechanismType::SHA3_256_RSA_PKCS),
-            CKM_SHA3_384_RSA_PKCS => Ok(MechanismType::SHA3_384_RSA_PKCS),
-            CKM_SHA3_512_RSA_PKCS => Ok(MechanismType::SHA3_512_RSA_PKCS),
-            CKM_SHA3_256_RSA_PKCS_PSS => Ok(MechanismType::SHA3_256_RSA_PKCS_PSS),
-            CKM_SHA3_384_RSA_PKCS_PSS => Ok(MechanismType::SHA3_384_RSA_PKCS_PSS),
-            CKM_SHA3_512_RSA_PKCS_PSS => Ok(MechanismType::SHA3_512_RSA_PKCS_PSS),
-            CKM_SHA3_224_RSA_PKCS => Ok(MechanismType::SHA3_224_RSA_PKCS),
-            CKM_SHA3_224_RSA_PKCS_PSS => Ok(MechanismType::SHA3_224_RSA_PKCS_PSS),
-            CKM_DSA_SHA3_224 => Ok(MechanismType::DSA_SHA3_224),
-            CKM_DSA_SHA3_256 => Ok(MechanismType::DSA_SHA3_256),
-            CKM_DSA_SHA3_384 => Ok(MechanismType::DSA_SHA3_384),
-            CKM_DSA_SHA3_512 => Ok(MechanismType::DSA_SHA3_512),
-            CKM_ECDSA_SHA3_224 => Ok(MechanismType::ECDSA_SHA3_224),
-            CKM_ECDSA_SHA3_256 => Ok(MechanismType::ECDSA_SHA3_256),
-            CKM_ECDSA_SHA3_384 => Ok(MechanismType::ECDSA_SHA3_384),
-            CKM_ECDSA_SHA3_512 => Ok(MechanismType::ECDSA_SHA3_512),
-            CKM_SHA3_256 => Ok(MechanismType::SHA3_256),
-            CKM_SHA3_256_HMAC => Ok(MechanismType::SHA3_256_HMAC),
-            CKM_SHA3_256_HMAC_GENERAL => Ok(MechanismType::SHA3_256_HMAC_GENERAL),
-            CKM_SHA3_256_KEY_GEN => Ok(MechanismType::SHA3_256_KEY_GEN),
-            CKM_SHA3_224 => Ok(MechanismType::SHA3_224),
-            CKM_SHA3_224_HMAC => Ok(MechanismType::SHA3_224_HMAC),
-            CKM_SHA3_224_HMAC_GENERAL => Ok(MechanismType::SHA3_224_HMAC_GENERAL),
-            CKM_SHA3_224_KEY_GEN => Ok(MechanismType::SHA3_224_KEY_GEN),
-            CKM_SHA3_384 => Ok(MechanismType::SHA3_384),
-            CKM_SHA3_384_HMAC => Ok(MechanismType::SHA3_384_HMAC),
-            CKM_SHA3_384_HMAC_GENERAL => Ok(MechanismType::SHA3_384_HMAC_GENERAL),
-            CKM_SHA3_384_KEY_GEN => Ok(MechanismType::SHA3_384_KEY_GEN),
-            CKM_SHA3_512 => Ok(MechanismType::SHA3_512),
-            CKM_SHA3_512_HMAC => Ok(MechanismType::SHA3_512_HMAC),
-            CKM_SHA3_512_HMAC_GENERAL => Ok(MechanismType::SHA3_512_HMAC_GENERAL),
-            CKM_SHA3_512_KEY_GEN => Ok(MechanismType::SHA3_512_KEY_GEN),
-            CKM_SHA3_256_KEY_DERIVE => Ok(MechanismType::SHA3_256_KEY_DERIVE),
-            CKM_SHA3_224_KEY_DERIVE => Ok(MechanismType::SHA3_224_KEY_DERIVE),
-            CKM_SHA3_384_KEY_DERIVE => Ok(MechanismType::SHA3_384_KEY_DERIVE),
-            CKM_SHA3_512_KEY_DERIVE => Ok(MechanismType::SHA3_512_KEY_DERIVE),
-            // !SHA3
-
-            // pkcs11tua
-            CKM_GOST28147_ECB_UA => Ok(MechanismType::GOST28147_ECB_UA),
-            CKM_GOST28147_CNT => Ok(MechanismType::GOST28147_CNT),
-            CKM_GOST28147_CFB => Ok(MechanismType::GOST28147_CFB),
-            CKM_GOST28147_MAC_UA => Ok(MechanismType::GOST28147_MAC_UA),
-            CKM_GOST28147_MAC_GENERAL => Ok(MechanismType::GOST28147_MAC_GENERAL),
-            CKM_GOST28147_WRAP => Ok(MechanismType::GOST28147_WRAP),
-
-            CKM_GOST34311 => Ok(MechanismType::GOST34311),
-
-            CKM_DSTU4145 => Ok(MechanismType::DSTU4145),
-            CKM_GOST34311_DSTU4145 => Ok(MechanismType::GOST34311_DSTU4145),
-
-            CKM_GOST28147_KEY_GEN_UA => Ok(MechanismType::GOST28147_KEY_GEN_UA),
-            CKM_DSTU4145_KEY_PAIR_GEN => Ok(MechanismType::DSTU4145_KEY_PAIR_GEN),
-            CKM_DSTUDH_DERIVE => Ok(MechanismType::DSTUDH_DERIVE),
-            CKM_DSTUDH_COFACTOR_DERIVE => Ok(MechanismType::DSTUDH_COFACTOR_DERIVE),
-            // !pkcs11tua
             CKM_VENDOR_DEFINED..=CK_MECHANISM_TYPE::MAX => {
                 Ok(MechanismType(mechanism_type))
             }
@@ -2197,25 +2144,6 @@ pub enum Mechanism<'a> {
     // Sha3_384KeyDerive, // UNDEFINED_T
     // Sha3_512KeyDerive, // UNDEFINED_T
     // !SHA3
-
-    // pkcs11tua
-    Gost28147EcbUa,
-    Gost28147Cnt([u8; 8]),
-    Gost28147Cfb([u8; 8]),
-    Gost28147MacUa,
-    Gost28147MacGeneral(Ulong), // CK_MAC_GENERAL_PARAMS
-    Gost28147Wrap,
-
-    Gost34311(Vec<Byte>), // DER-encoding of the Gost34311Params structure
-
-    Dstu4145,
-    Gost34311Dstu4145,
-
-    Gost28147KeyGenUa,
-    Dstu4145KeyPairGen,
-    DstudhDerive(Ecdh1DeriveParamsDstru4145Indirect<'a>),
-    DstudhCofactorDerive(Ecdh1DeriveParamsDstru4145Indirect<'a>),
-    // !pkcs11tua
     /// Vendor defined.
     VendorDefined {
         mechanism_type: MechanismType,
@@ -2607,19 +2535,6 @@ impl Mechanism<'_> {
             // Mechanism::Sha3_384KeyDerive(_) => MechanismType::SHA3_384_KEY_DERIVE,
             // Mechanism::Sha3_512KeyDerive(_) => MechanismType::SHA3_512_KEY_DERIVE,
             // !SHA3
-            Mechanism::Gost28147EcbUa => MechanismType::GOST28147_ECB_UA,
-            Mechanism::Gost28147Cnt(_) => MechanismType::GOST28147_CNT,
-            Mechanism::Gost28147Cfb(_) => MechanismType::GOST28147_CFB,
-            Mechanism::Gost28147MacUa => MechanismType::GOST28147_MAC_UA,
-            Mechanism::Gost28147MacGeneral(_) => MechanismType::GOST28147_MAC_GENERAL,
-            Mechanism::Gost28147Wrap => MechanismType::GOST28147_WRAP,
-            Mechanism::Gost34311(_) => MechanismType::GOST34311,
-            Mechanism::Dstu4145 => MechanismType::DSTU4145,
-            Mechanism::Gost34311Dstu4145 => MechanismType::GOST34311_DSTU4145,
-            Mechanism::Gost28147KeyGenUa => MechanismType::GOST28147_KEY_GEN_UA,
-            Mechanism::Dstu4145KeyPairGen => MechanismType::DSTU4145_KEY_PAIR_GEN,
-            Mechanism::DstudhDerive(_) => MechanismType::DSTUDH_DERIVE,
-            Mechanism::DstudhCofactorDerive(_) => MechanismType::DSTUDH_COFACTOR_DERIVE,
             Mechanism::VendorDefined { mechanism_type, .. } => *mechanism_type,
         }
     }
@@ -2727,20 +2642,12 @@ impl Mechanism<'_> {
             | Mechanism::DhPkcsParameterGen
             | Mechanism::X9_42DhParameterGen
             | Mechanism::RsaPkcsTpm11
-            | Mechanism::RsaPkcsOaepTpm11
-            | Mechanism::Gost28147EcbUa
-            | Mechanism::Gost28147MacUa
-            | Mechanism::Gost28147Wrap
-            | Mechanism::Dstu4145
-            | Mechanism::Gost34311Dstu4145
-            | Mechanism::Gost28147KeyGenUa
-            | Mechanism::Dstu4145KeyPairGen => std::ptr::null_mut() as CK_VOID_PTR,
+            | Mechanism::RsaPkcsOaepTpm11 => std::ptr::null_mut() as CK_VOID_PTR,
 
             Mechanism::DhPkcsDerive(param)
             | Mechanism::Gostr3410WithGostr3411(param)
             | Mechanism::Gostr3411(param)
-            | Mechanism::Gostr3411Hmac(param)
-            | Mechanism::Gost34311(param) => param.as_ptr() as CK_VOID_PTR,
+            | Mechanism::Gostr3411Hmac(param) => param.as_ptr() as CK_VOID_PTR,
 
             Mechanism::RsaPkcsPss(param)
             | Mechanism::Sha1RsaPkcsPss(param)
@@ -2780,8 +2687,7 @@ impl Mechanism<'_> {
             | Mechanism::AriaMacGeneral(param)
             | Mechanism::SeedMacGeneral(param)
             | Mechanism::AesMacGeneral(param)
-            | Mechanism::AesCmac(param)
-            | Mechanism::Gost28147MacGeneral(param) => param as *const u64 as CK_VOID_PTR,
+            | Mechanism::AesCmac(param) => param as *const u64 as CK_VOID_PTR,
 
             Mechanism::DesCbc(param)
             | Mechanism::DesCbcPad(param)
@@ -2795,9 +2701,7 @@ impl Mechanism<'_> {
             | Mechanism::BlowfishCbcPad(param)
             | Mechanism::Gost28147(param)
             | Mechanism::Gost28147Mac(param)
-            | Mechanism::Gost28147KeyWrap(param)
-            | Mechanism::Gost28147Cnt(param)
-            | Mechanism::Gost28147Cfb(param) => param as *const _ as CK_VOID_PTR,
+            | Mechanism::Gost28147KeyWrap(param) => param as *const _ as CK_VOID_PTR,
 
             Mechanism::AesGmac(param) => param as *const _ as CK_VOID_PTR,
 
@@ -2840,10 +2744,6 @@ impl Mechanism<'_> {
 
             Mechanism::X9_42DhDerive(param) => {
                 param as *const X92_42Dh1DeriveParams as CK_VOID_PTR
-            }
-
-            Mechanism::DstudhDerive(param) | Mechanism::DstudhCofactorDerive(param) => {
-                param as *const Ecdh1DeriveParamsDstru4145Indirect as CK_VOID_PTR
             }
 
             Mechanism::VendorDefined { param, .. } => param
@@ -2956,20 +2856,12 @@ impl Mechanism<'_> {
             | Mechanism::DhPkcsParameterGen
             | Mechanism::X9_42DhParameterGen
             | Mechanism::RsaPkcsTpm11
-            | Mechanism::RsaPkcsOaepTpm11
-            | Mechanism::Gost28147EcbUa
-            | Mechanism::Gost28147MacUa
-            | Mechanism::Gost28147Wrap
-            | Mechanism::Dstu4145
-            | Mechanism::Gost34311Dstu4145
-            | Mechanism::Gost28147KeyGenUa
-            | Mechanism::Dstu4145KeyPairGen => 0 as Ulong,
+            | Mechanism::RsaPkcsOaepTpm11 => 0 as Ulong,
 
             Mechanism::DhPkcsDerive(param)
             | Mechanism::Gostr3410WithGostr3411(param)
             | Mechanism::Gostr3411(param)
-            | Mechanism::Gostr3411Hmac(param)
-            | Mechanism::Gost34311(param) => {
+            | Mechanism::Gostr3411Hmac(param) => {
                 (std::mem::size_of::<Byte>() * param.len()) as Ulong
             }
 
@@ -3013,10 +2905,7 @@ impl Mechanism<'_> {
             | Mechanism::AriaMacGeneral(_param)
             | Mechanism::SeedMacGeneral(_param)
             | Mechanism::AesMacGeneral(_param)
-            | Mechanism::AesCmac(_param)
-            | Mechanism::Gost28147MacGeneral(_param) => {
-                std::mem::size_of::<Ulong>() as Ulong
-            }
+            | Mechanism::AesCmac(_param) => std::mem::size_of::<Ulong>() as Ulong,
 
             Mechanism::DesCbc(_param)
             | Mechanism::DesCbcPad(_param)
@@ -3030,9 +2919,9 @@ impl Mechanism<'_> {
             | Mechanism::BlowfishCbcPad(_param)
             | Mechanism::Gost28147(_param)
             | Mechanism::Gost28147Mac(_param)
-            | Mechanism::Gost28147KeyWrap(_param)
-            | Mechanism::Gost28147Cnt(_param)
-            | Mechanism::Gost28147Cfb(_param) => std::mem::size_of::<[u8; 8]>() as Ulong,
+            | Mechanism::Gost28147KeyWrap(_param) => {
+                std::mem::size_of::<[u8; 8]>() as Ulong
+            }
 
             Mechanism::AesGmac(_param) => std::mem::size_of::<[u8; 12]>() as Ulong,
 
@@ -3077,10 +2966,6 @@ impl Mechanism<'_> {
 
             Mechanism::X9_42DhDerive(_param) => {
                 std::mem::size_of::<X92_42Dh1DeriveParams>() as Ulong
-            }
-
-            Mechanism::DstudhDerive(_param) | Mechanism::DstudhCofactorDerive(_param) => {
-                std::mem::size_of::<Ecdh1DeriveParamsDstru4145Indirect>() as Ulong
             }
 
             Mechanism::VendorDefined { param, .. } => {
@@ -3286,10 +3171,12 @@ impl From<CK_MECHANISM_INFO> for MechanismInfo {
 
 // CK_EC_KDF_TYPE, CK_X9_42_DH_KDF_TYPE
 
+// TODO: add vendor defined
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(transparent)]
 pub struct KeyDerivationFunctionType(CK_ULONG);
 
+// TODO: add missing types
 /// Identifies the classes (or types) of objects that Cryptoki recognizes.
 impl KeyDerivationFunctionType {
     pub const NULL: KeyDerivationFunctionType = KeyDerivationFunctionType(CKD_NULL);
@@ -3309,8 +3196,6 @@ impl KeyDerivationFunctionType {
         KeyDerivationFunctionType(CKD_SHA512_KDF);
     pub const CPDIVERSIFY_KDF: KeyDerivationFunctionType =
         KeyDerivationFunctionType(CKD_CPDIVERSIFY_KDF);
-    pub const GOST34311_KDF: KeyDerivationFunctionType =
-        KeyDerivationFunctionType(CKD_GOST34311_KDF);
 }
 
 impl Deref for KeyDerivationFunctionType {
@@ -3399,10 +3284,7 @@ impl<'a> KeyDerivationFunction<'a> {
         kdf_type: KeyDerivationFunctionType,
         shared_data: Option<&'a [Byte]>,
     ) -> Result<Self> {
-        let shr_data_len = shared_data.map_or(0, <[Byte]>::len);
-        if kdf_type == KeyDerivationFunctionType::GOST34311_KDF && shr_data_len != 64 {
-            return Err(Error::InvalidValue);
-        }
+        let _shr_data_len = shared_data.map_or(0, <[Byte]>::len);
         Ok(Self {
             kdf_type,
             shared_data,
@@ -3497,65 +3379,6 @@ impl<'a> X92_42Dh1DeriveParams<'a> {
             public_data: public_data.as_ptr(),
             _phantom: std::marker::PhantomData,
         }
-    }
-}
-
-// CK_ECDH1_DERIVE_PARAMS_DSTU4145Indirect
-
-/// Structure that provides the parameters for the
-/// [`Mechanism::DstudhDerive`] and [`Mechanism::DstudhCofactorDerive`]
-/// key derivation mechanisms, where each party contributes one key pair.
-#[derive(Copy, Debug, Clone)]
-#[repr(C)]
-pub struct Ecdh1DeriveParamsDstru4145Indirect<'a> {
-    /// Key derivation function used on the shared secret value
-    kdf: KeyDerivationFunctionType,
-    /// The length in bytes of the shared info. [Optional]
-    shared_data_len: Ulong,
-    /// Pointer to some data shared between the two parties [Optional]
-    shared_data: [Byte; 64],
-    /// The length in bytes of the other party's EC public key
-    public_data_len: Ulong,
-    /// Pointer to other party's EC public key value.
-    public_data: [Byte; 72],
-    /// Phantom type
-    _phantom: std::marker::PhantomData<&'a [Byte]>,
-}
-
-impl<'a> Ecdh1DeriveParamsDstru4145Indirect<'a> {
-    /// Construct ECDH derivation parameters.
-    ///
-    /// # Parameters
-    ///
-    /// * `kdf` - The key derivation function to use.
-    ///   `kdf.kdf_type` must be `KeyDerivationFunctionType::CKD_NULL` or
-    ///   `KeyDerivationFunctionType::GOST34311_KDF`.
-    /// * `public_data` - The public key of the other party.
-    ///   MUST be able to accept this value encoded as a raw octet
-    ///   string (as per section A.5.2 of [ANSI X9.62]). A token MAY,
-    ///   in addition, support accepting this value as a DER-encoded
-    ///   [`Attribute::EcPoint`](crate::module::types::Attribute::EcPoint)
-    ///   (as per section E.6 of [ANSI X9.62]) i.e. the same
-    ///   as a CKA_EC_POINT encoding. The calling application is responsible
-    ///   for converting the offered public key to the compressed or
-    ///   uncompressed forms of these encodings if the token does not support
-    ///   the offered form.
-    pub fn new(kdf: KeyDerivationFunction<'a>, public_data: [Byte; 72]) -> Self {
-        let shd_len = kdf.shared_data.map_or(0, <[Byte]>::len);
-        let mut ret = Self {
-            kdf: kdf.kdf_type,
-            shared_data_len: shd_len as Ulong,
-            shared_data: [0; 64],
-            public_data_len: public_data.len() as Ulong,
-            public_data,
-            _phantom: std::marker::PhantomData,
-        };
-        if let Some(shd) = kdf.shared_data {
-            // Checking the lengths of arrays is checked in
-            // [`KeyDerivationFunction::new`](crate::module::types::mechanism)
-            ret.shared_data.copy_from_slice(shd);
-        }
-        ret
     }
 }
 
