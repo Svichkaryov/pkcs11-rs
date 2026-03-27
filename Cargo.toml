@@ -1,0 +1,20 @@
+[package]
+name = "pkcs11"
+version = "0.1.0"
+description = "A Rust implementation of the PKCS#11 API"
+edition = "2021"
+readme = "README.md"
+rust-version = "1.89"
+keywords = ["pkcs11", "cryptoki"]
+categories = ["cryptography"]
+license = "Apache-2.0"
+
+[dependencies]
+libloading = "0.9"
+serial_test = "3.4.0"
+bitflags = "2.11"
+secrecy = "0.10"
+
+[[example]]
+name = "general_info"
+path = "examples/general_info.rs"
