@@ -1110,15 +1110,20 @@ impl From<&Attribute> for CK_ATTRIBUTE {
 
 impl From<&CK_ATTRIBUTE> for bool {
     fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+        if ck_attribute.pValue.is_null() {
+            return false;
+        }
         let b: CK_BBOOL =
             unsafe { std::ptr::read(ck_attribute.pValue as *const CK_BBOOL) };
-
         !matches!(b, 0)
     }
 }
 
 impl From<&CK_ATTRIBUTE> for String {
     fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+        if ck_attribute.pValue.is_null() || ck_attribute.ulValueLen == 0 {
+            return String::new();
+        }
         let value: &[u8] = unsafe {
             std::slice::from_raw_parts(
                 ck_attribute.pValue as *const u8,
@@ -1129,17 +1134,29 @@ impl From<&CK_ATTRIBUTE> for String {
     }
 }
 
-impl From<&CK_ATTRIBUTE> for Ulong {
+impl From<&CK_ATTRIBUTE> for Date {
     fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
-        let value: CK_ULONG =
-            unsafe { std::ptr::read(ck_attribute.pValue as *const CK_ULONG) };
+        let value: CK_DATE =
+            unsafe { std::ptr::read(ck_attribute.pValue as *const CK_DATE) };
 
         value
     }
 }
 
+impl From<&CK_ATTRIBUTE> for Ulong {
+    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+        if ck_attribute.pValue.is_null() {
+            return 0;
+        }
+        unsafe { std::ptr::read(ck_attribute.pValue as *const CK_ULONG) }
+    }
+}
+
 impl From<&CK_ATTRIBUTE> for Vec<Byte> {
     fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+        if ck_attribute.pValue.is_null() || ck_attribute.ulValueLen == 0 {
+            return Vec::new();
+        }
         let value: &[Byte] = unsafe {
             std::slice::from_raw_parts(
                 ck_attribute.pValue as *const Byte,
@@ -1150,31 +1167,26 @@ impl From<&CK_ATTRIBUTE> for Vec<Byte> {
     }
 }
 
-// Get rust byte vector from CK_ATTRIBUTE.
-pub(crate) fn try_from_ck_attribute_for_vec_mechanism_type(
-    ck_attribute: &CK_ATTRIBUTE,
-) -> Result<Vec<MechanismType>> {
-    let value: &[CK_MECHANISM_TYPE] = unsafe {
-        std::slice::from_raw_parts(
-            ck_attribute.pValue as *const CK_MECHANISM_TYPE,
-            ck_attribute.ulValueLen as CK_ULONG as usize,
-        )
-    };
+impl TryFrom<&CK_ATTRIBUTE> for Vec<MechanismType> {
+    type Error = Error;
 
-    let types: Vec<MechanismType> = value
-        .iter()
-        .copied()
-        .map(|t| t.try_into())
-        .collect::<Result<Vec<MechanismType>>>()?;
-    Ok(types)
-}
-
-impl From<&CK_ATTRIBUTE> for Date {
-    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
-        let value: CK_DATE =
-            unsafe { std::ptr::read(ck_attribute.pValue as *const CK_DATE) };
+    fn try_from(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
+        if ck_attribute.pValue.is_null() || ck_attribute.ulValueLen == 0 {
+            return Ok(Vec::new());
+        }
+        let value: &[CK_MECHANISM_TYPE] = unsafe {
+            std::slice::from_raw_parts(
+                ck_attribute.pValue as *const CK_MECHANISM_TYPE,
+                ck_attribute.ulValueLen as CK_ULONG as usize
+                    / std::mem::size_of::<CK_MECHANISM_TYPE>(),
+            )
+        };
 
         value
+            .iter()
+            .copied()
+            .map(|t| t.try_into())
+            .collect::<Result<Vec<MechanismType>>>()
     }
 }
 
@@ -1451,7 +1463,7 @@ impl TryFrom<CK_ATTRIBUTE> for Attribute {
                 Attribute::SupportedCmsAttributes(Vec::<Byte>::from(&ck_attribute)),
             ),
             AttributeType::ALLOWED_MECHANISMS => Ok(Attribute::AllowedMechanisms(
-                try_from_ck_attribute_for_vec_mechanism_type(&ck_attribute)?,
+                Vec::<MechanismType>::try_from(&ck_attribute)?,
             )),
             vendor_defined => Ok(Attribute::VendorDefined {
                 attr_type: vendor_defined,
