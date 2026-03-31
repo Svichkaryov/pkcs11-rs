@@ -1,6 +1,6 @@
-use std::env;
+use pkcs11::module::{MechanismType, Pkcs11Module, Slot};
 
-use pkcs11::module::{InitializeArgs, MechanismType, Pkcs11Module, Slot};
+mod common;
 
 struct Printer {
     indent: usize,
@@ -46,14 +46,6 @@ macro_rules! println_aligned {
             $p.println(format!("{:<width$} {}", $key, $val, width = max_len));
         )*
     }};
-}
-
-fn get_pkcs11_module() -> Pkcs11Module {
-    let path = env::var("EXAMPLE_PKCS11_PATH")
-        .unwrap_or_else(|_| "/usr/lib/libfake.so".to_string());
-    let mut pkcs11 = Pkcs11Module::new(path).unwrap();
-    pkcs11.initialize(InitializeArgs::OsLocking).unwrap();
-    pkcs11
 }
 
 fn print_library_info(p: &Printer, pkcs11: &Pkcs11Module) {
@@ -205,7 +197,7 @@ fn fmt_decorate(title: &str, f: impl FnOnce(&Printer)) {
 }
 
 fn main() {
-    let pkcs11 = get_pkcs11_module();
+    let pkcs11 = common::get_pkcs11_module();
 
     fmt_decorate("Library info", |p| {
         print_library_info(p, &pkcs11);

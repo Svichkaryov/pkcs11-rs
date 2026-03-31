@@ -17,5 +17,6 @@ bitflags = "2.11"
 secrecy = "0.10"
 
 [[example]]
-name = "general_info"
-path = "examples/general_info.rs"
+name = "common"
+path = "examples/common.rs"
+crate-type = ["staticlib"]
