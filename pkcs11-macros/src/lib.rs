@@ -344,6 +344,7 @@ pub fn pkcs11_type(input: TokenStream) -> TokenStream {
     quote! {
         #(#type_attrs)*
         #[derive(Copy, Clone, PartialEq, Eq)]
+        #[repr(transparent)]
         pub struct #type_name(#inner_type);
 
         impl #type_name {
