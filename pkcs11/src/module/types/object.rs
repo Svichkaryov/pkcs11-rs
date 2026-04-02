@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use pkcs11_macros::pkcs11_type;
+use pkcs11_macros::{pkcs11_type, AttributePodType};
 
 use crate::error::{Error, Result};
 
@@ -15,6 +15,7 @@ pkcs11_type!(
     /// is specified on an object through the
     /// [`Attribute::Class`](crate::module::types::Attribute::Class)
     /// attribute of the object.
+    #[derive(AttributePodType)]
     ObjectClass: CK_OBJECT_CLASS, naming = ScreamingSnakeCase;
     [
         /// Data objects hold information defined by an application.
@@ -60,6 +61,7 @@ pkcs11_type!(
     /// The type is specified on an object through the
     /// [`Attribute::HwFeatureType`](crate::module::types::Attribute::HwFeatureType)
     /// attribute of the object.
+    #[derive(AttributePodType)]
     HwFeatureType: CK_HW_FEATURE_TYPE, naming = ScreamingSnakeCase;
     [
         /// Monotonic counter objects represent hardware counters that exist on
@@ -89,6 +91,7 @@ pkcs11_type!(
     /// The key type is specified on an object through the
     /// [`Attribute::KeyType`](crate::module::types::Attribute::KeyType)
     /// attribute of the object.
+    #[derive(AttributePodType)]
     KeyType: CK_KEY_TYPE, naming = ScreamingSnakeCase;
     [
         CKK_RSA,
@@ -195,6 +198,7 @@ pkcs11_type!(
     /// them. The certificate type is specified on an object through the
     /// [`Attribute::CertificateType`](crate::module::types::Attribute::CertificateType)
     /// attribute of the object.
+    #[derive(AttributePodType)]
     CertificateType: CK_CERTIFICATE_TYPE, naming = ScreamingSnakeCase;
     [
         /// X.509 certificate objects hold X.509 public key certificates.
@@ -208,10 +212,9 @@ pkcs11_type!(
     ]
 );
 
-// CK_CERTIFICATE_CATEGORY
-
 pkcs11_type!(
     /// Identifies a certificate category.
+    #[derive(AttributePodType)]
     CertificateCategory: CK_CERTIFICATE_CATEGORY, naming = ScreamingSnakeCase;
     [
         /// No category specified.
@@ -225,10 +228,9 @@ pkcs11_type!(
     ]
 );
 
-// CK_JAVA_MIDP_SECURITY_DOMAIN
-
 pkcs11_type!(
     /// Identifies the Java MIDP security domain of a certificate.
+    #[derive(AttributePodType)]
     JavaMidpSecurityDomain: CK_JAVA_MIDP_SECURITY_DOMAIN, naming = ScreamingSnakeCase;
     [
         /// No domain specified.
@@ -242,7 +244,53 @@ pkcs11_type!(
     ]
 );
 
-// CK_ATTRIBUTE_TYPE
+#[allow(clippy::len_without_is_empty)]
+pub trait AttributeValue {
+    fn as_ck_ptr(&self) -> CK_VOID_PTR;
+    fn len(&self) -> Ulong;
+}
+
+pub trait CkPodType: Sized {}
+
+macro_rules! impl_ck_pod_type {
+    ($($ty:ty),+ $(,)?) => {
+        $(
+            impl CkPodType for $ty {}
+        )+
+    };
+}
+
+impl_ck_pod_type!(bool, Ulong, Date);
+
+impl<T: CkPodType> AttributeValue for T {
+    fn as_ck_ptr(&self) -> CK_VOID_PTR {
+        self as *const T as CK_VOID_PTR
+    }
+
+    fn len(&self) -> Ulong {
+        std::mem::size_of::<T>() as Ulong
+    }
+}
+
+impl<T> AttributeValue for Vec<T> {
+    fn as_ck_ptr(&self) -> CK_VOID_PTR {
+        self.as_ptr() as CK_VOID_PTR
+    }
+
+    fn len(&self) -> Ulong {
+        std::mem::size_of_val(self.as_slice()) as Ulong
+    }
+}
+
+impl AttributeValue for String {
+    fn as_ck_ptr(&self) -> CK_VOID_PTR {
+        self.as_ptr() as CK_VOID_PTR
+    }
+
+    fn len(&self) -> Ulong {
+        self.len() as Ulong
+    }
+}
 
 pkcs11_type!(
     /// Identifies an attribute type.
@@ -833,60 +881,58 @@ impl Attribute {
         }
     }
 
-    fn ptr(&self) -> CK_VOID_PTR {
+    fn inner_value(&self) -> &dyn AttributeValue {
         match self {
             // bool
-            Attribute::Token(b)
-            | Attribute::Private(b)
-            | Attribute::Trusted(b)
-            | Attribute::Sensitive(b)
-            | Attribute::Encrypt(b)
-            | Attribute::Decrypt(b)
-            | Attribute::Wrap(b)
-            | Attribute::Unwrap(b)
-            | Attribute::Sign(b)
-            | Attribute::SignRecover(b)
-            | Attribute::Verify(b)
-            | Attribute::VerifyRecover(b)
-            | Attribute::Derive(b)
-            | Attribute::Extractable(b)
-            | Attribute::Local(b)
-            | Attribute::NeverExtractable(b)
-            | Attribute::AlwaysSensitive(b)
-            | Attribute::Modifiable(b)
-            | Attribute::CopyAble(b)
-            | Attribute::DestroyAble(b)
-            | Attribute::AlwaysAuthenticate(b)
-            | Attribute::WrapWithTrusted(b)
-            | Attribute::OtpUserFriendlyMode(b)
-            | Attribute::ResetOnInit(b)
-            | Attribute::HasReset(b)
-            | Attribute::Color(b) => b as *const _ as CK_VOID_PTR,
+            Attribute::Token(v)
+            | Attribute::Private(v)
+            | Attribute::Trusted(v)
+            | Attribute::Sensitive(v)
+            | Attribute::Encrypt(v)
+            | Attribute::Decrypt(v)
+            | Attribute::Wrap(v)
+            | Attribute::Unwrap(v)
+            | Attribute::Sign(v)
+            | Attribute::SignRecover(v)
+            | Attribute::Verify(v)
+            | Attribute::VerifyRecover(v)
+            | Attribute::Derive(v)
+            | Attribute::Extractable(v)
+            | Attribute::Local(v)
+            | Attribute::NeverExtractable(v)
+            | Attribute::AlwaysSensitive(v)
+            | Attribute::Modifiable(v)
+            | Attribute::CopyAble(v)
+            | Attribute::DestroyAble(v)
+            | Attribute::AlwaysAuthenticate(v)
+            | Attribute::WrapWithTrusted(v)
+            | Attribute::OtpUserFriendlyMode(v)
+            | Attribute::ResetOnInit(v)
+            | Attribute::HasReset(v)
+            | Attribute::Color(v) => v,
 
             // Ulong
-            Attribute::ModulusBits(ulong)
-            | Attribute::PrimeBits(ulong)
-            | Attribute::SubPrimeBits(ulong)
-            | Attribute::ValueBits(ulong)
-            | Attribute::ValueLen(ulong)
-            | Attribute::OtpFormat(ulong)
-            | Attribute::OtpLength(ulong)
-            | Attribute::OtpTimeInterval(ulong)
-            | Attribute::OtpChallengeRequirement(ulong)
-            | Attribute::OtpTimeRequirement(ulong)
-            | Attribute::OtpCounterRequirement(ulong)
-            | Attribute::OtpPinRequirement(ulong)
-            | Attribute::PixelX(ulong)
-            | Attribute::PixelY(ulong)
-            | Attribute::Resolution(ulong)
-            | Attribute::CharRows(ulong)
-            | Attribute::CharColumns(ulong)
-            | Attribute::BitsPerPixel(ulong) => ulong as *const _ as CK_VOID_PTR,
+            Attribute::ModulusBits(v)
+            | Attribute::PrimeBits(v)
+            | Attribute::SubPrimeBits(v)
+            | Attribute::ValueBits(v)
+            | Attribute::ValueLen(v)
+            | Attribute::OtpFormat(v)
+            | Attribute::OtpLength(v)
+            | Attribute::OtpTimeInterval(v)
+            | Attribute::OtpChallengeRequirement(v)
+            | Attribute::OtpTimeRequirement(v)
+            | Attribute::OtpCounterRequirement(v)
+            | Attribute::OtpPinRequirement(v)
+            | Attribute::PixelX(v)
+            | Attribute::PixelY(v)
+            | Attribute::Resolution(v)
+            | Attribute::CharRows(v)
+            | Attribute::CharColumns(v)
+            | Attribute::BitsPerPixel(v) => v,
 
             // String
-            Attribute::Label(s) | Attribute::Application(s) | Attribute::Url(s) => {
-                s.as_ptr() as CK_VOID_PTR
-            }
+            Attribute::Label(v) | Attribute::Application(v) | Attribute::Url(v) => v,
 
             // Vec<Byte>
             Attribute::Value(v)
@@ -929,182 +975,39 @@ impl Attribute {
             | Attribute::MimeTypes(v)
             | Attribute::RequiredCmsAttributes(v)
             | Attribute::DefaultCmsAttributes(v)
-            | Attribute::SupportedCmsAttributes(v) => v.as_ptr() as CK_VOID_PTR,
+            | Attribute::SupportedCmsAttributes(v) => v,
 
             // Date
-            Attribute::StartDate(date) | Attribute::EndDate(date) => {
-                date as *const _ as CK_VOID_PTR
-            }
-
-            //
-            Attribute::Class(c) => c as *const _ as CK_VOID_PTR,
-            Attribute::CertificateType(t) => t as *const _ as CK_VOID_PTR,
-            Attribute::CertificateCategory(c) => c as *const _ as CK_VOID_PTR,
-            Attribute::JavaMidpSecurityDomain(d) => d as *const _ as CK_VOID_PTR,
-            Attribute::NameHashAlgorithm(t) => t as *const _ as CK_VOID_PTR,
-            Attribute::KeyGenMechanism(t) => t as *const _ as CK_VOID_PTR,
-            Attribute::KeyType(t) => t as *const _ as CK_VOID_PTR,
-            Attribute::HwFeatureType(t) => t as *const _ as CK_VOID_PTR,
-            Attribute::MechanismType(t) => t as *const _ as CK_VOID_PTR,
-
-            //
-            Attribute::AllowedMechanisms(mechanisms) => {
-                mechanisms.as_ptr() as CK_VOID_PTR
-            } // Attribute::WrapTemplate(attr)
-            // | Attribute::UnwrapTemplate(attr) =>
-
-            //
-            Attribute::VendorDefined { value, .. } => value.as_ptr() as CK_VOID_PTR,
-        }
-    }
-
-    fn len(&self) -> Ulong {
-        match self {
-            // bool
-            Attribute::Token(_)
-            | Attribute::Private(_)
-            | Attribute::Trusted(_)
-            | Attribute::Sensitive(_)
-            | Attribute::Encrypt(_)
-            | Attribute::Decrypt(_)
-            | Attribute::Wrap(_)
-            | Attribute::Unwrap(_)
-            | Attribute::Sign(_)
-            | Attribute::SignRecover(_)
-            | Attribute::Verify(_)
-            | Attribute::VerifyRecover(_)
-            | Attribute::Derive(_)
-            | Attribute::Extractable(_)
-            | Attribute::Local(_)
-            | Attribute::NeverExtractable(_)
-            | Attribute::AlwaysSensitive(_)
-            | Attribute::Modifiable(_)
-            | Attribute::CopyAble(_)
-            | Attribute::DestroyAble(_)
-            | Attribute::AlwaysAuthenticate(_)
-            | Attribute::WrapWithTrusted(_)
-            | Attribute::OtpUserFriendlyMode(_)
-            | Attribute::ResetOnInit(_)
-            | Attribute::HasReset(_)
-            | Attribute::Color(_) => std::mem::size_of::<bool>() as Ulong,
-
-            // Ulong
-            Attribute::ModulusBits(_)
-            | Attribute::PrimeBits(_)
-            | Attribute::SubPrimeBits(_)
-            | Attribute::ValueBits(_)
-            | Attribute::ValueLen(_)
-            | Attribute::OtpFormat(_)
-            | Attribute::OtpLength(_)
-            | Attribute::OtpTimeInterval(_)
-            | Attribute::OtpChallengeRequirement(_)
-            | Attribute::OtpTimeRequirement(_)
-            | Attribute::OtpCounterRequirement(_)
-            | Attribute::OtpPinRequirement(_)
-            | Attribute::PixelX(_)
-            | Attribute::PixelY(_)
-            | Attribute::Resolution(_)
-            | Attribute::CharRows(_)
-            | Attribute::CharColumns(_)
-            | Attribute::BitsPerPixel(_) => std::mem::size_of::<Ulong>() as Ulong,
-
-            // String
-            Attribute::Label(s) | Attribute::Application(s) | Attribute::Url(s) => {
-                s.len() as Ulong
-            }
-
-            // Vec<Byte>
-            Attribute::Value(v)
-            | Attribute::ObjectId(v)
-            | Attribute::Issuer(v)
-            | Attribute::SerialNumber(v)
-            | Attribute::AcIssuer(v)
-            | Attribute::Owner(v)
-            | Attribute::AttrTypes(v)
-            | Attribute::HashOfSubjectPublicKey(v)
-            | Attribute::HashOfIssuerPublicKey(v)
-            | Attribute::CheckValue(v)
-            | Attribute::Subject(v)
-            | Attribute::Id(v)
-            | Attribute::Modulus(v)
-            | Attribute::PublicExponent(v)
-            | Attribute::PrivateExponent(v)
-            | Attribute::Prime1(v)
-            | Attribute::Prime2(v)
-            | Attribute::Exponent1(v)
-            | Attribute::Exponent2(v)
-            | Attribute::Coefficient(v)
-            | Attribute::PublicKeyInfo(v)
-            | Attribute::Prime(v)
-            | Attribute::SubPrime(v)
-            | Attribute::Base(v)
-            | Attribute::EcParams(v)
-            | Attribute::EcPoint(v)
-            | Attribute::OtpCounter(v)
-            | Attribute::OtpTime(v)
-            | Attribute::OtpUserIdentifier(v)
-            | Attribute::OtpServiceIdentifier(v)
-            | Attribute::OtpServiceLogo(v)
-            | Attribute::OtpServiceLogoType(v)
-            | Attribute::GostR3410(v)
-            | Attribute::GostR3411(v)
-            | Attribute::Gost28147(v)
-            | Attribute::CharSets(v)
-            | Attribute::EncodingMethods(v)
-            | Attribute::MimeTypes(v)
-            | Attribute::RequiredCmsAttributes(v)
-            | Attribute::DefaultCmsAttributes(v)
-            | Attribute::SupportedCmsAttributes(v) => {
-                (std::mem::size_of::<Byte>() * v.len()) as Ulong
-            }
-
-            // Date
-            Attribute::StartDate(_) | Attribute::EndDate(_) => {
-                std::mem::size_of::<Date>() as Ulong
-            }
+            Attribute::StartDate(v) | Attribute::EndDate(v) => v,
 
             // MechanismType
-            Attribute::NameHashAlgorithm(_)
-            | Attribute::KeyGenMechanism(_)
-            | Attribute::MechanismType(_) => {
-                std::mem::size_of::<MechanismType>() as Ulong
-            }
+            Attribute::NameHashAlgorithm(v)
+            | Attribute::KeyGenMechanism(v)
+            | Attribute::MechanismType(v) => v,
 
             //
-            Attribute::Class(_) => std::mem::size_of::<ObjectClass>() as Ulong,
-            Attribute::CertificateType(_) => {
-                std::mem::size_of::<CertificateType>() as Ulong
-            }
-            Attribute::CertificateCategory(_) => {
-                std::mem::size_of::<CertificateCategory>() as Ulong
-            }
-            Attribute::JavaMidpSecurityDomain(_) => {
-                std::mem::size_of::<JavaMidpSecurityDomain>() as Ulong
-            }
-            Attribute::KeyType(_) => std::mem::size_of::<KeyType>() as Ulong,
-            Attribute::HwFeatureType(_) => std::mem::size_of::<HwFeatureType>() as Ulong,
+            Attribute::Class(v) => v,
+            Attribute::CertificateType(v) => v,
+            Attribute::CertificateCategory(v) => v,
+            Attribute::JavaMidpSecurityDomain(v) => v,
+            Attribute::KeyType(v) => v,
+            Attribute::HwFeatureType(v) => v,
 
             //
-            Attribute::AllowedMechanisms(v) => {
-                (std::mem::size_of::<MechanismType>() * v.len()) as Ulong
-            } // Attribute::WrapTemplate(attr)
+            Attribute::AllowedMechanisms(v) => v, // Attribute::WrapTemplate(attr)
             // | Attribute::UnwrapTemplate(attr) =>
 
             // Vendor defined
-            Attribute::VendorDefined { value, .. } => {
-                (std::mem::size_of::<Byte>() * value.len()) as Ulong
-            }
+            Attribute::VendorDefined { value, .. } => value,
         }
     }
-}
 
-impl From<&Attribute> for CK_ATTRIBUTE {
-    fn from(attribute: &Attribute) -> Self {
-        Self {
-            attrType: attribute.attribute_type().into(),
-            pValue: attribute.ptr(),
-            ulValueLen: attribute.len(),
-        }
+    fn ptr(&self) -> CK_VOID_PTR {
+        self.inner_value().as_ck_ptr()
+    }
+
+    fn len(&self) -> Ulong {
+        self.inner_value().len()
     }
 }
 
@@ -1187,6 +1090,16 @@ impl TryFrom<&CK_ATTRIBUTE> for Vec<MechanismType> {
             .copied()
             .map(|t| t.try_into())
             .collect::<Result<Vec<MechanismType>>>()
+    }
+}
+
+impl From<&Attribute> for CK_ATTRIBUTE {
+    fn from(attribute: &Attribute) -> Self {
+        Self {
+            attrType: attribute.attribute_type().into(),
+            pValue: attribute.ptr(),
+            ulValueLen: attribute.len(),
+        }
     }
 }
 
