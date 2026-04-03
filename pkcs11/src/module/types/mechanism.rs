@@ -1,14 +1,14 @@
 use bitflags::bitflags;
 
-use pkcs11_macros::{pkcs11_type, AttributePodType};
+use pkcs11_macros::{pkcs11_type, AttributePodType, TryFromCkAttribute};
 
 use crate::error::{Error, Result};
 
-use super::{general::*, CkPodType, ObjectHandle};
+use super::{general::*, CkPodType, ObjectHandle, TryFromCkAttribute};
 
 pkcs11_type!(
     /// Identifies a mechanism type.
-    #[derive(AttributePodType)]
+    #[derive(AttributePodType, TryFromCkAttribute)]
     MechanismType: CK_MECHANISM_TYPE, naming = ScreamingSnakeCase;
     [
         CKM_RSA_PKCS_KEY_PAIR_GEN,

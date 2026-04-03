@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use pkcs11_macros::{pkcs11_type, AttributePodType};
+use pkcs11_macros::{pkcs11_type, AttributePodType, TryFromCkAttribute};
 
 use crate::error::{Error, Result};
 
@@ -15,7 +15,7 @@ pkcs11_type!(
     /// is specified on an object through the
     /// [`Attribute::Class`](crate::module::types::Attribute::Class)
     /// attribute of the object.
-    #[derive(AttributePodType)]
+    #[derive(AttributePodType, TryFromCkAttribute)]
     ObjectClass: CK_OBJECT_CLASS, naming = ScreamingSnakeCase;
     [
         /// Data objects hold information defined by an application.
@@ -61,7 +61,7 @@ pkcs11_type!(
     /// The type is specified on an object through the
     /// [`Attribute::HwFeatureType`](crate::module::types::Attribute::HwFeatureType)
     /// attribute of the object.
-    #[derive(AttributePodType)]
+    #[derive(AttributePodType, TryFromCkAttribute)]
     HwFeatureType: CK_HW_FEATURE_TYPE, naming = ScreamingSnakeCase;
     [
         /// Monotonic counter objects represent hardware counters that exist on
@@ -91,7 +91,7 @@ pkcs11_type!(
     /// The key type is specified on an object through the
     /// [`Attribute::KeyType`](crate::module::types::Attribute::KeyType)
     /// attribute of the object.
-    #[derive(AttributePodType)]
+    #[derive(AttributePodType, TryFromCkAttribute)]
     KeyType: CK_KEY_TYPE, naming = ScreamingSnakeCase;
     [
         CKK_RSA,
@@ -198,7 +198,7 @@ pkcs11_type!(
     /// them. The certificate type is specified on an object through the
     /// [`Attribute::CertificateType`](crate::module::types::Attribute::CertificateType)
     /// attribute of the object.
-    #[derive(AttributePodType)]
+    #[derive(AttributePodType, TryFromCkAttribute)]
     CertificateType: CK_CERTIFICATE_TYPE, naming = ScreamingSnakeCase;
     [
         /// X.509 certificate objects hold X.509 public key certificates.
@@ -214,7 +214,7 @@ pkcs11_type!(
 
 pkcs11_type!(
     /// Identifies a certificate category.
-    #[derive(AttributePodType)]
+    #[derive(AttributePodType, TryFromCkAttribute)]
     CertificateCategory: CK_CERTIFICATE_CATEGORY, naming = ScreamingSnakeCase;
     [
         /// No category specified.
@@ -230,7 +230,7 @@ pkcs11_type!(
 
 pkcs11_type!(
     /// Identifies the Java MIDP security domain of a certificate.
-    #[derive(AttributePodType)]
+    #[derive(AttributePodType, TryFromCkAttribute)]
     JavaMidpSecurityDomain: CK_JAVA_MIDP_SECURITY_DOMAIN, naming = ScreamingSnakeCase;
     [
         /// No domain specified.
@@ -644,6 +644,12 @@ pkcs11_type!(
     ]
 );
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VendorDefinedAttribute {
+    pub attr_type: AttributeType,
+    pub value: Vec<Byte>,
+}
+
 // TODO: add missing attributes
 /// Identifies an attribute.
 ///
@@ -756,10 +762,7 @@ pub enum Attribute {
     AllowedMechanisms(Vec<MechanismType>),
 
     /// Vendor defined.
-    VendorDefined {
-        attr_type: AttributeType,
-        value: Vec<Byte>,
-    },
+    VendorDefined(VendorDefinedAttribute),
 }
 
 impl Attribute {
@@ -877,7 +880,7 @@ impl Attribute {
                 AttributeType::SUPPORTED_CMS_ATTRIBUTES
             }
             Attribute::AllowedMechanisms(_) => AttributeType::ALLOWED_MECHANISMS,
-            Attribute::VendorDefined { attr_type, .. } => *attr_type,
+            Attribute::VendorDefined(v) => v.attr_type,
         }
     }
 
@@ -998,7 +1001,7 @@ impl Attribute {
             // | Attribute::UnwrapTemplate(attr) =>
 
             // Vendor defined
-            Attribute::VendorDefined { value, .. } => value,
+            Attribute::VendorDefined(v) => &v.value,
         }
     }
 
@@ -1011,6 +1014,10 @@ impl Attribute {
     }
 }
 
+pub trait TryFromCkAttribute: Sized {
+    fn try_from_ck_attr(attr: &CK_ATTRIBUTE) -> Result<Self>;
+}
+
 impl From<&CK_ATTRIBUTE> for bool {
     fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
         if ck_attribute.pValue.is_null() {
@@ -1019,6 +1026,24 @@ impl From<&CK_ATTRIBUTE> for bool {
         let b: CK_BBOOL =
             unsafe { std::ptr::read(ck_attribute.pValue as *const CK_BBOOL) };
         !matches!(b, 0)
+    }
+}
+
+impl From<&CK_ATTRIBUTE> for Ulong {
+    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+        if ck_attribute.pValue.is_null() {
+            return 0;
+        }
+        unsafe { std::ptr::read(ck_attribute.pValue as *const CK_ULONG) }
+    }
+}
+
+impl From<&CK_ATTRIBUTE> for Date {
+    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+        let value: CK_DATE =
+            unsafe { std::ptr::read(ck_attribute.pValue as *const CK_DATE) };
+
+        value
     }
 }
 
@@ -1037,24 +1062,6 @@ impl From<&CK_ATTRIBUTE> for String {
     }
 }
 
-impl From<&CK_ATTRIBUTE> for Date {
-    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
-        let value: CK_DATE =
-            unsafe { std::ptr::read(ck_attribute.pValue as *const CK_DATE) };
-
-        value
-    }
-}
-
-impl From<&CK_ATTRIBUTE> for Ulong {
-    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
-        if ck_attribute.pValue.is_null() {
-            return 0;
-        }
-        unsafe { std::ptr::read(ck_attribute.pValue as *const CK_ULONG) }
-    }
-}
-
 impl From<&CK_ATTRIBUTE> for Vec<Byte> {
     fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
         if ck_attribute.pValue.is_null() || ck_attribute.ulValueLen == 0 {
@@ -1069,6 +1076,18 @@ impl From<&CK_ATTRIBUTE> for Vec<Byte> {
         value.to_vec()
     }
 }
+
+macro_rules! impl_from_ck_attr {
+    ($($t:ty),* $(,)?) => {
+        $(impl TryFromCkAttribute for $t {
+            fn try_from_ck_attr(attr: &CK_ATTRIBUTE) -> Result<Self> {
+                Ok(<$t>::from(attr))
+            }
+        })*
+    };
+}
+
+impl_from_ck_attr!(bool, Ulong, Date, String, Vec<Byte>);
 
 impl TryFrom<&CK_ATTRIBUTE> for Vec<MechanismType> {
     type Error = Error;
@@ -1093,6 +1112,44 @@ impl TryFrom<&CK_ATTRIBUTE> for Vec<MechanismType> {
     }
 }
 
+impl TryFrom<&CK_ATTRIBUTE> for VendorDefinedAttribute {
+    type Error = Error;
+
+    fn try_from(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
+        let attr_type = AttributeType::try_from(ck_attribute.attrType)?;
+
+        if ck_attribute.pValue.is_null() || ck_attribute.ulValueLen == 0 {
+            return Ok(VendorDefinedAttribute {
+                attr_type,
+                value: Vec::new(),
+            });
+        }
+        let value: &[Byte] = unsafe {
+            std::slice::from_raw_parts(
+                ck_attribute.pValue as *const Byte,
+                ck_attribute.ulValueLen as CK_ULONG as usize,
+            )
+        };
+
+        Ok(VendorDefinedAttribute {
+            attr_type,
+            value: value.to_vec(),
+        })
+    }
+}
+
+macro_rules! impl_try_from_ck_attr {
+    ($($t:ty),* $(,)?) => {
+        $(impl TryFromCkAttribute for $t {
+            fn try_from_ck_attr(attr: &CK_ATTRIBUTE) -> Result<Self> {
+                <$t>::try_from(attr)
+            }
+        })*
+    };
+}
+
+impl_try_from_ck_attr!(Vec<MechanismType>, VendorDefinedAttribute);
+
 impl From<&Attribute> for CK_ATTRIBUTE {
     fn from(attribute: &Attribute) -> Self {
         Self {
@@ -1116,272 +1173,323 @@ impl TryFrom<CK_ATTRIBUTE> for Attribute {
         let attr_type = AttributeType::try_from(ck_attribute.attrType)?;
 
         match attr_type {
-            AttributeType::CLASS => {
-                Ok(Attribute::Class(Ulong::from(&ck_attribute).try_into()?))
+            AttributeType::CLASS => Ok(Attribute::Class(ObjectClass::try_from_ck_attr(
+                &ck_attribute,
+            )?)),
+            AttributeType::TOKEN => {
+                Ok(Attribute::Token(bool::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::TOKEN => Ok(Attribute::Token(bool::from(&ck_attribute))),
-            AttributeType::PRIVATE => Ok(Attribute::Private(bool::from(&ck_attribute))),
-            AttributeType::LABEL => Ok(Attribute::Label(String::from(&ck_attribute))),
-            AttributeType::APPLICATION => {
-                Ok(Attribute::Application(String::from(&ck_attribute)))
+            AttributeType::PRIVATE => {
+                Ok(Attribute::Private(bool::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::VALUE => {
-                Ok(Attribute::Value(Vec::<Byte>::from(&ck_attribute)))
+            AttributeType::LABEL => {
+                Ok(Attribute::Label(String::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::OBJECT_ID => {
-                Ok(Attribute::ObjectId(Vec::<Byte>::from(&ck_attribute)))
-            }
+            AttributeType::APPLICATION => Ok(Attribute::Application(
+                String::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::VALUE => Ok(Attribute::Value(Vec::<Byte>::try_from_ck_attr(
+                &ck_attribute,
+            )?)),
+            AttributeType::OBJECT_ID => Ok(Attribute::ObjectId(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
             AttributeType::CERTIFICATE_TYPE => Ok(Attribute::CertificateType(
-                Ulong::from(&ck_attribute).try_into()?,
+                CertificateType::try_from_ck_attr(&ck_attribute)?,
             )),
-            AttributeType::ISSUER => {
-                Ok(Attribute::Issuer(Vec::<Byte>::from(&ck_attribute)))
+            AttributeType::ISSUER => Ok(Attribute::Issuer(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::SERIAL_NUMBER => Ok(Attribute::SerialNumber(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::AC_ISSUER => Ok(Attribute::AcIssuer(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::OWNER => Ok(Attribute::Owner(Vec::<Byte>::try_from_ck_attr(
+                &ck_attribute,
+            )?)),
+            AttributeType::ATTR_TYPES => Ok(Attribute::AttrTypes(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::TRUSTED => {
+                Ok(Attribute::Trusted(bool::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::SERIAL_NUMBER => {
-                Ok(Attribute::SerialNumber(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::AC_ISSUER => {
-                Ok(Attribute::AcIssuer(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::OWNER => {
-                Ok(Attribute::Owner(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::ATTR_TYPES => {
-                Ok(Attribute::AttrTypes(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::TRUSTED => Ok(Attribute::Trusted(bool::from(&ck_attribute))),
             AttributeType::CERTIFICATE_CATEGORY => Ok(Attribute::CertificateCategory(
-                Ulong::from(&ck_attribute).try_into()?,
+                CertificateCategory::try_from_ck_attr(&ck_attribute)?,
             )),
-            AttributeType::JAVA_MIDP_SECURITY_DOMAIN => Ok(
-                Attribute::JavaMidpSecurityDomain(Ulong::from(&ck_attribute).try_into()?),
-            ),
-            AttributeType::URL => Ok(Attribute::Url(String::from(&ck_attribute))),
-            AttributeType::HASH_OF_SUBJECT_PUBLIC_KEY => Ok(
-                Attribute::HashOfSubjectPublicKey(Vec::<Byte>::from(&ck_attribute)),
-            ),
-            AttributeType::HASH_OF_ISSUER_PUBLIC_KEY => Ok(
-                Attribute::HashOfIssuerPublicKey(Vec::<Byte>::from(&ck_attribute)),
-            ),
+            AttributeType::JAVA_MIDP_SECURITY_DOMAIN => {
+                Ok(Attribute::JavaMidpSecurityDomain(
+                    JavaMidpSecurityDomain::try_from_ck_attr(&ck_attribute)?,
+                ))
+            }
+            AttributeType::URL => {
+                Ok(Attribute::Url(String::try_from_ck_attr(&ck_attribute)?))
+            }
+            AttributeType::HASH_OF_SUBJECT_PUBLIC_KEY => {
+                Ok(Attribute::HashOfSubjectPublicKey(
+                    Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+                ))
+            }
+            AttributeType::HASH_OF_ISSUER_PUBLIC_KEY => {
+                Ok(Attribute::HashOfIssuerPublicKey(
+                    Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+                ))
+            }
             AttributeType::NAME_HASH_ALGORITHM => Ok(Attribute::NameHashAlgorithm(
-                Ulong::from(&ck_attribute).try_into()?,
+                MechanismType::try_from_ck_attr(&ck_attribute)?,
             )),
-            AttributeType::CHECK_VALUE => {
-                Ok(Attribute::CheckValue(Vec::<Byte>::from(&ck_attribute)))
+            AttributeType::CHECK_VALUE => Ok(Attribute::CheckValue(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::KEY_TYPE => Ok(Attribute::KeyType(KeyType::try_from_ck_attr(
+                &ck_attribute,
+            )?)),
+            AttributeType::SUBJECT => Ok(Attribute::Subject(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::ID => {
+                Ok(Attribute::Id(Vec::<Byte>::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::KEY_TYPE => {
-                Ok(Attribute::KeyType(Ulong::from(&ck_attribute).try_into()?))
-            }
-            AttributeType::SUBJECT => {
-                Ok(Attribute::Subject(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::ID => Ok(Attribute::Id(Vec::<Byte>::from(&ck_attribute))),
             AttributeType::SENSITIVE => {
-                Ok(Attribute::Sensitive(bool::from(&ck_attribute)))
+                Ok(Attribute::Sensitive(bool::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::ENCRYPT => Ok(Attribute::Encrypt(bool::from(&ck_attribute))),
-            AttributeType::DECRYPT => Ok(Attribute::Decrypt(bool::from(&ck_attribute))),
-            AttributeType::WRAP => Ok(Attribute::Wrap(bool::from(&ck_attribute))),
-            AttributeType::UNWRAP => Ok(Attribute::Unwrap(bool::from(&ck_attribute))),
-            AttributeType::SIGN => Ok(Attribute::Sign(bool::from(&ck_attribute))),
-            AttributeType::SIGN_RECOVER => {
-                Ok(Attribute::SignRecover(bool::from(&ck_attribute)))
+            AttributeType::ENCRYPT => {
+                Ok(Attribute::Encrypt(bool::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::VERIFY => Ok(Attribute::Verify(bool::from(&ck_attribute))),
-            AttributeType::VERIFY_RECOVER => {
-                Ok(Attribute::VerifyRecover(bool::from(&ck_attribute)))
+            AttributeType::DECRYPT => {
+                Ok(Attribute::Decrypt(bool::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::DERIVE => Ok(Attribute::Derive(bool::from(&ck_attribute))),
+            AttributeType::WRAP => {
+                Ok(Attribute::Wrap(bool::try_from_ck_attr(&ck_attribute)?))
+            }
+            AttributeType::UNWRAP => {
+                Ok(Attribute::Unwrap(bool::try_from_ck_attr(&ck_attribute)?))
+            }
+            AttributeType::SIGN => {
+                Ok(Attribute::Sign(bool::try_from_ck_attr(&ck_attribute)?))
+            }
+            AttributeType::SIGN_RECOVER => Ok(Attribute::SignRecover(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::VERIFY => {
+                Ok(Attribute::Verify(bool::try_from_ck_attr(&ck_attribute)?))
+            }
+            AttributeType::VERIFY_RECOVER => Ok(Attribute::VerifyRecover(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::DERIVE => {
+                Ok(Attribute::Derive(bool::try_from_ck_attr(&ck_attribute)?))
+            }
             AttributeType::START_DATE => {
-                Ok(Attribute::StartDate(Date::from(&ck_attribute)))
+                Ok(Attribute::StartDate(Date::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::END_DATE => Ok(Attribute::EndDate(Date::from(&ck_attribute))),
-            AttributeType::MODULUS => {
-                Ok(Attribute::Modulus(Vec::<Byte>::from(&ck_attribute)))
+            AttributeType::END_DATE => {
+                Ok(Attribute::EndDate(Date::try_from_ck_attr(&ck_attribute)?))
             }
+            AttributeType::MODULUS => Ok(Attribute::Modulus(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
             AttributeType::MODULUS_BITS => {
                 Ok(Attribute::ModulusBits(Ulong::from(&ck_attribute)))
             }
-            AttributeType::PUBLIC_EXPONENT => {
-                Ok(Attribute::PublicExponent(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::PRIVATE_EXPONENT => {
-                Ok(Attribute::PrivateExponent(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::PRIME_1 => {
-                Ok(Attribute::Prime1(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::PRIME_2 => {
-                Ok(Attribute::Prime2(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::EXPONENT_1 => {
-                Ok(Attribute::Exponent1(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::EXPONENT_2 => {
-                Ok(Attribute::Exponent2(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::COEFFICIENT => {
-                Ok(Attribute::Coefficient(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::PUBLIC_KEY_INFO => {
-                Ok(Attribute::PublicKeyInfo(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::PRIME => {
-                Ok(Attribute::Prime(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::SUBPRIME => {
-                Ok(Attribute::SubPrime(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::BASE => Ok(Attribute::Base(Vec::<Byte>::from(&ck_attribute))),
-            AttributeType::PRIME_BITS => {
-                Ok(Attribute::PrimeBits(Ulong::from(&ck_attribute)))
-            }
-            AttributeType::SUB_PRIME_BITS => {
-                Ok(Attribute::SubPrimeBits(Ulong::from(&ck_attribute)))
-            }
-            AttributeType::VALUE_BITS => {
-                Ok(Attribute::ValueBits(Ulong::from(&ck_attribute)))
-            }
-            AttributeType::VALUE_LEN => {
-                Ok(Attribute::ValueLen(Ulong::from(&ck_attribute)))
-            }
-            AttributeType::EXTRACTABLE => {
-                Ok(Attribute::Extractable(bool::from(&ck_attribute)))
-            }
-            AttributeType::LOCAL => Ok(Attribute::Local(bool::from(&ck_attribute))),
-            AttributeType::NEVER_EXTRACTABLE => {
-                Ok(Attribute::NeverExtractable(bool::from(&ck_attribute)))
-            }
-            AttributeType::ALWAYS_SENSITIVE => {
-                Ok(Attribute::AlwaysSensitive(bool::from(&ck_attribute)))
-            }
-            AttributeType::KEY_GEN_MECHANISM => Ok(Attribute::KeyGenMechanism(
-                Ulong::from(&ck_attribute).try_into()?,
+            AttributeType::PUBLIC_EXPONENT => Ok(Attribute::PublicExponent(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
             )),
-            AttributeType::MODIFIABLE => {
-                Ok(Attribute::Modifiable(bool::from(&ck_attribute)))
+            AttributeType::PRIVATE_EXPONENT => Ok(Attribute::PrivateExponent(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::PRIME_1 => Ok(Attribute::Prime1(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::PRIME_2 => Ok(Attribute::Prime2(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::EXPONENT_1 => Ok(Attribute::Exponent1(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::EXPONENT_2 => Ok(Attribute::Exponent2(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::COEFFICIENT => Ok(Attribute::Coefficient(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::PUBLIC_KEY_INFO => Ok(Attribute::PublicKeyInfo(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::PRIME => Ok(Attribute::Prime(Vec::<Byte>::try_from_ck_attr(
+                &ck_attribute,
+            )?)),
+            AttributeType::SUBPRIME => Ok(Attribute::SubPrime(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::BASE => Ok(Attribute::Base(Vec::<Byte>::try_from_ck_attr(
+                &ck_attribute,
+            )?)),
+            AttributeType::PRIME_BITS => Ok(Attribute::PrimeBits(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::SUB_PRIME_BITS => Ok(Attribute::SubPrimeBits(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::VALUE_BITS => Ok(Attribute::ValueBits(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::VALUE_LEN => {
+                Ok(Attribute::ValueLen(Ulong::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::COPYABLE => Ok(Attribute::CopyAble(bool::from(&ck_attribute))),
-            AttributeType::DESTROYABLE => {
-                Ok(Attribute::DestroyAble(bool::from(&ck_attribute)))
+            AttributeType::EXTRACTABLE => Ok(Attribute::Extractable(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::LOCAL => {
+                Ok(Attribute::Local(bool::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::EC_PARAMS => {
-                Ok(Attribute::EcParams(Vec::<Byte>::from(&ck_attribute)))
+            AttributeType::NEVER_EXTRACTABLE => Ok(Attribute::NeverExtractable(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::ALWAYS_SENSITIVE => Ok(Attribute::AlwaysSensitive(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::KEY_GEN_MECHANISM => Ok(Attribute::KeyGenMechanism(
+                MechanismType::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::MODIFIABLE => Ok(Attribute::Modifiable(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::COPYABLE => {
+                Ok(Attribute::CopyAble(bool::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::EC_POINT => {
-                Ok(Attribute::EcPoint(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::ALWAYS_AUTHENTICATE => {
-                Ok(Attribute::AlwaysAuthenticate(bool::from(&ck_attribute)))
-            }
-            AttributeType::WRAP_WITH_TRUSTED => {
-                Ok(Attribute::WrapWithTrusted(bool::from(&ck_attribute)))
-            }
+            AttributeType::DESTROYABLE => Ok(Attribute::DestroyAble(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::EC_PARAMS => Ok(Attribute::EcParams(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::EC_POINT => Ok(Attribute::EcPoint(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::ALWAYS_AUTHENTICATE => Ok(Attribute::AlwaysAuthenticate(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::WRAP_WITH_TRUSTED => Ok(Attribute::WrapWithTrusted(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
             // AttributeType::WRAP_TEMPLATE => Ok(Attribute::WrapTemplate(get_())),
             // AttributeType::UNWRAP_TEMPLATE => Ok(Attribute::UnwrapTemplate(get_())),
-            AttributeType::OTP_FORMAT => {
-                Ok(Attribute::OtpFormat(Ulong::from(&ck_attribute)))
+            AttributeType::OTP_FORMAT => Ok(Attribute::OtpFormat(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::OTP_LENGTH => Ok(Attribute::OtpLength(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::OTP_TIME_INTERVAL => Ok(Attribute::OtpTimeInterval(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::OTP_USER_FRIENDLY_MODE => Ok(Attribute::OtpUserFriendlyMode(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::OTP_CHALLENGE_REQUIREMENT => {
+                Ok(Attribute::OtpChallengeRequirement(Ulong::try_from_ck_attr(
+                    &ck_attribute,
+                )?))
             }
-            AttributeType::OTP_LENGTH => {
-                Ok(Attribute::OtpLength(Ulong::from(&ck_attribute)))
-            }
-            AttributeType::OTP_TIME_INTERVAL => {
-                Ok(Attribute::OtpTimeInterval(Ulong::from(&ck_attribute)))
-            }
-            AttributeType::OTP_USER_FRIENDLY_MODE => {
-                Ok(Attribute::OtpUserFriendlyMode(bool::from(&ck_attribute)))
-            }
-            AttributeType::OTP_CHALLENGE_REQUIREMENT => Ok(
-                Attribute::OtpChallengeRequirement(Ulong::from(&ck_attribute)),
+            AttributeType::OTP_TIME_REQUIREMENT => Ok(Attribute::OtpTimeRequirement(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::OTP_COUNTER_REQUIREMENT => Ok(
+                Attribute::OtpCounterRequirement(Ulong::try_from_ck_attr(&ck_attribute)?),
             ),
-            AttributeType::OTP_TIME_REQUIREMENT => {
-                Ok(Attribute::OtpTimeRequirement(Ulong::from(&ck_attribute)))
-            }
-            AttributeType::OTP_COUNTER_REQUIREMENT => {
-                Ok(Attribute::OtpCounterRequirement(Ulong::from(&ck_attribute)))
-            }
-            AttributeType::OTP_PIN_REQUIREMENT => {
-                Ok(Attribute::OtpPinRequirement(Ulong::from(&ck_attribute)))
-            }
-            AttributeType::OTP_COUNTER => {
-                Ok(Attribute::OtpCounter(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::OTP_TIME => {
-                Ok(Attribute::OtpTime(Vec::<Byte>::from(&ck_attribute)))
-            }
+            AttributeType::OTP_PIN_REQUIREMENT => Ok(Attribute::OtpPinRequirement(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::OTP_COUNTER => Ok(Attribute::OtpCounter(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::OTP_TIME => Ok(Attribute::OtpTime(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
             AttributeType::OTP_USER_IDENTIFIER => Ok(Attribute::OtpUserIdentifier(
-                Vec::<Byte>::from(&ck_attribute),
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
             )),
             AttributeType::OTP_SERVICE_IDENTIFIER => Ok(Attribute::OtpServiceIdentifier(
-                Vec::<Byte>::from(&ck_attribute),
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
             )),
-            AttributeType::OTP_SERVICE_LOGO => {
-                Ok(Attribute::OtpServiceLogo(Vec::<Byte>::from(&ck_attribute)))
-            }
+            AttributeType::OTP_SERVICE_LOGO => Ok(Attribute::OtpServiceLogo(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
             AttributeType::OTP_SERVICE_LOGO_TYPE => Ok(Attribute::OtpServiceLogoType(
-                Vec::<Byte>::from(&ck_attribute),
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
             )),
-            AttributeType::GOSTR3410_PARAMS => {
-                Ok(Attribute::GostR3410(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::GOSTR3411_PARAMS => {
-                Ok(Attribute::GostR3411(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::GOST28147_PARAMS => {
-                Ok(Attribute::Gost28147(Vec::<Byte>::from(&ck_attribute)))
-            }
+            AttributeType::GOSTR3410_PARAMS => Ok(Attribute::GostR3410(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::GOSTR3411_PARAMS => Ok(Attribute::GostR3411(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::GOST28147_PARAMS => Ok(Attribute::Gost28147(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
             AttributeType::HW_FEATURE_TYPE => Ok(Attribute::HwFeatureType(
-                Ulong::from(&ck_attribute).try_into()?,
+                HwFeatureType::try_from_ck_attr(&ck_attribute)?,
             )),
-            AttributeType::RESET_ON_INIT => {
-                Ok(Attribute::ResetOnInit(bool::from(&ck_attribute)))
-            }
+            AttributeType::RESET_ON_INIT => Ok(Attribute::ResetOnInit(
+                bool::try_from_ck_attr(&ck_attribute)?,
+            )),
             AttributeType::HAS_RESET => {
-                Ok(Attribute::HasReset(bool::from(&ck_attribute)))
+                Ok(Attribute::HasReset(bool::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::PIXEL_X => Ok(Attribute::PixelX(Ulong::from(&ck_attribute))),
-            AttributeType::PIXEL_Y => Ok(Attribute::PixelY(Ulong::from(&ck_attribute))),
-            AttributeType::RESOLUTION => {
-                Ok(Attribute::Resolution(Ulong::from(&ck_attribute)))
+            AttributeType::PIXEL_X => {
+                Ok(Attribute::PixelX(Ulong::try_from_ck_attr(&ck_attribute)?))
             }
+            AttributeType::PIXEL_Y => {
+                Ok(Attribute::PixelY(Ulong::try_from_ck_attr(&ck_attribute)?))
+            }
+            AttributeType::RESOLUTION => Ok(Attribute::Resolution(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
             AttributeType::CHAR_ROWS => {
-                Ok(Attribute::CharRows(Ulong::from(&ck_attribute)))
+                Ok(Attribute::CharRows(Ulong::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::CHAR_COLUMNS => {
-                Ok(Attribute::CharColumns(Ulong::from(&ck_attribute)))
+            AttributeType::CHAR_COLUMNS => Ok(Attribute::CharColumns(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::COLOR => {
+                Ok(Attribute::Color(bool::try_from_ck_attr(&ck_attribute)?))
             }
-            AttributeType::COLOR => Ok(Attribute::Color(bool::from(&ck_attribute))),
-            AttributeType::BITS_PER_PIXEL => {
-                Ok(Attribute::BitsPerPixel(Ulong::from(&ck_attribute)))
-            }
-            AttributeType::CHAR_SETS => {
-                Ok(Attribute::CharSets(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::ENCODING_METHODS => {
-                Ok(Attribute::EncodingMethods(Vec::<Byte>::from(&ck_attribute)))
-            }
-            AttributeType::MIME_TYPES => {
-                Ok(Attribute::MimeTypes(Vec::<Byte>::from(&ck_attribute)))
-            }
+            AttributeType::BITS_PER_PIXEL => Ok(Attribute::BitsPerPixel(
+                Ulong::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::CHAR_SETS => Ok(Attribute::CharSets(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::ENCODING_METHODS => Ok(Attribute::EncodingMethods(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
+            AttributeType::MIME_TYPES => Ok(Attribute::MimeTypes(
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+            )),
             AttributeType::MECHANISM_TYPE => Ok(Attribute::MechanismType(
-                Ulong::from(&ck_attribute).try_into()?,
+                MechanismType::try_from_ck_attr(&ck_attribute)?,
             )),
-            AttributeType::REQUIRED_CMS_ATTRIBUTES => Ok(
-                Attribute::RequiredCmsAttributes(Vec::<Byte>::from(&ck_attribute)),
-            ),
+            AttributeType::REQUIRED_CMS_ATTRIBUTES => {
+                Ok(Attribute::RequiredCmsAttributes(
+                    Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+                ))
+            }
             AttributeType::DEFAULT_CMS_ATTRIBUTES => Ok(Attribute::DefaultCmsAttributes(
-                Vec::<Byte>::from(&ck_attribute),
+                Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
             )),
-            AttributeType::SUPPORTED_CMS_ATTRIBUTES => Ok(
-                Attribute::SupportedCmsAttributes(Vec::<Byte>::from(&ck_attribute)),
-            ),
+            AttributeType::SUPPORTED_CMS_ATTRIBUTES => {
+                Ok(Attribute::SupportedCmsAttributes(
+                    Vec::<Byte>::try_from_ck_attr(&ck_attribute)?,
+                ))
+            }
             AttributeType::ALLOWED_MECHANISMS => Ok(Attribute::AllowedMechanisms(
-                Vec::<MechanismType>::try_from(&ck_attribute)?,
+                Vec::<MechanismType>::try_from_ck_attr(&ck_attribute)?,
             )),
-            vendor_defined => Ok(Attribute::VendorDefined {
-                attr_type: vendor_defined,
-                value: Vec::<Byte>::from(&ck_attribute),
-            }),
+            _ => Ok(Attribute::VendorDefined(
+                VendorDefinedAttribute::try_from_ck_attr(&ck_attribute)?,
+            )),
         }
     }
 }

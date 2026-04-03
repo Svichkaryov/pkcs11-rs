@@ -8,6 +8,11 @@ pub fn derive_attribute_value(input: TokenStream) -> TokenStream {
     attributes::derive_attribute_pod_type_impl(input)
 }
 
+#[proc_macro_derive(TryFromCkAttribute)]
+pub fn derive_try_from_ck_attribute_impl(input: TokenStream) -> TokenStream {
+    attributes::derive_try_from_ck_attribute_impl(input)
+}
+
 /// Generate rust newtype and traits for a PKCS#11 type based on a list of
 /// C-style constants.
 ///

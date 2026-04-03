@@ -38,7 +38,8 @@ pub(crate) fn derive_attribute_pod_type_impl(input: TokenStream) -> TokenStream 
     if !valid_repr {
         return syn::Error::new_spanned(
             &input.ident,
-            "AttributePodType derive requires #[repr(C)], #[repr(transparent)], etc.",
+            "AttributePodType derive requires #[repr(C)], \
+            #[repr(transparent)], etc.",
         )
         .to_compile_error()
         .into();
@@ -47,6 +48,32 @@ pub(crate) fn derive_attribute_pod_type_impl(input: TokenStream) -> TokenStream 
     quote! {
         impl #impl_generics CkPodType
             for #type_name #ty_generics #where_clause {}
+    }
+    .into()
+}
+
+pub(crate) fn derive_try_from_ck_attribute_impl(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let type_name = &input.ident;
+
+    let valid_repr = has_valid_repr(&input.attrs);
+
+    if !valid_repr {
+        return syn::Error::new_spanned(
+            &input.ident,
+            "TryFromCkAttribute derive requires #[repr(C)], \
+            #[repr(transparent)], etc and Ulong inner type",
+        )
+        .to_compile_error()
+        .into();
+    }
+
+    quote! {
+        impl TryFromCkAttribute for #type_name {
+            fn try_from_ck_attr(attr: &CK_ATTRIBUTE) -> Result<Self> {
+                Ulong::from(attr).try_into()
+            }
+        }
     }
     .into()
 }
