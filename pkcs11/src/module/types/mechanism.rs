@@ -652,6 +652,12 @@ pkcs11_type!(
     ]
 );
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VendorDefinedMechanism<'a> {
+    pub mechanism_type: MechanismType,
+    pub param: Option<&'a [Byte]>,
+}
+
 // TODO: add missing mechanisms
 //
 /// Specifies a particular mechanism and any parameters it requires.
@@ -1246,10 +1252,7 @@ pub enum Mechanism<'a> {
     // Sha3_512KeyDerive, // UNDEFINED_T
     // !SHA3
     /// Vendor defined.
-    VendorDefined {
-        mechanism_type: MechanismType,
-        param: Option<&'a [Byte]>,
-    },
+    VendorDefined(VendorDefinedMechanism<'a>),
 }
 
 impl<'a> Mechanism<'a> {
@@ -1260,10 +1263,10 @@ impl<'a> Mechanism<'a> {
         if !mechanism_type.is_vendor_defined() {
             return Err(Error::InvalidInput);
         }
-        Ok(Mechanism::VendorDefined {
+        Ok(Self::VendorDefined(VendorDefinedMechanism {
             mechanism_type,
             param,
-        })
+        }))
     }
 }
 
@@ -1636,7 +1639,7 @@ impl Mechanism<'_> {
             // Mechanism::Sha3_384KeyDerive(_) => MechanismType::SHA3_384_KEY_DERIVE,
             // Mechanism::Sha3_512KeyDerive(_) => MechanismType::SHA3_512_KEY_DERIVE,
             // !SHA3
-            Mechanism::VendorDefined { mechanism_type, .. } => *mechanism_type,
+            Mechanism::VendorDefined(v) => v.mechanism_type,
         }
     }
 
@@ -1755,11 +1758,9 @@ impl Mechanism<'_> {
             | Mechanism::Sha256RsaPkcsPss(param)
             | Mechanism::Sha384RsaPkcsPss(param)
             | Mechanism::Sha512RsaPkcsPss(param)
-            | Mechanism::Sha224RsaPkcsPss(param) => {
-                param as *const RsaPkcsPssParams as CK_VOID_PTR
-            }
+            | Mechanism::Sha224RsaPkcsPss(param) => param as *const _ as CK_VOID_PTR,
 
-            Mechanism::WtlsPreMasterKeyGen(param) => param as *const Byte as CK_VOID_PTR,
+            Mechanism::WtlsPreMasterKeyGen(param) => param as *const _ as CK_VOID_PTR,
 
             Mechanism::Sha512_224HmacGeneral(param)
             | Mechanism::Sha512_256HmacGeneral(param)
@@ -1788,7 +1789,7 @@ impl Mechanism<'_> {
             | Mechanism::AriaMacGeneral(param)
             | Mechanism::SeedMacGeneral(param)
             | Mechanism::AesMacGeneral(param)
-            | Mechanism::AesCmac(param) => param as *const u64 as CK_VOID_PTR,
+            | Mechanism::AesCmac(param) => param as *const _ as CK_VOID_PTR,
 
             Mechanism::DesCbc(param)
             | Mechanism::DesCbcPad(param)
@@ -1840,17 +1841,16 @@ impl Mechanism<'_> {
             | Mechanism::JuniperShuffle(param) => param as *const _ as CK_VOID_PTR,
 
             Mechanism::Ecdh1Derive(param) | Mechanism::Ecdh1CofactorDerive(param) => {
-                param as *const Ecdh1DeriveParams as CK_VOID_PTR
+                param as *const _ as CK_VOID_PTR
             }
 
-            Mechanism::X9_42DhDerive(param) => {
-                param as *const X92_42Dh1DeriveParams as CK_VOID_PTR
-            }
+            Mechanism::X9_42DhDerive(param) => param as *const _ as CK_VOID_PTR,
 
-            Mechanism::VendorDefined { param, .. } => param
-                .map_or(std::ptr::null_mut() as CK_VOID_PTR, |p| {
+            Mechanism::VendorDefined(m) => {
+                m.param.map_or(std::ptr::null_mut() as CK_VOID_PTR, |p| {
                     p.as_ptr() as CK_VOID_PTR
-                }),
+                })
+            }
         }
     }
 
@@ -1963,114 +1963,106 @@ impl Mechanism<'_> {
             | Mechanism::Gostr3410WithGostr3411(param)
             | Mechanism::Gostr3411(param)
             | Mechanism::Gostr3411Hmac(param) => {
-                (std::mem::size_of::<Byte>() * param.len()) as Ulong
+                std::mem::size_of_val(param.as_slice()) as Ulong as Ulong
             }
 
-            Mechanism::RsaPkcsPss(_param)
-            | Mechanism::Sha1RsaPkcsPss(_param)
-            | Mechanism::Sha256RsaPkcsPss(_param)
-            | Mechanism::Sha384RsaPkcsPss(_param)
-            | Mechanism::Sha512RsaPkcsPss(_param)
-            | Mechanism::Sha224RsaPkcsPss(_param) => {
-                std::mem::size_of::<RsaPkcsPssParams>() as Ulong
+            Mechanism::RsaPkcsPss(param)
+            | Mechanism::Sha1RsaPkcsPss(param)
+            | Mechanism::Sha256RsaPkcsPss(param)
+            | Mechanism::Sha384RsaPkcsPss(param)
+            | Mechanism::Sha512RsaPkcsPss(param)
+            | Mechanism::Sha224RsaPkcsPss(param) => std::mem::size_of_val(param) as Ulong,
+
+            Mechanism::WtlsPreMasterKeyGen(param) => {
+                std::mem::size_of_val(param) as Ulong
             }
 
-            Mechanism::WtlsPreMasterKeyGen(_param) => {
-                std::mem::size_of::<Byte>() as Ulong
+            Mechanism::Sha512_224HmacGeneral(param)
+            | Mechanism::Sha512_256HmacGeneral(param)
+            | Mechanism::Sha512T(param)
+            | Mechanism::Sha512THmac(param)
+            | Mechanism::Sha512THmacGeneral(param)
+            | Mechanism::Rc2Ecb(param)
+            | Mechanism::Rc2Mac(param)
+            | Mechanism::DesMacGeneral(param)
+            | Mechanism::Des3MacGeneral(param)
+            | Mechanism::Des3CmacGeneral(param)
+            | Mechanism::Md2HmacGeneral(param)
+            | Mechanism::Md5HmacGeneral(param)
+            | Mechanism::Sha1HmacGeneral(param)
+            | Mechanism::Ripemd128HmacGeneral(param)
+            | Mechanism::Ripemd160HmacGeneral(param)
+            | Mechanism::Sha256HmacGeneral(param)
+            | Mechanism::Sha224HmacGeneral(param)
+            | Mechanism::Sha384HmacGeneral(param)
+            | Mechanism::Sha512HmacGeneral(param)
+            | Mechanism::ConcatenateBaseAndKey(param)
+            | Mechanism::ExtractKeyFromKey(param)
+            | Mechanism::Ssl3Md5Mac(param)
+            | Mechanism::Ssl3Sha1Mac(param)
+            | Mechanism::CamelliaMacGeneral(param)
+            | Mechanism::AriaMacGeneral(param)
+            | Mechanism::SeedMacGeneral(param)
+            | Mechanism::AesMacGeneral(param)
+            | Mechanism::AesCmac(param) => std::mem::size_of_val(param) as Ulong,
+
+            Mechanism::DesCbc(param)
+            | Mechanism::DesCbcPad(param)
+            | Mechanism::Des3Cbc(param)
+            | Mechanism::Des3CbcPad(param)
+            | Mechanism::DesOfb64(param)
+            | Mechanism::DesOfb8(param)
+            | Mechanism::DesCfb64(param)
+            | Mechanism::DesCfb8(param)
+            | Mechanism::BlowfishCbc(param)
+            | Mechanism::BlowfishCbcPad(param)
+            | Mechanism::Gost28147(param)
+            | Mechanism::Gost28147Mac(param)
+            | Mechanism::Gost28147KeyWrap(param) => std::mem::size_of_val(param) as Ulong,
+
+            Mechanism::AesGmac(param) => std::mem::size_of_val(param) as Ulong,
+
+            Mechanism::CamelliaCbc(param)
+            | Mechanism::CamelliaCbcPad(param)
+            | Mechanism::AriaCbc(param)
+            | Mechanism::AriaCbcPad(param)
+            | Mechanism::SeedCbc(param)
+            | Mechanism::SeedCbcPad(param)
+            | Mechanism::AesCbc(param)
+            | Mechanism::AesCbcPad(param)
+            | Mechanism::AesCts(param)
+            | Mechanism::TwofishCbc(param)
+            | Mechanism::TwofishCbcPad(param)
+            | Mechanism::AesOfb(param)
+            | Mechanism::AesCfb64(param)
+            | Mechanism::AesCfb8(param)
+            | Mechanism::AesCfb128(param) => std::mem::size_of_val(param) as Ulong,
+
+            Mechanism::SkipjackEcb64(param)
+            | Mechanism::SkipjackCbc64(param)
+            | Mechanism::SkipjackOfb64(param)
+            | Mechanism::SkipjackCfb64(param)
+            | Mechanism::SkipjackCfb32(param)
+            | Mechanism::SkipjackCfb16(param)
+            | Mechanism::SkipjackCfb8(param)
+            | Mechanism::BatonEcb128(param)
+            | Mechanism::BatonEcb96(param)
+            | Mechanism::BatonCbc128(param)
+            | Mechanism::BatonCounter(param)
+            | Mechanism::BatonShuffle(param)
+            | Mechanism::JuniperEcb128(param)
+            | Mechanism::JuniperCbc128(param)
+            | Mechanism::JuniperCounter(param)
+            | Mechanism::JuniperShuffle(param) => std::mem::size_of_val(param) as Ulong,
+
+            Mechanism::Ecdh1Derive(param) | Mechanism::Ecdh1CofactorDerive(param) => {
+                std::mem::size_of_val(param) as Ulong
             }
 
-            Mechanism::Sha512_224HmacGeneral(_param)
-            | Mechanism::Sha512_256HmacGeneral(_param)
-            | Mechanism::Sha512T(_param)
-            | Mechanism::Sha512THmac(_param)
-            | Mechanism::Sha512THmacGeneral(_param)
-            | Mechanism::Rc2Ecb(_param)
-            | Mechanism::Rc2Mac(_param)
-            | Mechanism::DesMacGeneral(_param)
-            | Mechanism::Des3MacGeneral(_param)
-            | Mechanism::Des3CmacGeneral(_param)
-            | Mechanism::Md2HmacGeneral(_param)
-            | Mechanism::Md5HmacGeneral(_param)
-            | Mechanism::Sha1HmacGeneral(_param)
-            | Mechanism::Ripemd128HmacGeneral(_param)
-            | Mechanism::Ripemd160HmacGeneral(_param)
-            | Mechanism::Sha256HmacGeneral(_param)
-            | Mechanism::Sha224HmacGeneral(_param)
-            | Mechanism::Sha384HmacGeneral(_param)
-            | Mechanism::Sha512HmacGeneral(_param)
-            | Mechanism::ConcatenateBaseAndKey(_param)
-            | Mechanism::ExtractKeyFromKey(_param)
-            | Mechanism::Ssl3Md5Mac(_param)
-            | Mechanism::Ssl3Sha1Mac(_param)
-            | Mechanism::CamelliaMacGeneral(_param)
-            | Mechanism::AriaMacGeneral(_param)
-            | Mechanism::SeedMacGeneral(_param)
-            | Mechanism::AesMacGeneral(_param)
-            | Mechanism::AesCmac(_param) => std::mem::size_of::<Ulong>() as Ulong,
+            Mechanism::X9_42DhDerive(param) => std::mem::size_of_val(param) as Ulong,
 
-            Mechanism::DesCbc(_param)
-            | Mechanism::DesCbcPad(_param)
-            | Mechanism::Des3Cbc(_param)
-            | Mechanism::Des3CbcPad(_param)
-            | Mechanism::DesOfb64(_param)
-            | Mechanism::DesOfb8(_param)
-            | Mechanism::DesCfb64(_param)
-            | Mechanism::DesCfb8(_param)
-            | Mechanism::BlowfishCbc(_param)
-            | Mechanism::BlowfishCbcPad(_param)
-            | Mechanism::Gost28147(_param)
-            | Mechanism::Gost28147Mac(_param)
-            | Mechanism::Gost28147KeyWrap(_param) => {
-                std::mem::size_of::<[u8; 8]>() as Ulong
-            }
-
-            Mechanism::AesGmac(_param) => std::mem::size_of::<[u8; 12]>() as Ulong,
-
-            Mechanism::CamelliaCbc(_param)
-            | Mechanism::CamelliaCbcPad(_param)
-            | Mechanism::AriaCbc(_param)
-            | Mechanism::AriaCbcPad(_param)
-            | Mechanism::SeedCbc(_param)
-            | Mechanism::SeedCbcPad(_param)
-            | Mechanism::AesCbc(_param)
-            | Mechanism::AesCbcPad(_param)
-            | Mechanism::AesCts(_param)
-            | Mechanism::TwofishCbc(_param)
-            | Mechanism::TwofishCbcPad(_param)
-            | Mechanism::AesOfb(_param)
-            | Mechanism::AesCfb64(_param)
-            | Mechanism::AesCfb8(_param)
-            | Mechanism::AesCfb128(_param) => std::mem::size_of::<[u8; 16]>() as Ulong,
-
-            Mechanism::SkipjackEcb64(_param)
-            | Mechanism::SkipjackCbc64(_param)
-            | Mechanism::SkipjackOfb64(_param)
-            | Mechanism::SkipjackCfb64(_param)
-            | Mechanism::SkipjackCfb32(_param)
-            | Mechanism::SkipjackCfb16(_param)
-            | Mechanism::SkipjackCfb8(_param)
-            | Mechanism::BatonEcb128(_param)
-            | Mechanism::BatonEcb96(_param)
-            | Mechanism::BatonCbc128(_param)
-            | Mechanism::BatonCounter(_param)
-            | Mechanism::BatonShuffle(_param)
-            | Mechanism::JuniperEcb128(_param)
-            | Mechanism::JuniperCbc128(_param)
-            | Mechanism::JuniperCounter(_param)
-            | Mechanism::JuniperShuffle(_param) => {
-                std::mem::size_of::<[u8; 24]>() as Ulong
-            }
-
-            Mechanism::Ecdh1Derive(_param) | Mechanism::Ecdh1CofactorDerive(_param) => {
-                std::mem::size_of::<Ecdh1DeriveParams>() as Ulong
-            }
-
-            Mechanism::X9_42DhDerive(_param) => {
-                std::mem::size_of::<X92_42Dh1DeriveParams>() as Ulong
-            }
-
-            Mechanism::VendorDefined { param, .. } => {
-                param.map_or(0, |p| std::mem::size_of_val(p) as Ulong)
+            Mechanism::VendorDefined(m) => {
+                m.param.map_or(0, |p| std::mem::size_of_val(p) as Ulong)
             }
         }
     }

@@ -8,33 +8,7 @@ use syn::{
     Attribute, Error, Ident, Result, Token,
 };
 
-#[allow(clippy::enum_variant_names)]
-enum NamingConvention {
-    // UpperCamelCase
-    UpperCamelCase,
-    // SCREAMING_SNAKE_CASE
-    ScreamingSnakeCase,
-    // snake_case
-    SnakeCase,
-}
-
-impl Parse for NamingConvention {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let ident: Ident = input.parse()?;
-        match ident.to_string().as_str() {
-            "UpperCamelCase" => Ok(Self::UpperCamelCase),
-            "ScreamingSnakeCase" => Ok(Self::ScreamingSnakeCase),
-            "SnakeCase" => Ok(Self::SnakeCase),
-            other => Err(Error::new(
-                ident.span(),
-                format!(
-                    "unknown convention `{other}`, expected one of: \
-                    UpperCamelCase, ScreamingSnakeCase, SnakeCase"
-                ),
-            )),
-        }
-    }
-}
+use crate::naming::{convert_name, extract_prefix, NamingConvention};
 
 struct ConstEntry {
     /// Doc comments.
@@ -51,40 +25,9 @@ impl Parse for ConstEntry {
     }
 }
 
-fn extract_prefix(name: &str) -> Option<String> {
-    let pos = name.find('_')?;
-    if pos == 0 {
-        return None; // "_FOO"
-    }
-    Some(name[..=pos].to_string())
-}
-
-/// Converts a PKCS#11 constant name to the desired naming convention,
-/// stripping the common prefix.
-fn convert_name(name: &str, prefix: &str, naming: &NamingConvention) -> String {
-    let stripped = name.strip_prefix(prefix).unwrap_or(name);
-
-    match naming {
-        NamingConvention::UpperCamelCase => stripped
-            .split('_')
-            .filter(|p| !p.is_empty())
-            .map(|word| {
-                let mut result = String::with_capacity(word.len());
-                let mut chars = word.chars();
-                let first = chars.next().unwrap();
-                result.extend(first.to_uppercase());
-                result.extend(chars.flat_map(|c| c.to_lowercase()));
-                result
-            })
-            .collect(),
-        NamingConvention::ScreamingSnakeCase => stripped.to_uppercase(),
-        NamingConvention::SnakeCase => stripped.to_lowercase(),
-    }
-}
-
 /// Input for the `pkcs11_type!` procedure macro.
 struct Pkcs11Type {
-    /// Doc comments for the type impl.
+    /// Doc comments and derive attributes for the type impl.
     type_attrs: Vec<Attribute>,
     /// Type name.
     type_name: Ident,
@@ -130,7 +73,6 @@ impl Parse for Pkcs11Type {
         // Parse list of constants in brackets
         let content;
         bracketed!(content in input);
-
         let constants: Vec<ConstEntry> =
             Punctuated::<ConstEntry, Token![,]>::parse_terminated(&content)?
                 .into_iter()
@@ -226,6 +168,7 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
         })
         .collect();
 
+    // Type impl
     let const_defs = name_pairs.iter().map(|p| {
         let (attrs, rust_name, c_name) = (&p.attrs, &p.rust_name, &p.c_name);
         quote! {
@@ -239,6 +182,23 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
         quote! { #type_name::#rust_name }
     });
 
+    let impl_ts = quote! {
+        #(#type_attrs)*
+        #[derive(Copy, Clone, PartialEq, Eq)]
+        #[repr(transparent)]
+        pub struct #type_name(#inner_type);
+
+        impl #type_name {
+            #(#const_defs)*
+
+            /// Returns a slice of all known variants.
+            pub fn all() -> &'static [#type_name] {
+                &[ #(#const_all_variants),* ]
+            }
+        }
+    };
+
+    //
     let optional_vendor_defined_impl =
         vendor_defined_const.as_ref().map(|vendor_const| {
             quote! {
@@ -258,7 +218,23 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
             }
         });
 
-    let type_name_str = type_name.to_string();
+    let deref_ts = quote! {
+        impl ::std::ops::Deref for #type_name {
+            type Target = #inner_type;
+
+            fn deref(&self) -> &Self::Target {
+                &self.0
+            }
+        }
+    };
+
+    let from_ts = quote! {
+        impl ::std::convert::From<#type_name> for #inner_type {
+            fn from(val: #type_name) -> Self {
+                *val
+            }
+        }
+    };
 
     // TryFrom
     let try_from_arms = name_pairs.iter().map(|p| {
@@ -274,6 +250,22 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
         },
         None => quote! {},
     };
+
+    let try_from_ts = quote! {
+        impl ::std::convert::TryFrom<#inner_type> for #type_name {
+            type Error = Error;
+
+            fn try_from(val: #inner_type) -> Result<Self> {
+                match val {
+                    #(#try_from_arms)*
+                    #try_from_vendor_defined_ext
+                    _ => Err(Error::NotSupported),
+                }
+            }
+        }
+    };
+
+    let type_name_str = type_name.to_string();
 
     // Display
     let display_arms = name_pairs.iter().map(|p| {
@@ -294,6 +286,18 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
             }
         })
         .unwrap_or_default();
+
+    let display_ts = quote! {
+        impl ::std::fmt::Display for #type_name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                match *self {
+                    #(#display_arms)*
+                    #display_vendor_defined_ext
+                    other => ::std::write!(f, "Unknown {}: {:#x}", #type_name_str, *other),
+                }
+            }
+        }
+    };
 
     // Debug
     let debug_arms = name_pairs.iter().map(|p| {
@@ -318,60 +322,7 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
         })
         .unwrap_or_default();
 
-    // Generate the final code for a newtype: impl, traits.
-    quote! {
-        #(#type_attrs)*
-        #[derive(Copy, Clone, PartialEq, Eq)]
-        #[repr(transparent)]
-        pub struct #type_name(#inner_type);
-
-        impl #type_name {
-            #(#const_defs)*
-
-            /// Returns a slice of all known variants.
-            pub fn all() -> &'static [#type_name] {
-                &[ #(#const_all_variants),* ]
-            }
-        }
-
-        #optional_vendor_defined_impl
-
-        impl ::std::ops::Deref for #type_name {
-            type Target = #inner_type;
-
-            fn deref(&self) -> &Self::Target {
-                &self.0
-            }
-        }
-
-        impl ::std::convert::From<#type_name> for #inner_type {
-            fn from(val: #type_name) -> Self {
-                *val
-            }
-        }
-
-        impl ::std::convert::TryFrom<#inner_type> for #type_name {
-            type Error = Error;
-
-            fn try_from(val: #inner_type) -> Result<Self> {
-                match val {
-                    #(#try_from_arms)*
-                    #try_from_vendor_defined_ext
-                    _ => Err(Error::NotSupported),
-                }
-            }
-        }
-
-        impl ::std::fmt::Display for #type_name {
-            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-                match *self {
-                    #(#display_arms)*
-                    #display_vendor_defined_ext
-                    other => ::std::write!(f, "Unknown {}: {:#x}", #type_name_str, *other),
-                }
-            }
-        }
-
+    let debug_ts = quote! {
         impl ::std::fmt::Debug for #type_name {
             fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 match *self {
@@ -381,6 +332,17 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
                 }
             }
         }
+    };
+
+    // Generate the final code for a newtype: impl, traits.
+    quote! {
+        #impl_ts
+        #optional_vendor_defined_impl
+        #deref_ts
+        #from_ts
+        #try_from_ts
+        #display_ts
+        #debug_ts
     }
     .into()
 }
