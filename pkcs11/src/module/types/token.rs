@@ -1,5 +1,4 @@
-use bitflags::bitflags;
-use std::convert::TryFrom;
+use {bitflags::bitflags, std::convert::TryFrom};
 
 use crate::{
     error::{Error, Result},

@@ -1,6 +1,4 @@
-use bitflags::bitflags;
-use secrecy::SecretString;
-use std::convert::TryFrom;
+use {bitflags::bitflags, secrecy::SecretString, std::convert::TryFrom};
 
 pub use crate::bindings::*;
 use crate::{

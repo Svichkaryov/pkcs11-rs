@@ -1,11 +1,13 @@
-use proc_macro::TokenStream;
-use quote::quote;
-use syn::{
-    bracketed,
-    parse::{Parse, ParseStream},
-    parse_macro_input,
-    punctuated::Punctuated,
-    Attribute, Error, Ident, Result, Token,
+use {
+    proc_macro::TokenStream,
+    quote::quote,
+    syn::{
+        bracketed,
+        parse::{Parse, ParseStream},
+        parse_macro_input,
+        punctuated::Punctuated,
+        Attribute, Error, Ident, Result, Token,
+    },
 };
 
 use crate::naming::{convert_name, extract_prefix, NamingConvention};

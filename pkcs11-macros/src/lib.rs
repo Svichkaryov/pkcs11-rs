@@ -1,6 +1,7 @@
 use proc_macro::TokenStream;
 
 mod attribute;
+mod mech;
 mod naming;
 mod types;
 
@@ -69,4 +70,37 @@ pub fn pkcs11_type(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn pkcs11_attribute_type(input: TokenStream) -> TokenStream {
     attribute::pkcs11_attribute_type_impl(input)
+}
+
+/// Generate rust newtype and traits for a PKCS#11 mechanism type based on a
+/// list of C-style constants with parameter.
+///
+/// /// # Example:
+///
+/// ```rust
+/// pkcs11_mechanism_type!(
+///     /// Specifies a particular mechanism and any parameters it requires.
+///     #[non_exhaustive]
+///     Mechanism, naming = UpperCamelCase;
+///     [
+///         CKM_DH_PKCS_KEY_PAIR_GEN,
+///         CKM_DH_PKCS_DERIVE: Vec<Byte>,
+///
+///         CKM_SHA224_RSA_PKCS,
+///         CKM_SHA224_RSA_PKCS_PSS: RsaPkcsPssParams,
+///
+///         CKM_AES_KEY_GEN,
+///         CKM_AES_ECB,
+///         CKM_AES_CBC: [u8; 16],
+///         CKM_AES_MAC,
+///         CKM_AES_MAC_GENERAL: Ulong,
+///         CKM_AES_CBC_PAD: [u8; 16],
+///
+///         CKM_VENDOR_DEFINED,
+///     ]
+/// );
+/// ```
+#[proc_macro]
+pub fn pkcs11_mechanism_type(input: TokenStream) -> TokenStream {
+    mech::pkcs11_mechanism_type_impl(input)
 }

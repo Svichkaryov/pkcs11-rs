@@ -1,6 +1,8 @@
-use proc_macro::TokenStream;
-use quote::quote;
-use syn::{parse_macro_input, DeriveInput};
+use {
+    proc_macro::TokenStream,
+    quote::quote,
+    syn::{parse_macro_input, DeriveInput},
+};
 
 fn has_valid_repr(attrs: &[syn::Attribute]) -> bool {
     const VALID: &[&str] = &[

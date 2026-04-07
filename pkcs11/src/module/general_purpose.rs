@@ -1,5 +1,7 @@
-use libloading;
-use std::{path::Path, sync::Arc};
+use {
+    libloading,
+    std::{path::Path, sync::Arc},
+};
 
 use crate::{
     error::{CryptokiRetVal, Error, Result},

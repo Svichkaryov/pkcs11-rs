@@ -16,7 +16,7 @@ use crate::{
     types::pkcs11_type_impl,
 };
 
-struct AttrEntry {
+struct MechEntry {
     /// Doc comments.
     attrs: Vec<Attribute>,
     /// A c-style pkcs#11 constant name.
@@ -25,7 +25,7 @@ struct AttrEntry {
     ty: Option<Type>,
 }
 
-impl Parse for AttrEntry {
+impl Parse for MechEntry {
     fn parse(input: ParseStream) -> Result<Self> {
         let attrs = input.call(Attribute::parse_outer)?;
         let ck_name: Ident = input.parse()?;
@@ -35,12 +35,12 @@ impl Parse for AttrEntry {
         } else {
             None
         };
-        Ok(AttrEntry { attrs, ck_name, ty })
+        Ok(MechEntry { attrs, ck_name, ty })
     }
 }
 
-/// Input for the `pkcs11_attribute_type!` procedure macro.
-struct Pkcs11AttributeType {
+/// Input for the `pkcs11_mechanism_type!` procedure macro.
+struct Pkcs11MechanismType {
     /// Doc comments and derive attributes for the type impl.
     type_attrs: Vec<Attribute>,
     /// Type name.
@@ -48,12 +48,12 @@ struct Pkcs11AttributeType {
     /// Naming convention for attribute types (default: UpperCamelCase).
     naming: NamingConvention,
     /// Attribute entries with type.
-    entries: Vec<AttrEntry>,
+    entries: Vec<MechEntry>,
     /// Validated common prefix to all c-style pkcs#11 constants.
     const_prefix: String,
 }
 
-impl Parse for Pkcs11AttributeType {
+impl Parse for Pkcs11MechanismType {
     fn parse(input: ParseStream) -> Result<Self> {
         let type_attrs = input.call(Attribute::parse_outer)?;
         let type_name: Ident = input.parse()?;
@@ -78,8 +78,8 @@ impl Parse for Pkcs11AttributeType {
         // Parse list of constants in brackets
         let content;
         bracketed!(content in input);
-        let entries: Vec<AttrEntry> =
-            Punctuated::<AttrEntry, Token![,]>::parse_terminated(&content)?
+        let entries: Vec<MechEntry> =
+            Punctuated::<MechEntry, Token![,]>::parse_terminated(&content)?
                 .into_iter()
                 .collect();
 
@@ -115,7 +115,7 @@ impl Parse for Pkcs11AttributeType {
             }
         }
 
-        Ok(Pkcs11AttributeType {
+        Ok(Pkcs11MechanismType {
             type_attrs,
             type_name,
             naming,
@@ -125,14 +125,23 @@ impl Parse for Pkcs11AttributeType {
     }
 }
 
-pub(crate) fn pkcs11_attribute_type_impl(input: TokenStream) -> TokenStream {
-    let Pkcs11AttributeType {
+fn is_vec_type(ty: &Type) -> bool {
+    if let syn::Type::Path(type_path) = ty {
+        if let Some(segment) = type_path.path.segments.last() {
+            return segment.ident == "Vec";
+        }
+    }
+    false
+}
+
+pub(crate) fn pkcs11_mechanism_type_impl(input: TokenStream) -> TokenStream {
+    let Pkcs11MechanismType {
         type_attrs,
         type_name,
         naming,
         entries,
         const_prefix,
-    } = parse_macro_input!(input as Pkcs11AttributeType);
+    } = parse_macro_input!(input as Pkcs11MechanismType);
     // Build a new type with `pkcs11_type` macro
 
     let attr_type_name = Ident::new(&format!("{}Type", type_name), type_name.span());
@@ -147,8 +156,9 @@ pub(crate) fn pkcs11_attribute_type_impl(input: TokenStream) -> TokenStream {
         .collect();
 
     let pkcs11_type_ts: TokenStream2 = quote! {
-        /// Identifies an attribute type.
-        #attr_type_name: CK_ATTRIBUTE_TYPE, naming = ScreamingSnakeCase;
+        /// Identifies an mechanism type.
+        #[derive(AttributePodType, TryFromCkAttribute)]
+        #attr_type_name: CK_MECHANISM_TYPE, naming = ScreamingSnakeCase;
         [ #(#ck_const_list),* ]
     };
 
@@ -156,25 +166,25 @@ pub(crate) fn pkcs11_attribute_type_impl(input: TokenStream) -> TokenStream {
 
     //
     struct NamePair<'a> {
-        attr_name: Ident,
-        attr_type_const_name: Ident,
-        entry: &'a AttrEntry,
+        mech_name: Ident,
+        mech_type_const_name: Ident,
+        entry: &'a MechEntry,
     }
 
-    let typed_entries: Vec<&AttrEntry> = entries
+    let typed_entries: Vec<&MechEntry> = entries
         .iter()
         .filter(|e| e.ty.is_some() && !e.ck_name.to_string().ends_with("_VENDOR_DEFINED"))
         .collect();
 
     let name_pairs: Vec<NamePair> = typed_entries
-        .into_iter()
+        .iter()
         .map(|entry| {
             let ck_name_str = entry.ck_name.to_string();
-            let attr_name = Ident::new(
+            let mech_name = Ident::new(
                 &convert_name(&ck_name_str, &const_prefix, &naming),
                 entry.ck_name.span(),
             );
-            let attr_type_const_name = Ident::new(
+            let mech_type_const_name = Ident::new(
                 &convert_name(
                     &ck_name_str,
                     &const_prefix,
@@ -183,8 +193,8 @@ pub(crate) fn pkcs11_attribute_type_impl(input: TokenStream) -> TokenStream {
                 entry.ck_name.span(),
             );
             NamePair {
-                attr_name,
-                attr_type_const_name,
+                mech_name,
+                mech_type_const_name,
                 entry,
             }
         })
@@ -192,114 +202,147 @@ pub(crate) fn pkcs11_attribute_type_impl(input: TokenStream) -> TokenStream {
 
     // Type enumeration
     let enum_variants = name_pairs.iter().map(|p| {
-        let (attrs, name, ty) =
-            (&p.entry.attrs, &p.attr_name, p.entry.ty.as_ref().unwrap());
-        quote! { #(#attrs)* #name(#ty) }
+        let (attrs, name, mech_ty) = (&p.entry.attrs, &p.mech_name, &p.entry.ty);
+        match mech_ty {
+            Some(ty) => quote! { #(#attrs)* #name(#ty) },
+            None => quote! { #(#attrs)* #name },
+        }
     });
 
     let enum_ts = quote! {
         #(#type_attrs)*
-        #[derive(Debug, Clone, PartialEq, Eq)]
-        pub enum #type_name {
+        #[derive(Debug, Clone)]
+        pub enum #type_name<'a> {
             #(#enum_variants,)*
-            /// Vendor-defined attribute.
-            VendorDefined(VendorDefinedAttribute),
+            /// Vendor-defined mechanism.
+            VendorDefined(VendorDefinedMechanism<'a>),
         }
     };
 
     // Type impl
-    let attribute_type_arms = name_pairs.iter().map(|p| {
-        let (attr_name, const_name) = (&p.attr_name, &p.attr_type_const_name);
-        quote! {
-            #type_name::#attr_name(_) => #attr_type_name::#const_name,
+    let mechanism_type_arms = name_pairs.iter().map(|p| {
+        let (mech_name, const_name, mech_type) =
+            (&p.mech_name, &p.mech_type_const_name, &p.entry.ty);
+
+        match mech_type {
+            Some(_) => {
+                quote! {
+                    #type_name::#mech_name(_) => #attr_type_name::#const_name,
+                }
+            }
+            None => quote! {
+                #type_name::#mech_name => #attr_type_name::#const_name,
+            },
         }
     });
 
-    let inner_value_arms = name_pairs.iter().map(|p| {
-        let attr_name = &p.attr_name;
-        quote! {
-            #type_name::#attr_name(v) => v,
+    let ptr_arms = name_pairs.iter().map(|p| {
+        let (mech_name, mech_type) = (&p.mech_name, &p.entry.ty);
+
+        match mech_type {
+            Some(ty) => {
+                if is_vec_type(ty) {
+                    quote! {
+                        #type_name::#mech_name(param) => param.as_ptr() as CK_VOID_PTR,
+                    }
+                } else {
+                    quote! {
+                        #type_name::#mech_name(param) => param as *const _ as CK_VOID_PTR,
+                    }
+                }
+            }
+            None => quote! {
+                #type_name::#mech_name => std::ptr::null_mut() as CK_VOID_PTR,
+            },
+        }
+    });
+
+    let len_arms = name_pairs.iter().map(|p| {
+        let (mech_name, mech_type) = (&p.mech_name, &p.entry.ty);
+
+        match mech_type {
+            Some(ty) => {
+                if is_vec_type(ty) {
+                    quote! {
+                        #type_name::#mech_name(param) => std::mem::size_of_val(param.as_slice()) as Ulong,
+                    }
+                } else {
+                    quote! {
+                        #type_name::#mech_name(param) => std::mem::size_of_val(param) as Ulong,
+                    }
+                }
+            }
+            None => quote! { #type_name::#mech_name => 0 as Ulong, },
         }
     });
 
     let impl_ts = quote! {
         #[allow(clippy::len_without_is_empty)]
-        impl #type_name {
-            pub fn attribute_type(&self) -> #attr_type_name {
-                match self {
-                    #(#attribute_type_arms)*
-                    #type_name::VendorDefined(v) => v.attr_type,
+        impl<'a> #type_name<'a> {
+            pub fn new_vendor_defined(
+                mechanism_type: #attr_type_name,
+                param: Option<&'a [Byte]>,
+            ) -> Result<Self> {
+                if !mechanism_type.is_vendor_defined() {
+                    return Err(crate::error::Error::InvalidInput);
                 }
+                Ok(Self::VendorDefined(VendorDefinedMechanism {
+                    mechanism_type,
+                    param,
+                }))
             }
 
-            pub fn inner_value(&self) -> &dyn AttributeValue {
+            pub fn mechanism_type(&self) -> #attr_type_name {
                 match self {
-                    #(#inner_value_arms)*
-                    #type_name::VendorDefined(v) => &v.value,
+                    #(#mechanism_type_arms)*
+                    #type_name::VendorDefined(v) => v.mechanism_type,
                 }
             }
 
             pub fn ptr(&self) -> CK_VOID_PTR {
-                self.inner_value().as_ck_ptr()
+                match self {
+                    #(#ptr_arms)*
+                    #type_name::VendorDefined(m) => {
+                        m.param.map_or(std::ptr::null_mut() as CK_VOID_PTR, |p| {
+                            p.as_ptr() as CK_VOID_PTR
+                        })
+                    }
+                }
             }
 
             pub fn len(&self) -> Ulong {
-                self.inner_value().len()
+                match self {
+                    #(#len_arms)*
+                    #type_name::VendorDefined(m) => {
+                        m.param.map_or(0, |p| std::mem::size_of_val(p) as Ulong)
+                    }
+                }
             }
         }
     };
 
     // From
     let from_ts = quote! {
-        impl ::std::convert::From<&#type_name> for CK_ATTRIBUTE {
-            fn from(attribute: &#type_name) -> Self {
+        impl<'a> From<&#type_name<'a>> for CK_MECHANISM {
+            fn from(mechanism: &#type_name) -> Self {
                 Self {
-                    attrType: attribute.attribute_type().into(),
-                    pValue: attribute.ptr(),
-                    ulValueLen: attribute.len(),
+                    mechanism: mechanism.mechanism_type().into(),
+                    pParameter: mechanism.ptr(),
+                    ulParameterLen: mechanism.len(),
                 }
             }
         }
     };
 
-    // TryFrom
-    let try_from_arms = name_pairs.iter().map(|p| {
-        let (attr_name, const_name, ty) = (
-            &p.attr_name,
-            &p.attr_type_const_name,
-            p.entry.ty.as_ref().unwrap(),
-        );
-        quote! {
-            #attr_type_name::#const_name => Ok(#type_name::#attr_name(
-                <#ty as TryFromCkAttribute>::try_from_ck_attr(&ck_attribute)?
-            )),
-        }
-    });
+    // No out Mechanism
+    // impl !TryFrom<CK_MECHANISM> for Mechanism<'_> {}
 
-    let try_from_ts = quote! {
-        impl ::std::convert::TryFrom<CK_ATTRIBUTE> for #type_name {
-            type Error = Error;
-
-            fn try_from(ck_attribute: CK_ATTRIBUTE) -> Result<Self> {
-                let attr_type = #attr_type_name::try_from(ck_attribute.attrType)?;
-                match attr_type {
-                    #(#try_from_arms)*
-                    _ => Ok(#type_name::VendorDefined(
-                        VendorDefinedAttribute::try_from_ck_attr(&ck_attribute)?
-                    )),
-                }
-            }
-        }
-    };
-
-    // Generate the final code for a newtype: impl, traits.
     quote! {
         #attr_type_ts
 
         #enum_ts
         #impl_ts
         #from_ts
-        #try_from_ts
     }
     .into()
 }
