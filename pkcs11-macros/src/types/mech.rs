@@ -2,107 +2,16 @@ use {
     proc_macro::TokenStream,
     proc_macro2::TokenStream as TokenStream2,
     quote::quote,
-    syn::{
-        bracketed,
-        parse::{Parse, ParseStream},
-        parse_macro_input,
-        punctuated::Punctuated,
-        Attribute, Error, Ident, Result, Token, Type,
-    },
+    syn::{parse_macro_input, Ident, Type},
 };
 
 use crate::{
-    naming::{convert_name, extract_prefix, NamingConvention},
-    types::pkcs11_type_impl,
+    naming::{convert_name, NamingConvention},
+    types::{
+        input::{Pkcs11Type, TypeEntry},
+        pkcs11_type_impl,
+    },
 };
-
-pub type MechEntry = crate::types::input::TypeEntry;
-
-/// Input for the `pkcs11_mechanism_type!` procedure macro.
-struct Pkcs11MechanismType {
-    /// Doc comments and derive attributes for the type impl.
-    type_attrs: Vec<Attribute>,
-    /// Type name.
-    type_name: Ident,
-    /// Naming convention for attribute types (default: UpperCamelCase).
-    naming: NamingConvention,
-    /// Attribute entries with type.
-    entries: Vec<MechEntry>,
-    /// Validated common prefix to all c-style pkcs#11 constants.
-    const_prefix: String,
-}
-
-impl Parse for Pkcs11MechanismType {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let type_attrs = input.call(Attribute::parse_outer)?;
-        let type_name: Ident = input.parse()?;
-
-        let naming = if input.peek(Token![,]) {
-            input.parse::<Token![,]>()?;
-            let key: Ident = input.parse()?;
-            if key != "naming" {
-                return Err(Error::new(
-                    key.span(),
-                    format!("expected `naming`, found `{key}`"),
-                ));
-            }
-            input.parse::<Token![=]>()?;
-            input.parse::<NamingConvention>()?
-        } else {
-            NamingConvention::UpperCamelCase
-        };
-
-        input.parse::<Token![;]>()?;
-
-        // Parse list of constants in brackets
-        let content;
-        bracketed!(content in input);
-        let entries: Vec<MechEntry> =
-            Punctuated::<MechEntry, Token![,]>::parse_terminated(&content)?
-                .into_iter()
-                .collect();
-
-        // Validate list
-
-        if entries.is_empty() {
-            return Err(Error::new(type_name.span(), "expected at least one entry"));
-        }
-
-        let prefixes: Vec<String> = entries
-            .iter()
-            .map(|entry| {
-                let name = entry.ck_name.to_string();
-                extract_prefix(&name).ok_or_else(|| {
-                    Error::new_spanned(
-                        &entry.ck_name,
-                        "constant does not contain a prefix",
-                    )
-                })
-            })
-            .collect::<Result<_>>()?;
-
-        let first = prefixes[0].clone();
-        for (entry, prefix) in entries.iter().zip(prefixes.iter()) {
-            if prefix != &first {
-                return Err(Error::new_spanned(
-                    &entry.ck_name,
-                    format!(
-                        "mismatched prefix: expected `{}`, found `{}`",
-                        first, prefix
-                    ),
-                ));
-            }
-        }
-
-        Ok(Pkcs11MechanismType {
-            type_attrs,
-            type_name,
-            naming,
-            entries,
-            const_prefix: first,
-        })
-    }
-}
 
 fn is_vec_type(ty: &Type) -> bool {
     if let syn::Type::Path(type_path) = ty {
@@ -114,13 +23,15 @@ fn is_vec_type(ty: &Type) -> bool {
 }
 
 pub(crate) fn pkcs11_mechanism_type_impl(input: TokenStream) -> TokenStream {
-    let Pkcs11MechanismType {
+    let Pkcs11Type {
         type_attrs,
         type_name,
+        inner_type: _,
         naming,
         entries,
         const_prefix,
-    } = parse_macro_input!(input as Pkcs11MechanismType);
+        vendor_defined_const: _,
+    } = parse_macro_input!(input as Pkcs11Type);
     // Build a new type with `pkcs11_type` macro
 
     let attr_type_name = Ident::new(&format!("{}Type", type_name), type_name.span());
@@ -147,16 +58,12 @@ pub(crate) fn pkcs11_mechanism_type_impl(input: TokenStream) -> TokenStream {
     struct NamePair<'a> {
         mech_name: Ident,
         mech_type_const_name: Ident,
-        entry: &'a MechEntry,
+        entry: &'a TypeEntry,
     }
 
-    let typed_entries: Vec<&MechEntry> = entries
+    let name_pairs: Vec<NamePair> = entries
         .iter()
-        .filter(|e| e.ty.is_some() && !e.ck_name.to_string().ends_with("_VENDOR_DEFINED"))
-        .collect();
-
-    let name_pairs: Vec<NamePair> = typed_entries
-        .iter()
+        .filter(|e| !e.ck_name.to_string().ends_with("_VENDOR_DEFINED"))
         .map(|entry| {
             let ck_name_str = entry.ck_name.to_string();
             let mech_name = Ident::new(

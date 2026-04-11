@@ -1,134 +1,10 @@
 use {
     proc_macro::TokenStream,
     quote::quote,
-    syn::{
-        bracketed,
-        parse::{Parse, ParseStream},
-        parse_macro_input,
-        punctuated::Punctuated,
-        Attribute, Error, Ident, Result, Token,
-    },
+    syn::{parse_macro_input, Attribute, Ident},
 };
 
-use crate::naming::{convert_name, extract_prefix, NamingConvention};
-
-pub type ConstEntry = crate::types::input::TypeEntry;
-
-/// Input for the `pkcs11_type!` procedure macro.
-struct Pkcs11Type {
-    /// Doc comments and derive attributes for the type impl.
-    type_attrs: Vec<Attribute>,
-    /// Type name.
-    type_name: Ident,
-    /// Inner type of the newtype.
-    inner_type: Ident,
-    /// Naming convention for generated constants
-    /// (default: ScreamingSnakeCase).
-    naming: NamingConvention,
-    /// PKCS#11 C constant list.
-    constants: Vec<ConstEntry>,
-    /// Validated common prefix to all c-style pkcs#11 constants.
-    const_prefix: String,
-    /// Optional CK*_VENDOR_DEFINED constant. If present, generates extra
-    /// methods for vendor-defined values.
-    vendor_defined_const: Option<Ident>,
-}
-
-impl Parse for Pkcs11Type {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let type_attrs = input.call(Attribute::parse_outer)?;
-        let type_name: Ident = input.parse()?;
-
-        input.parse::<Token![:]>()?;
-        let inner_type: Ident = input.parse()?;
-
-        let naming = if input.peek(Token![,]) {
-            input.parse::<Token![,]>()?;
-            let key: Ident = input.parse()?;
-            if key != "naming" {
-                return Err(Error::new(
-                    key.span(),
-                    format!("expected `naming`, found `{key}`"),
-                ));
-            }
-            input.parse::<Token![=]>()?;
-            input.parse::<NamingConvention>()?
-        } else {
-            NamingConvention::ScreamingSnakeCase
-        };
-
-        input.parse::<Token![;]>()?;
-
-        // Parse list of constants in brackets
-        let content;
-        bracketed!(content in input);
-        let constants: Vec<ConstEntry> =
-            Punctuated::<ConstEntry, Token![,]>::parse_terminated(&content)?
-                .into_iter()
-                .collect();
-
-        // Validate list
-
-        if constants.is_empty() {
-            return Err(Error::new(
-                type_name.span(),
-                "expected at least one constant",
-            ));
-        }
-
-        let prefixes: Vec<String> = constants
-            .iter()
-            .map(|entry| {
-                let name = entry.ck_name.to_string();
-                extract_prefix(&name).ok_or_else(|| {
-                    Error::new_spanned(
-                        &entry.ck_name,
-                        "constant does not contain a prefix",
-                    )
-                })
-            })
-            .collect::<Result<_>>()?;
-
-        let first = prefixes[0].clone();
-        for (entry, prefix) in constants.iter().zip(prefixes.iter()) {
-            if prefix != &first {
-                return Err(Error::new_spanned(
-                    &entry.ck_name,
-                    format!(
-                        "mismatched prefix: expected `{}`, found `{}`",
-                        first, prefix
-                    ),
-                ));
-            }
-        }
-
-        let const_prefix = first;
-
-        // Remove CK*_VENDOR_DEFINED contant marker from the main const list.
-        let mut vendor_defined_const: Option<Ident> = None;
-        let constants = constants
-            .into_iter()
-            .filter_map(|entry| {
-                if entry.ck_name.to_string().ends_with("_VENDOR_DEFINED") {
-                    vendor_defined_const = Some(entry.ck_name);
-                    None
-                } else {
-                    Some(entry)
-                }
-            })
-            .collect();
-
-        Ok(Pkcs11Type {
-            type_attrs,
-            type_name,
-            inner_type,
-            naming,
-            constants,
-            const_prefix,
-            vendor_defined_const,
-        })
-    }
-}
+use crate::{naming::convert_name, types::input::Pkcs11Type};
 
 pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
     let Pkcs11Type {
@@ -136,10 +12,13 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
         type_name,
         inner_type,
         naming,
-        constants,
+        entries,
         const_prefix,
         vendor_defined_const,
     } = parse_macro_input!(input as Pkcs11Type);
+
+    // For simple types there must always be a type
+    // let inner_type = inner_type.unwrap_or_else(|| parse_quote!(u64));
 
     struct NamePair {
         // doc comments
@@ -148,8 +27,9 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
         c_name: Ident,
     }
 
-    let name_pairs: Vec<NamePair> = constants
+    let name_pairs: Vec<NamePair> = entries
         .into_iter()
+        .filter(|entry| !entry.ck_name.to_string().ends_with("_VENDOR_DEFINED"))
         .map(|entry| {
             let converted =
                 convert_name(&entry.ck_name.to_string(), &const_prefix, &naming);
