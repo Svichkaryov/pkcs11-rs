@@ -1,18 +1,16 @@
 use proc_macro::TokenStream;
 
-mod attribute;
-mod mech;
 mod naming;
 mod types;
 
 #[proc_macro_derive(AttributePodType)]
 pub fn derive_attribute_value(input: TokenStream) -> TokenStream {
-    attribute::derive_attribute_pod_type_impl(input)
+    types::derive_attribute_pod_type_impl(input)
 }
 
 #[proc_macro_derive(TryFromCkAttribute)]
 pub fn derive_try_from_ck_attribute_impl(input: TokenStream) -> TokenStream {
-    attribute::derive_try_from_ck_attribute_impl(input)
+    types::derive_try_from_ck_attribute_impl(input)
 }
 
 /// Generate rust newtype and traits for a PKCS#11 type based on a list of
@@ -69,7 +67,7 @@ pub fn pkcs11_type(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn pkcs11_attribute_type(input: TokenStream) -> TokenStream {
-    attribute::pkcs11_attribute_type_impl(input)
+    types::pkcs11_attribute_type_impl(input)
 }
 
 /// Generate rust newtype and traits for a PKCS#11 mechanism type based on a
@@ -102,5 +100,5 @@ pub fn pkcs11_attribute_type(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn pkcs11_mechanism_type(input: TokenStream) -> TokenStream {
-    mech::pkcs11_mechanism_type_impl(input)
+    types::pkcs11_mechanism_type_impl(input)
 }

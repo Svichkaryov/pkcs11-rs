@@ -16,28 +16,7 @@ use crate::{
     types::pkcs11_type_impl,
 };
 
-struct MechEntry {
-    /// Doc comments.
-    attrs: Vec<Attribute>,
-    /// A c-style pkcs#11 constant name.
-    ck_name: Ident,
-    /// Attribute type.
-    ty: Option<Type>,
-}
-
-impl Parse for MechEntry {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let attrs = input.call(Attribute::parse_outer)?;
-        let ck_name: Ident = input.parse()?;
-        let ty = if input.peek(Token![:]) {
-            input.parse::<Token![:]>()?;
-            Some(input.parse::<Type>()?)
-        } else {
-            None
-        };
-        Ok(MechEntry { attrs, ck_name, ty })
-    }
-}
+pub type MechEntry = crate::types::input::TypeEntry;
 
 /// Input for the `pkcs11_mechanism_type!` procedure macro.
 struct Pkcs11MechanismType {

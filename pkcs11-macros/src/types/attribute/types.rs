@@ -7,7 +7,7 @@ use {
         parse::{Parse, ParseStream},
         parse_macro_input,
         punctuated::Punctuated,
-        Attribute, Error, Ident, Result, Token, Type,
+        Attribute, Error, Ident, Result, Token,
     },
 };
 
@@ -16,28 +16,7 @@ use crate::{
     types::pkcs11_type_impl,
 };
 
-struct AttrEntry {
-    /// Doc comments.
-    attrs: Vec<Attribute>,
-    /// A c-style pkcs#11 constant name.
-    ck_name: Ident,
-    /// Attribute type.
-    ty: Option<Type>,
-}
-
-impl Parse for AttrEntry {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let attrs = input.call(Attribute::parse_outer)?;
-        let ck_name: Ident = input.parse()?;
-        let ty = if input.peek(Token![:]) {
-            input.parse::<Token![:]>()?;
-            Some(input.parse::<Type>()?)
-        } else {
-            None
-        };
-        Ok(AttrEntry { attrs, ck_name, ty })
-    }
-}
+pub type AttrEntry = crate::types::input::TypeEntry;
 
 /// Input for the `pkcs11_attribute_type!` procedure macro.
 struct Pkcs11AttributeType {
