@@ -2,14 +2,13 @@
 
 use std::env;
 
-use pkcs11::module::{InitializeArgs, Pkcs11Module, SecretPin, UserType};
+use pkcs11::module::{InitializeArgs, Initialized, Pkcs11Module, SecretPin, UserType};
 
-pub(crate) fn get_pkcs11_module() -> Pkcs11Module {
+pub(crate) fn get_pkcs11_module() -> Pkcs11Module<Initialized> {
     let path = env::var("EXAMPLE_PKCS11_PATH")
         .unwrap_or_else(|_| "/usr/lib/libfake.so".to_string());
-    let mut pkcs11 = Pkcs11Module::new(path).unwrap();
-    pkcs11.initialize(InitializeArgs::OsLocking).unwrap();
-    pkcs11
+    let pkcs11 = Pkcs11Module::new(path).unwrap();
+    pkcs11.initialize(InitializeArgs::OsLocking).unwrap()
 }
 
 pub(crate) fn reset_token() {

@@ -14,7 +14,7 @@ use crate::{
 /// Session between an application and a token in a particular slot.
 #[derive(Debug)]
 pub struct Session {
-    module: Pkcs11Module,
+    module: Pkcs11Module<Initialized>,
 
     handle: SessionHandle,
 
@@ -57,7 +57,7 @@ impl std::fmt::UpperHex for Session {
 }
 
 impl Session {
-    pub fn new(module: Pkcs11Module, handle: SessionHandle) -> Self {
+    pub fn new(module: Pkcs11Module<Initialized>, handle: SessionHandle) -> Self {
         Self {
             module,
             handle,
@@ -71,7 +71,7 @@ impl Session {
             .into_result()
     }
 
-    pub(crate) fn module(&self) -> &Pkcs11Module {
+    pub(crate) fn module(&self) -> &Pkcs11Module<Initialized> {
         &self.module
     }
 

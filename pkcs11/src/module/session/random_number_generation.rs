@@ -6,8 +6,6 @@ use crate::{
 impl Session {
     /// Mixes additional seed material into the token's random number generator.
     pub fn seed_random(&self, seed: &[Byte]) -> Result<()> {
-        self.module().initialized()?;
-
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SeedRandom,
@@ -20,8 +18,6 @@ impl Session {
 
     /// Generates random or pseudo-random data of the given length in bytes.
     pub fn generate_random(&self, random_len: Ulong) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut random_data: Vec<Byte> = vec![0; random_len as usize];
 
         CryptokiRetVal::from(invoke_pkcs11!(

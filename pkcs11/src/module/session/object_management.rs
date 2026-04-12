@@ -6,8 +6,6 @@ use crate::{
 impl Session {
     /// Creates a new object.
     pub fn create_object(&self, template: &[Attribute]) -> Result<ObjectHandle> {
-        self.module().initialized()?;
-
         let template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
 
@@ -35,8 +33,6 @@ impl Session {
         object: ObjectHandle,
         template: &[Attribute],
     ) -> Result<ObjectHandle> {
-        self.module().initialized()?;
-
         let template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
 
@@ -58,8 +54,6 @@ impl Session {
 
     /// Destroys an object.
     pub fn destroy_object(&self, object: ObjectHandle) -> Result<()> {
-        self.module().initialized()?;
-
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_DestroyObject,
@@ -71,8 +65,6 @@ impl Session {
 
     /// Gets the size of an object in bytes.
     pub fn get_object_size(&self, object: ObjectHandle) -> Result<Ulong> {
-        self.module().initialized()?;
-
         let mut object_size: Ulong = Ulong::default();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -97,8 +89,6 @@ impl Session {
         object: ObjectHandle,
         attribute_types: &[AttributeType],
     ) -> Result<Vec<Attribute>> {
-        self.module().initialized()?;
-
         let mut template: Vec<CK_ATTRIBUTE> = Vec::new();
 
         for attr_type in attribute_types.iter() {
@@ -182,8 +172,6 @@ impl Session {
         object: ObjectHandle,
         template: &[Attribute],
     ) -> Result<()> {
-        self.module().initialized()?;
-
         let template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
 

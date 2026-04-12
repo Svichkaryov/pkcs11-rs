@@ -5,10 +5,8 @@ use crate::{
     module::{ck_util::*, general_purpose::*, types::*},
 };
 
-impl Pkcs11Module {
+impl Pkcs11Module<Initialized> {
     fn get_slot_list(&self, with_token: CK_BBOOL) -> Result<Vec<Slot>> {
-        self.initialized()?;
-
         // An application will often call C_GetSlotList twice (or sometimes
         // even more times—if an application is trying to get a list of all
         // slots with a token present, then the number of such slots
@@ -83,8 +81,6 @@ impl Pkcs11Module {
 
     /// Obtains information about a particular slot in the system.
     pub fn get_slot_info(&self, slot: Slot) -> Result<SlotInfo> {
-        self.initialized()?;
-
         let mut ck_slot_info = CK_SLOT_INFO::default();
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
@@ -99,8 +95,6 @@ impl Pkcs11Module {
 
     /// Obtains information about a particular token in the system.
     pub fn get_token_info(&self, slot: Slot) -> Result<TokenInfo> {
-        self.initialized()?;
-
         let mut ck_token_info = CK_TOKEN_INFO::default();
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
@@ -123,8 +117,6 @@ impl Pkcs11Module {
     /// threads of a single application make simultaneous calls to
     /// [`Pkcs11Module::wait_for_slot_event`][crate::module::slot_token_management::Pkcs11Module::wait_for_slot_event].
     pub fn wait_for_slot_event(&self) -> Result<Option<Slot>> {
-        self.initialized()?;
-
         let mut slot = Slot::default();
         match invoke_pkcs11!(
             self,
@@ -146,8 +138,6 @@ impl Pkcs11Module {
         slot: Slot,
         mech_type: MechanismType,
     ) -> Result<MechanismInfo> {
-        self.initialized()?;
-
         let mut ck_mechanism_info = CK_MECHANISM_INFO::default();
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
@@ -163,8 +153,6 @@ impl Pkcs11Module {
 
     /// Obtain a list of mechanism types supported by a token.
     pub fn get_mechanism_list(&self, slot: Slot) -> Result<Vec<MechanismType>> {
-        self.initialized()?;
-
         let mut mech_type_count: CK_ULONG = 0;
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
@@ -202,8 +190,6 @@ impl Pkcs11Module {
         pin: Option<&SecretPin>,
         label: &str,
     ) -> Result<()> {
-        self.initialized()?;
-
         let mut c_label = c_label_from_str(label)?.to_vec();
 
         let (pin_ptr, pin_len) = match pin {

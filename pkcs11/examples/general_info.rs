@@ -1,4 +1,4 @@
-use pkcs11::module::{MechanismType, Pkcs11Module, Slot};
+use pkcs11::module::{Initialized, MechanismType, Pkcs11Module, Slot};
 
 mod common;
 
@@ -48,7 +48,7 @@ macro_rules! println_aligned {
     }};
 }
 
-fn print_library_info(p: &Printer, pkcs11: &Pkcs11Module) {
+fn print_library_info(p: &Printer, pkcs11: &Pkcs11Module<Initialized>) {
     let info = pkcs11.get_info().unwrap();
     p.group("Cryptoki general info:", |p| {
         println_aligned!(p,
@@ -62,7 +62,11 @@ fn print_library_info(p: &Printer, pkcs11: &Pkcs11Module) {
     p.println(format!("Debug library info: {info:#?}"));
 }
 
-fn print_slot_token_list_info(p: &Printer, pkcs11: &Pkcs11Module, slots: &[Slot]) {
+fn print_slot_token_list_info(
+    p: &Printer,
+    pkcs11: &Pkcs11Module<Initialized>,
+    slots: &[Slot],
+) {
     p.println(format!("Slot list: {slots:#?}"));
     p.blank_line();
 
@@ -147,7 +151,7 @@ fn print_mechanism_list(p: &Printer, mechs: &[MechanismType]) {
 
 fn print_mechanism_info(
     p: &Printer,
-    pkcs11: &Pkcs11Module,
+    pkcs11: &Pkcs11Module<Initialized>,
     slot: Slot,
     mechs: &[MechanismType],
 ) {

@@ -27,8 +27,6 @@ impl Session {
     ///
     /// [`protected authentication path`]: TokenInfo::protected_authentication_path
     pub fn init_pin(&self, pin: Option<&SecretPin>) -> Result<()> {
-        self.module().initialized()?;
-
         let (pin_ptr, pin_len) = match pin {
             Some(pin) => (
                 pin.expose_secret().as_ptr() as CK_UTF8CHAR_PTR,
@@ -76,8 +74,6 @@ impl Session {
         old_pin: Option<&SecretPin>,
         new_pin: Option<&SecretPin>,
     ) -> Result<()> {
-        self.module().initialized()?;
-
         let (old_pin_ptr, old_pin_len, new_pin_ptr, new_pin_len) =
             match (old_pin, new_pin) {
                 (Some(old_pin), Some(new_pin)) => (

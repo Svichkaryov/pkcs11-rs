@@ -5,7 +5,7 @@ use crate::{
     module::{general_purpose::*, session::*, types::*},
 };
 
-impl Pkcs11Module {
+impl Pkcs11Module<Initialized> {
     /// Opens a session between an application and a token in a particular slot.
     ///
     /// There may be a limit on the number of concurrent sessions an
@@ -23,8 +23,6 @@ impl Pkcs11Module {
     /// [`write-protected`]: TokenInfo::write_protected
     /// [`PKCS11-UG`]: http://docs.oasis-open.org/pkcs11/pkcs11-ug/v2.40/pkcs11-ug-v2.40.html
     pub fn open_session(&self, slot: Slot, rw: bool) -> Result<Session> {
-        self.initialized()?;
-
         let mut session_handle = SessionHandle::default();
         let mut flags = SessionInfoFlags::SERIAL_SESSION;
         if rw {
@@ -59,8 +57,6 @@ impl Pkcs11Module {
 
     /// Closes all sessions an application has with a token.
     pub fn close_all_session(&self, slot: Slot) -> Result<()> {
-        self.initialized()?;
-
         CryptokiRetVal::from(invoke_pkcs11!(self, C_CloseAllSessions, slot)).into_result()
     }
 }
@@ -68,8 +64,6 @@ impl Pkcs11Module {
 impl Session {
     /// Obtains information about a session.
     pub fn get_session_info(&self) -> Result<SessionInfo> {
-        self.module().initialized()?;
-
         let mut info = CK_SESSION_INFO::default();
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
@@ -85,8 +79,6 @@ impl Session {
     /// Obtains a copy of the cryptographic operations state of a session,
     /// encoded as a string of bytes.
     pub fn get_operation_state(&self) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut op_state_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -123,8 +115,6 @@ impl Session {
         encryption_key: Option<ObjectHandle>,
         authentication_key: Option<ObjectHandle>,
     ) -> Result<()> {
-        self.module().initialized()?;
-
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SetOperationState,
@@ -183,8 +173,6 @@ impl Session {
     /// [`logout`]: Self::logout
     /// [`ALWAYS_AUTHENTICATE`]: AttributeType::ALWAYS_AUTHENTICATE
     pub fn login(&self, user_type: UserType, pin: Option<&SecretPin>) -> Result<()> {
-        self.module().initialized()?;
-
         let (pin_ptr, pin_len) = match pin {
             Some(pin) => (
                 pin.expose_secret().as_ptr() as CK_UTF8CHAR_PTR,
@@ -222,8 +210,6 @@ impl Session {
     /// operations are still active. Therefore, before logging out, any active
     /// operations should be finished.
     pub fn logout(&self) -> Result<()> {
-        self.module().initialized()?;
-
         CryptokiRetVal::from(invoke_pkcs11!(self.module(), C_Logout, self.handle()))
             .into_result()
     }

@@ -11,8 +11,6 @@ impl Session {
         mechanism: &Mechanism,
         template: &[Attribute],
     ) -> Result<ObjectHandle> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
         let template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
@@ -40,8 +38,6 @@ impl Session {
         public_key_template: &[Attribute],
         private_key_template: &[Attribute],
     ) -> Result<(ObjectHandle, ObjectHandle)> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
         let pub_key_tmpl: Vec<CK_ATTRIBUTE> =
             public_key_template.iter().map(|attr| attr.into()).collect();
@@ -77,8 +73,6 @@ impl Session {
         wrapping_key: ObjectHandle,
         key: ObjectHandle,
     ) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         let mut wrapped_key_len: CK_ULONG = 0;
@@ -123,8 +117,6 @@ impl Session {
         wrapped_key: &[Byte],
         template: &[Attribute],
     ) -> Result<ObjectHandle> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
         let new_key_tmpl: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
@@ -155,8 +147,6 @@ impl Session {
         base_key: ObjectHandle,
         template: &[Attribute],
     ) -> Result<ObjectHandle> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
         let template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();

@@ -8,8 +8,6 @@ impl Session {
 
     /// Initializes an encryption operation.
     pub fn encrypt_init(&self, mechanism: &Mechanism, key: ObjectHandle) -> Result<()> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -25,8 +23,6 @@ impl Session {
     /// Continues a multiple-part encryption operation, processing another data
     /// part.
     pub fn encrypt_update(&self, data: &[Byte]) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut encrypted_data_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -60,8 +56,6 @@ impl Session {
 
     /// Finishes a multiple-part encryption operation.
     pub fn encrypt_final(&self) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut last_encrypted_part_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -94,8 +88,6 @@ impl Session {
 
     /// Initializes a decryption operation.
     pub fn decrypt_init(&self, mechanism: &Mechanism, key: ObjectHandle) -> Result<()> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -111,8 +103,6 @@ impl Session {
     /// Continues a multiple-part decryption operation, processing another
     /// encrypted data part.
     pub fn decrypt_update(&self, encrypted_part: &[Byte]) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut decrypted_part_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -146,8 +136,6 @@ impl Session {
 
     /// Finishes a multiple-part decryption operation.
     pub fn decrypt_final(&self) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut last_decrypted_part_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -180,8 +168,6 @@ impl Session {
 
     /// Initializes a message-digesting operation.
     pub fn digest_init(&self, mechanism: &Mechanism) -> Result<()> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -196,8 +182,6 @@ impl Session {
     /// Continues a multiple-part message-digesting operation, processing
     /// another data part.
     pub fn digest_update(&self, part: &[Byte]) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut digest_part_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -232,8 +216,6 @@ impl Session {
     /// Continues a multiple-part message-digesting operation by digesting the
     /// value of a secret key.
     pub fn digest_key(&self, key: ObjectHandle) -> Result<()> {
-        self.module().initialized()?;
-
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_DigestKey,
@@ -246,8 +228,6 @@ impl Session {
     /// Finishes a multiple-part message-digesting operation, returning the
     /// message digest.
     pub fn digest_final(&self) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut digest_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -280,8 +260,6 @@ impl Session {
     /// Initializes a signature operation, where the signature is an appendix
     /// to the data.
     pub fn sign_init(&self, mechanism: &Mechanism, key: ObjectHandle) -> Result<()> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -297,8 +275,6 @@ impl Session {
     /// Continues a multiple-part signature operation, processing another data
     /// part.
     pub fn sign_update(&self, part: &[Byte]) -> Result<()> {
-        self.module().initialized()?;
-
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SignUpdate,
@@ -311,8 +287,6 @@ impl Session {
 
     /// Finishes a multiple-part signature operation, returning the signature.
     pub fn sign_final(&self) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut signature_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -343,8 +317,6 @@ impl Session {
     /// Initializes a verification operation, where the signature is an appendix
     /// to the data.
     pub fn verify_init(&self, mechanism: &Mechanism, key: ObjectHandle) -> Result<()> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -360,8 +332,6 @@ impl Session {
     /// Continues a multiple-part verification operation, processing another
     /// data part.
     pub fn verify_update(&self, part: &[Byte]) -> Result<()> {
-        self.module().initialized()?;
-
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_VerifyUpdate,
@@ -374,8 +344,6 @@ impl Session {
 
     /// Finishes a multiple-part verification operation, checking the signature.
     pub fn verify_final(&self, signature: &[Byte]) -> Result<bool> {
-        self.module().initialized()?;
-
         match invoke_pkcs11!(
             self.module(),
             C_VerifyFinal,
@@ -394,8 +362,6 @@ impl Session {
     /// Continues multiple-part digest and encryption operations, processing
     /// another data part.
     pub fn digest_encrypt_update(&self, part: &[Byte]) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut encrypted_part_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -430,8 +396,6 @@ impl Session {
     /// Continues a multiple-part combined decryption and digest operation,
     /// processing another data part.
     pub fn decrypt_digest_update(&self, encrypted_part: &[Byte]) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut part_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -466,8 +430,6 @@ impl Session {
     /// Continues a multiple-part combined signature and encryption operation,
     /// processing another data part.
     pub fn sign_encrypt_update(&self, part: &[Byte]) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut encrypted_part_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -502,8 +464,6 @@ impl Session {
     /// Continues a multiple-part combined decryption and verification
     /// operation, processing another data part.
     pub fn decrypt_verify_update(&self, encrypted_part: &[Byte]) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut part_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(

@@ -13,8 +13,6 @@ impl Session {
         key: ObjectHandle,
         data: &[Byte],
     ) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -66,8 +64,6 @@ impl Session {
         key: ObjectHandle,
         encrypted_data: &[Byte],
     ) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -114,8 +110,6 @@ impl Session {
 
     /// Digests data in a single part.
     pub fn digest(&self, mechanism: &Mechanism, data: &[Byte]) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -167,8 +161,6 @@ impl Session {
         key: ObjectHandle,
         data: &[Byte],
     ) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -219,8 +211,6 @@ impl Session {
         key: ObjectHandle,
         data: &[Byte],
     ) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -272,8 +262,6 @@ impl Session {
         data: &[Byte],
         signature: &[Byte],
     ) -> Result<bool> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -308,8 +296,6 @@ impl Session {
         key: ObjectHandle,
         signature: &[Byte],
     ) -> Result<Vec<Byte>> {
-        self.module().initialized()?;
-
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
