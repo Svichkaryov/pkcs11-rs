@@ -2,11 +2,11 @@ use {
     proc_macro::TokenStream,
     proc_macro2::TokenStream as TokenStream2,
     quote::quote,
-    syn::{parse_macro_input, Ident, Type},
+    syn::{Ident, Type, parse_macro_input},
 };
 
 use crate::{
-    naming::{convert_name, NamingConvention},
+    naming::{NamingConvention, convert_name},
     types::{
         input::{Pkcs11Type, TypeEntry},
         pkcs11_type_impl,
@@ -14,10 +14,10 @@ use crate::{
 };
 
 fn is_vec_type(ty: &Type) -> bool {
-    if let syn::Type::Path(type_path) = ty {
-        if let Some(segment) = type_path.path.segments.last() {
-            return segment.ident == "Vec";
-        }
+    if let syn::Type::Path(type_path) = ty
+        && let Some(segment) = type_path.path.segments.last()
+    {
+        return segment.ident == "Vec";
     }
     false
 }

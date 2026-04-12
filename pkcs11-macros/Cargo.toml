@@ -1,7 +1,12 @@
 [package]
 name = "pkcs11-macros"
 version = "0.1.0"
-edition = "2021"
+description = "Auxiliary macros for type generation"
+edition = "2024"
+rust-version = "1.89"
+keywords = ["pkcs11", "cryptoki"]
+categories = ["cryptography"]
+license = "Apache-2.0"
 
 [lib]
 proc-macro = true

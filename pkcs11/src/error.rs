@@ -25,9 +25,9 @@ pub enum Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::LibraryLoading(ref e) => write!(f, "libloading error ({e})"),
+            Error::LibraryLoading(e) => write!(f, "libloading error ({e})"),
             Error::Module(s) => write!(f, "PKCS11 module error: {s}"),
-            Error::Pkcs11(ref e) => write!(f, "PKCS11 error: {e}"),
+            Error::Pkcs11(e) => write!(f, "PKCS11 error: {e}"),
             Error::InvalidValue => write!(f, "Invalid value"),
             Error::InvalidInput => write!(f, "Invalid input"),
             Error::NotSupported => write!(f, "Feature not supported"),
@@ -41,7 +41,7 @@ impl std::fmt::Display for Error {
 
 impl std::error::Error for Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        if let Error::LibraryLoading(ref err) = self {
+        if let Error::LibraryLoading(err) = self {
             Some(err)
         } else {
             None

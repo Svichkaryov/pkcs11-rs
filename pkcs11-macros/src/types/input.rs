@@ -1,11 +1,10 @@
 use syn::{
-    bracketed,
+    Attribute, Error, Ident, Result, Token, Type, bracketed,
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    Attribute, Error, Ident, Result, Token, Type,
 };
 
-use crate::naming::{extract_prefix, NamingConvention};
+use crate::naming::{NamingConvention, extract_prefix};
 
 pub(crate) struct TypeEntry {
     /// Doc comments.

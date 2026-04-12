@@ -1,12 +1,12 @@
 use bitflags::bitflags;
 
 use pkcs11_macros::{
-    pkcs11_mechanism_type, pkcs11_type, AttributePodType, TryFromCkAttribute,
+    AttributePodType, TryFromCkAttribute, pkcs11_mechanism_type, pkcs11_type,
 };
 
 use crate::error::{Error, Result};
 
-use super::{general::*, CkPodType, ObjectHandle, TryFromCkAttribute};
+use super::{CkPodType, ObjectHandle, TryFromCkAttribute, general::*};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorDefinedMechanism<'a> {

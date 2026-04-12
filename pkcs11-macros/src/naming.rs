@@ -1,6 +1,6 @@
 use syn::{
-    parse::{Parse, ParseStream},
     Error, Ident, Result,
+    parse::{Parse, ParseStream},
 };
 
 #[allow(clippy::enum_variant_names)]

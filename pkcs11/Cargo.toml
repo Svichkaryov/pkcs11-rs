@@ -2,7 +2,7 @@
 name = "pkcs11"
 version = "0.1.0"
 description = "A Rust implementation of the PKCS#11 API"
-edition = "2021"
+edition = "2024"
 readme = "README.md"
 rust-version = "1.89"
 keywords = ["pkcs11", "cryptoki"]

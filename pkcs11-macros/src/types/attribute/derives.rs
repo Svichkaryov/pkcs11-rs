@@ -1,7 +1,7 @@
 use {
     proc_macro::TokenStream,
     quote::quote,
-    syn::{parse_macro_input, DeriveInput},
+    syn::{DeriveInput, parse_macro_input},
 };
 
 fn has_valid_repr(attrs: &[syn::Attribute]) -> bool {

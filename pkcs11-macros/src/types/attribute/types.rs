@@ -2,11 +2,11 @@ use {
     proc_macro::TokenStream,
     proc_macro2::TokenStream as TokenStream2,
     quote::quote,
-    syn::{parse_macro_input, Ident},
+    syn::{Ident, parse_macro_input},
 };
 
 use crate::{
-    naming::{convert_name, NamingConvention},
+    naming::{NamingConvention, convert_name},
     types::{
         input::{Pkcs11Type, TypeEntry},
         pkcs11_type_impl,

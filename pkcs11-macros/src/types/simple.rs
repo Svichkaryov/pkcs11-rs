@@ -1,7 +1,7 @@
 use {
     proc_macro::TokenStream,
     quote::quote,
-    syn::{parse_macro_input, Attribute, Ident},
+    syn::{Attribute, Ident, parse_macro_input},
 };
 
 use crate::{naming::convert_name, types::input::Pkcs11Type};

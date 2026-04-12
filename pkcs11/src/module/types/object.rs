@@ -1,12 +1,12 @@
 use std::convert::TryFrom;
 
 use pkcs11_macros::{
-    pkcs11_attribute_type, pkcs11_type, AttributePodType, TryFromCkAttribute,
+    AttributePodType, TryFromCkAttribute, pkcs11_attribute_type, pkcs11_type,
 };
 
 use crate::error::{Error, Result};
 
-use super::{general::*, MechanismType};
+use super::{MechanismType, general::*};
 
 pub type ObjectHandle = CK_OBJECT_HANDLE;
 
