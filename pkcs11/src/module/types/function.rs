@@ -19,12 +19,6 @@ pub enum InitializeArgs {
     OsLocking,
 }
 
-impl CK_C_INITIALIZE_ARGS {
-    pub fn as_mut_ptr(&mut self) -> *mut Self {
-        self as *mut Self
-    }
-}
-
 impl From<InitializeArgs> for CK_C_INITIALIZE_ARGS {
     fn from(init_args: InitializeArgs) -> Self {
         let mut ck_c_init_arg = CK_C_INITIALIZE_ARGS::default();

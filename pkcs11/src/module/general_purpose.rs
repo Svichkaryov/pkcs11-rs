@@ -99,7 +99,7 @@ impl Pkcs11Module<Uninitialized> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
             C_Initialize,
-            ck_init_args.as_mut_ptr() as CK_VOID_PTR
+            &mut ck_init_args as *mut CK_C_INITIALIZE_ARGS as CK_VOID_PTR
         ))
         .into_result()?;
 

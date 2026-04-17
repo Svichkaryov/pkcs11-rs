@@ -1,5 +1,6 @@
+use pkcs11_sys::*;
+
 use crate::{
-    bindings::*,
     error::{Error, Result}
 };
 
@@ -53,6 +54,29 @@ pub(crate) fn check_ck_functional_list_valid(
     }
     Ok(())
 }
+
+macro_rules! from_byte_slice_to_num {
+    ($char_slice:expr) => {
+        std::str::from_utf8($char_slice)
+            .map_err(|_| Error::InvalidValue)?
+            .parse()
+            .map_err(|_| Error::InvalidValue)
+    };
+}
+
+macro_rules! from_byte_slice_to_num_unchecked {
+    ($char_slice:expr) => {
+        std::str::from_utf8($char_slice)
+            .expect("CK_CHAR slice must hold numeric characters \
+                    from the character set in Table 3 from PKCS#11 spec")
+            .parse()
+            .expect("CK_CHAR slice must represent a valid number per PKCS#11 spec")
+    };
+}
+
+pub(crate) use {
+    from_byte_slice_to_num, from_byte_slice_to_num_unchecked
+};
 
 pub(crate) fn string_from_blank_padded(field: &[CK_UTF8CHAR]) -> String {
     let decoded_str = String::from_utf8_lossy(field);

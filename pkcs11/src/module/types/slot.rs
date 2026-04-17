@@ -60,8 +60,8 @@ impl From<CK_SLOT_INFO> for SlotInfo {
             slot_description: string_from_blank_padded(&ck_slot_info.slotDescription),
             manufacturer_id: string_from_blank_padded(&ck_slot_info.manufacturerID),
             flags: SlotInfoFlags::from_bits_truncate(ck_slot_info.flags),
-            hardware_version: ck_slot_info.hardwareVersion,
-            firmware_version: ck_slot_info.firmwareVersion,
+            hardware_version: ck_slot_info.hardwareVersion.into(),
+            firmware_version: ck_slot_info.firmwareVersion.into(),
         }
     }
 }

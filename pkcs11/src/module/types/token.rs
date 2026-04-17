@@ -2,7 +2,7 @@ use {bitflags::bitflags, std::convert::TryFrom};
 
 use crate::{
     error::{Error, Result},
-    module::ck_util::string_from_blank_padded,
+    module::ck_util::{from_byte_slice_to_num, string_from_blank_padded},
 };
 
 use super::general::*;
@@ -52,15 +52,6 @@ impl UtcTime {
             self.year, self.month, self.day, self.hour, self.minute, self.second
         )
     }
-}
-
-macro_rules! from_byte_slice_to_num {
-    ($char_slice:expr) => {
-        std::str::from_utf8($char_slice)
-            .map_err(|_| Error::InvalidValue)?
-            .parse()
-            .map_err(|_| Error::InvalidValue)
-    };
 }
 
 pub(crate) fn convert_utc_time(orig: [u8; 16]) -> Result<UtcTime> {
@@ -347,8 +338,8 @@ impl TryFrom<CK_TOKEN_INFO> for TokenInfo {
             free_public_memory: maybe_unavailable(ck_toke_info.ulFreePublicMemory),
             total_private_memory: maybe_unavailable(ck_toke_info.ulTotalPrivateMemory),
             free_private_memory: maybe_unavailable(ck_toke_info.ulFreePrivateMemory),
-            hardware_version: ck_toke_info.hardwareVersion,
-            firmware_version: ck_toke_info.firmwareVersion,
+            hardware_version: ck_toke_info.hardwareVersion.into(),
+            firmware_version: ck_toke_info.firmwareVersion.into(),
             utc_time,
         })
     }

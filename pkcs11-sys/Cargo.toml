@@ -1,0 +1,10 @@
+[package]
+name = "pkcs11-sys"
+version = "0.1.0"
+description = "Low-level bindings to the PKCS#11 API"
+edition = "2024"
+readme = "README.md"
+rust-version = "1.89"
+keywords = ["pkcs11", "cryptoki"]
+categories = ["cryptography"]
+license = "Apache-2.0"

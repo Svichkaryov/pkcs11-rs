@@ -304,39 +304,43 @@ pub trait TryFromCkAttribute: Sized {
     fn try_from_ck_attr(attr: &CK_ATTRIBUTE) -> Result<Self>;
 }
 
-impl From<&CK_ATTRIBUTE> for bool {
-    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+impl TryFromCkAttribute for bool {
+    fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
         if ck_attribute.pValue.is_null() {
-            return false;
+            return Ok(false);
         }
         let b: CK_BBOOL =
             unsafe { std::ptr::read(ck_attribute.pValue as *const CK_BBOOL) };
-        !matches!(b, 0)
+
+        Ok(!matches!(b, 0))
     }
 }
 
-impl From<&CK_ATTRIBUTE> for Ulong {
-    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+impl TryFromCkAttribute for Ulong {
+    fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
         if ck_attribute.pValue.is_null() {
-            return 0;
+            return Ok(0);
         }
-        unsafe { std::ptr::read(ck_attribute.pValue as *const CK_ULONG) }
+        let value: CK_ULONG =
+            unsafe { std::ptr::read(ck_attribute.pValue as *const CK_ULONG) };
+
+        Ok(value)
     }
 }
 
-impl From<&CK_ATTRIBUTE> for Date {
-    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+impl TryFromCkAttribute for Date {
+    fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
         let value: CK_DATE =
             unsafe { std::ptr::read(ck_attribute.pValue as *const CK_DATE) };
 
-        value
+        value.try_into()
     }
 }
 
-impl From<&CK_ATTRIBUTE> for String {
-    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+impl TryFromCkAttribute for String {
+    fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
         if ck_attribute.pValue.is_null() || ck_attribute.ulValueLen == 0 {
-            return String::new();
+            return Ok(String::new());
         }
         let value: &[u8] = unsafe {
             std::slice::from_raw_parts(
@@ -344,14 +348,15 @@ impl From<&CK_ATTRIBUTE> for String {
                 ck_attribute.ulValueLen as CK_ULONG as usize,
             )
         };
-        String::from_utf8_lossy(value).into_owned()
+
+        Ok(String::from_utf8_lossy(value).into_owned())
     }
 }
 
-impl From<&CK_ATTRIBUTE> for Vec<Byte> {
-    fn from(ck_attribute: &CK_ATTRIBUTE) -> Self {
+impl TryFromCkAttribute for Vec<Byte> {
+    fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
         if ck_attribute.pValue.is_null() || ck_attribute.ulValueLen == 0 {
-            return Vec::new();
+            return Ok(Vec::new());
         }
         let value: &[Byte] = unsafe {
             std::slice::from_raw_parts(
@@ -359,26 +364,13 @@ impl From<&CK_ATTRIBUTE> for Vec<Byte> {
                 ck_attribute.ulValueLen as CK_ULONG as usize,
             )
         };
-        value.to_vec()
+
+        Ok(value.to_vec())
     }
 }
 
-macro_rules! impl_from_ck_attr {
-    ($($t:ty),* $(,)?) => {
-        $(impl TryFromCkAttribute for $t {
-            fn try_from_ck_attr(attr: &CK_ATTRIBUTE) -> Result<Self> {
-                Ok(<$t>::from(attr))
-            }
-        })*
-    };
-}
-
-impl_from_ck_attr!(bool, Ulong, Date, String, Vec<Byte>);
-
-impl TryFrom<&CK_ATTRIBUTE> for Vec<MechanismType> {
-    type Error = Error;
-
-    fn try_from(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
+impl TryFromCkAttribute for Vec<MechanismType> {
+    fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
         if ck_attribute.pValue.is_null() || ck_attribute.ulValueLen == 0 {
             return Ok(Vec::new());
         }
@@ -398,10 +390,8 @@ impl TryFrom<&CK_ATTRIBUTE> for Vec<MechanismType> {
     }
 }
 
-impl TryFrom<&CK_ATTRIBUTE> for VendorDefinedAttribute {
-    type Error = Error;
-
-    fn try_from(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
+impl TryFromCkAttribute for VendorDefinedAttribute {
+    fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
         let attr_type = AttributeType::try_from(ck_attribute.attrType)?;
 
         if ck_attribute.pValue.is_null() || ck_attribute.ulValueLen == 0 {
@@ -423,18 +413,6 @@ impl TryFrom<&CK_ATTRIBUTE> for VendorDefinedAttribute {
         })
     }
 }
-
-macro_rules! impl_try_from_ck_attr {
-    ($($t:ty),* $(,)?) => {
-        $(impl TryFromCkAttribute for $t {
-            fn try_from_ck_attr(attr: &CK_ATTRIBUTE) -> Result<Self> {
-                <$t>::try_from(attr)
-            }
-        })*
-    };
-}
-
-impl_try_from_ck_attr!(Vec<MechanismType>, VendorDefinedAttribute);
 
 // TODO: add missing attributes/types
 pkcs11_attribute_type!(

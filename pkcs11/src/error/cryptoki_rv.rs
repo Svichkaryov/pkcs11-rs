@@ -1,4 +1,4 @@
-use crate::bindings::*;
+use pkcs11_sys::*;
 
 use super::Error;
 

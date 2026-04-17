@@ -1235,7 +1235,13 @@ pkcs11_type!(
 );
 
 /// Parameters of the RsaPkcsPss mechanism
-pub type RsaPkcsPssParams = CK_RSA_PKCS_PSS_PARAMS;
+#[derive(Debug, Copy, Clone)]
+#[repr(C)]
+pub struct RsaPkcsPssParams {
+    hash_alg: MechanismType,
+    mgf: RsaPkcsMgfType,
+    s_len: Ulong,
+}
 
 impl RsaPkcsPssParams {
     /// Construct parameters to the RsaPkcsPss mechanism.
@@ -1254,9 +1260,9 @@ impl RsaPkcsPssParams {
     ///   the length of the message hash and zero.
     pub fn new(hash_alg: MechanismType, mgf: RsaPkcsMgfType, s_len: Ulong) -> Self {
         Self {
-            hashAlg: hash_alg.into(),
-            mgf: mgf.into(),
-            sLen: s_len,
+            hash_alg,
+            mgf,
+            s_len,
         }
     }
 }

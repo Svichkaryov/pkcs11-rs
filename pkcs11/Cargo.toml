@@ -11,6 +11,7 @@ license = "Apache-2.0"
 
 [dependencies]
 pkcs11-macros = { path = "../pkcs11-macros" }
+pkcs11-sys = { path = "../pkcs11-sys" }
 libloading = "0.9"
 serial_test = "3.4.0"
 bitflags = "2.11"

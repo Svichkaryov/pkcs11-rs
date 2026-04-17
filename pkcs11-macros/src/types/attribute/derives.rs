@@ -73,7 +73,7 @@ pub(crate) fn derive_try_from_ck_attribute_impl(input: TokenStream) -> TokenStre
     quote! {
         impl TryFromCkAttribute for #type_name {
             fn try_from_ck_attr(attr: &CK_ATTRIBUTE) -> Result<Self> {
-                Ulong::from(attr).try_into()
+                <#type_name as TryFromCkAttribute>::try_from_ck_attr(&attr)
             }
         }
     }

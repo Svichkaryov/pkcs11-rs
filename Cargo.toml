@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "pkcs11-macros",
+    "pkcs11-sys",
     "pkcs11",
 ]
 resolver = "2"
