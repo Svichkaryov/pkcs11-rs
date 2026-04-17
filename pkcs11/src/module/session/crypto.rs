@@ -11,8 +11,8 @@ impl Session {
         &self,
         mechanism: &Mechanism,
         key: ObjectHandle,
-        data: &[Byte],
-    ) -> Result<Vec<Byte>> {
+        data: &[u8],
+    ) -> Result<Vec<u8>> {
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -37,7 +37,7 @@ impl Session {
         ))
         .into_result()?;
 
-        let mut encrypted_data: Vec<Byte> = vec![0; encrypted_data_len as usize];
+        let mut encrypted_data: Vec<u8> = vec![0; encrypted_data_len as usize];
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
@@ -62,8 +62,8 @@ impl Session {
         &self,
         mechanism: &Mechanism,
         key: ObjectHandle,
-        encrypted_data: &[Byte],
-    ) -> Result<Vec<Byte>> {
+        encrypted_data: &[u8],
+    ) -> Result<Vec<u8>> {
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -109,7 +109,7 @@ impl Session {
     // Message digesting functions
 
     /// Digests data in a single part.
-    pub fn digest(&self, mechanism: &Mechanism, data: &[Byte]) -> Result<Vec<Byte>> {
+    pub fn digest(&self, mechanism: &Mechanism, data: &[u8]) -> Result<Vec<u8>> {
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -133,7 +133,7 @@ impl Session {
         ))
         .into_result()?;
 
-        let mut digest_data: Vec<Byte> = vec![0; digest_data_len as usize];
+        let mut digest_data: Vec<u8> = vec![0; digest_data_len as usize];
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
@@ -159,8 +159,8 @@ impl Session {
         &self,
         mechanism: &Mechanism,
         key: ObjectHandle,
-        data: &[Byte],
-    ) -> Result<Vec<Byte>> {
+        data: &[u8],
+    ) -> Result<Vec<u8>> {
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -185,7 +185,7 @@ impl Session {
         ))
         .into_result()?;
 
-        let mut signature: Vec<Byte> = vec![0; signature_len as usize];
+        let mut signature: Vec<u8> = vec![0; signature_len as usize];
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
@@ -209,8 +209,8 @@ impl Session {
         &self,
         mechanism: &Mechanism,
         key: ObjectHandle,
-        data: &[Byte],
-    ) -> Result<Vec<Byte>> {
+        data: &[u8],
+    ) -> Result<Vec<u8>> {
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -235,7 +235,7 @@ impl Session {
         ))
         .into_result()?;
 
-        let mut signature: Vec<Byte> = vec![0; signature_len as usize];
+        let mut signature: Vec<u8> = vec![0; signature_len as usize];
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
@@ -259,8 +259,8 @@ impl Session {
         &self,
         mechanism: &Mechanism,
         key: ObjectHandle,
-        data: &[Byte],
-        signature: &[Byte],
+        data: &[u8],
+        signature: &[u8],
     ) -> Result<bool> {
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
@@ -294,8 +294,8 @@ impl Session {
         &self,
         mechanism: &Mechanism,
         key: ObjectHandle,
-        signature: &[Byte],
-    ) -> Result<Vec<Byte>> {
+        signature: &[u8],
+    ) -> Result<Vec<u8>> {
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -320,7 +320,7 @@ impl Session {
         ))
         .into_result()?;
 
-        let mut data: Vec<Byte> = vec![0; data_len as usize];
+        let mut data: Vec<u8> = vec![0; data_len as usize];
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),

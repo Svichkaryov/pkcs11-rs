@@ -72,7 +72,7 @@ impl Session {
         mechanism: &Mechanism,
         wrapping_key: ObjectHandle,
         key: ObjectHandle,
-    ) -> Result<Vec<Byte>> {
+    ) -> Result<Vec<u8>> {
         let mut ck_mech: CK_MECHANISM = mechanism.into();
 
         let mut wrapped_key_len: CK_ULONG = 0;
@@ -89,7 +89,7 @@ impl Session {
         ))
         .into_result()?;
 
-        let mut wrapped_key: Vec<Byte> = vec![0; wrapped_key_len as usize];
+        let mut wrapped_key: Vec<u8> = vec![0; wrapped_key_len as usize];
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
@@ -114,7 +114,7 @@ impl Session {
         &self,
         mechanism: &Mechanism,
         unwrapping_key: ObjectHandle,
-        wrapped_key: &[Byte],
+        wrapped_key: &[u8],
         template: &[Attribute],
     ) -> Result<ObjectHandle> {
         let mut ck_mech: CK_MECHANISM = mechanism.into();

@@ -10,22 +10,20 @@ use crate::{
     },
 };
 
-pub type Byte = CK_BYTE;
-
 pub type Ulong = CK_ULONG;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Version(CK_VERSION);
 
 impl Version {
-    pub fn new(major: Byte, minor: Byte) -> Self {
+    pub fn new(major: u8, minor: u8) -> Self {
         Self(CK_VERSION { major, minor })
     }
 
-    pub fn major(&self) -> Byte {
+    pub fn major(&self) -> u8 {
         self.major
     }
-    pub fn minor(&self) -> Byte {
+    pub fn minor(&self) -> u8 {
         self.minor
     }
 }

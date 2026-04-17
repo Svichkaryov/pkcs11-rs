@@ -11,7 +11,7 @@ use super::{CkPodType, ObjectHandle, TryFromCkAttribute, general::*};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorDefinedMechanism<'a> {
     pub mechanism_type: MechanismType,
-    pub param: Option<&'a [Byte]>,
+    pub param: Option<&'a [u8]>,
 }
 
 // TODO: add missing mechanisms/params
@@ -59,7 +59,7 @@ pkcs11_mechanism_type!(
         /// It has a parameter, which is the public value of the other party
         /// in the key agreement protocol, represented as a Cryptoki "Big integer"
         /// (i.e., a sequence of bytes, most-significant byte first).
-        CKM_DH_PKCS_DERIVE: Vec<Byte>,  // BIG_INTEGER_T
+        CKM_DH_PKCS_DERIVE: Vec<u8>,  // BIG_INTEGER_T
 
         CKM_X9_42_DH_KEY_PAIR_GEN,
         CKM_X9_42_DH_DERIVE: X9_42Dh1DeriveParams<'a>,  // CK_X9_42_DH1_DERIVE_PARAMS_T
@@ -364,7 +364,7 @@ pkcs11_mechanism_type!(
 
         // CKM_PBA_SHA1_WITH_SHA1_HMAC,  // CK_PBE_PARAMS_T
 
-        CKM_WTLS_PRE_MASTER_KEY_GEN: Byte,
+        CKM_WTLS_PRE_MASTER_KEY_GEN: u8,
         // CKM_WTLS_MASTER_KEY_DERIVE,  // UNDEFINED_T, ? CK_WTLS_MASTER_KEY_DERIVE_PARAMS or CK_WTLS_RANDOM_DATA ?
         // CKM_WTLS_MASTER_KEY_DERIVE_DH_ECC,  // CK_WTLS_MASTER_KEY_DERIVE_PARAMS
         // CKM_WTLS_PRF,  // CK_WTLS_PRF_PARAMS_T
@@ -690,11 +690,11 @@ pkcs11_mechanism_type!(
 
         CKM_GOSTR3410_KEY_PAIR_GEN,
         CKM_GOSTR3410,
-        CKM_GOSTR3410_WITH_GOSTR3411: Vec<Byte>,  // DER-encoding of the object identifier
+        CKM_GOSTR3410_WITH_GOSTR3411: Vec<u8>,  // DER-encoding of the object identifier
         // CKM_GOSTR3410_KEY_WRAP,  // CK_GOSTR3410_KEY_WRAP_PARAMS_T
         // CKM_GOSTR3410_DERIVE,  // CK_GOSTR3410_DERIVE_PARAMS_T
-        CKM_GOSTR3411: Vec<Byte>,  // DER-encoding of the object identifier
-        CKM_GOSTR3411_HMAC: Vec<Byte>,  // DER-encoding of the object identifier
+        CKM_GOSTR3411: Vec<u8>,  // DER-encoding of the object identifier
+        CKM_GOSTR3411_HMAC: Vec<u8>,  // DER-encoding of the object identifier
         CKM_GOST28147_KEY_GEN,  /* CKM_GOST28147_KEY_GEN INTERNATIONAL */
         CKM_GOST28147_ECB,  /* CKM_GOST28147_ECB INTERNATIONAL */
         /// GOST 28147-89 encryption mode except ECB, denoted CKM_GOST28147,
@@ -1099,7 +1099,7 @@ pkcs11_type!(
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyDerivationFunction<'a> {
     kdf_type: KeyDerivationFunctionType,
-    shared_data: Option<&'a [Byte]>,
+    shared_data: Option<&'a [u8]>,
 }
 
 impl<'a> KeyDerivationFunction<'a> {
@@ -1114,9 +1114,9 @@ impl<'a> KeyDerivationFunction<'a> {
 
     pub fn new(
         kdf_type: KeyDerivationFunctionType,
-        shared_data: Option<&'a [Byte]>,
+        shared_data: Option<&'a [u8]>,
     ) -> Result<Self> {
-        let _shr_data_len = shared_data.map_or(0, <[Byte]>::len);
+        let _shr_data_len = shared_data.map_or(0, <[u8]>::len);
         Ok(Self {
             kdf_type,
             shared_data,
@@ -1137,13 +1137,13 @@ pub struct Ecdh1DeriveParams<'a> {
     /// The length in bytes of the shared info. [Optional]
     shared_data_len: Ulong,
     /// Pointer to some data shared between the two parties [Optional]
-    shared_data: *const Byte,
+    shared_data: *const u8,
     /// The length in bytes of the other party's EC public key
     public_data_len: Ulong,
     /// Pointer to other party's EC public key value.
-    public_data: *const Byte,
+    public_data: *const u8,
     /// Phantom type
-    _phantom: std::marker::PhantomData<&'a [Byte]>,
+    _phantom: std::marker::PhantomData<&'a [u8]>,
 }
 
 impl<'a> Ecdh1DeriveParams<'a> {
@@ -1161,11 +1161,11 @@ impl<'a> Ecdh1DeriveParams<'a> {
     ///   responsible for converting the offered public key to the compressed
     ///   or uncompressed forms of these encodings if the token does not
     ///   support the offered form.
-    pub fn new(kdf: KeyDerivationFunction<'a>, public_data: &'a [Byte]) -> Self {
+    pub fn new(kdf: KeyDerivationFunction<'a>, public_data: &'a [u8]) -> Self {
         Self {
             kdf: kdf.kdf_type,
-            shared_data_len: kdf.shared_data.map_or(0, <[Byte]>::len) as Ulong,
-            shared_data: kdf.shared_data.map_or(std::ptr::null(), <[Byte]>::as_ptr),
+            shared_data_len: kdf.shared_data.map_or(0, <[u8]>::len) as Ulong,
+            shared_data: kdf.shared_data.map_or(std::ptr::null(), <[u8]>::as_ptr),
             public_data_len: public_data.len() as Ulong,
             public_data: public_data.as_ptr(),
             _phantom: std::marker::PhantomData,
@@ -1185,14 +1185,14 @@ pub struct X9_42Dh1DeriveParams<'a> {
     /// The length in bytes of the other info. [Optional]
     other_info_len: Ulong,
     /// Pointer to some data shared between the two parties [Optional]
-    other_info: *const Byte,
+    other_info: *const u8,
     /// The length in bytes of the other party's X9.42 Diffie-Hellman
     /// public key
     public_data_len: Ulong,
     /// Pointer to other party's X9.42 Diffie-Hellman public key value.
-    public_data: *const Byte,
+    public_data: *const u8,
     /// Phantom type
-    _phantom: std::marker::PhantomData<&'a [Byte]>,
+    _phantom: std::marker::PhantomData<&'a [u8]>,
 }
 
 impl<'a> X9_42Dh1DeriveParams<'a> {
@@ -1202,11 +1202,11 @@ impl<'a> X9_42Dh1DeriveParams<'a> {
     ///
     /// * `kdf` - The key derivation function to use.
     /// * `public_data` - The other party's X9.42 Diffie-Hellman public key value.
-    pub fn new(kdf: KeyDerivationFunction<'a>, public_data: &'a [Byte]) -> Self {
+    pub fn new(kdf: KeyDerivationFunction<'a>, public_data: &'a [u8]) -> Self {
         Self {
             kdf: kdf.kdf_type,
-            other_info_len: kdf.shared_data.map_or(0, <[Byte]>::len) as Ulong,
-            other_info: kdf.shared_data.map_or(std::ptr::null(), <[Byte]>::as_ptr),
+            other_info_len: kdf.shared_data.map_or(0, <[u8]>::len) as Ulong,
+            other_info: kdf.shared_data.map_or(std::ptr::null(), <[u8]>::as_ptr),
             public_data_len: public_data.len() as Ulong,
             public_data: public_data.as_ptr(),
             _phantom: std::marker::PhantomData,

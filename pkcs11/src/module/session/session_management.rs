@@ -78,7 +78,7 @@ impl Session {
 
     /// Obtains a copy of the cryptographic operations state of a session,
     /// encoded as a string of bytes.
-    pub fn get_operation_state(&self) -> Result<Vec<Byte>> {
+    pub fn get_operation_state(&self) -> Result<Vec<u8>> {
         let mut op_state_len: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
@@ -90,7 +90,7 @@ impl Session {
         ))
         .into_result()?;
 
-        let mut op_state: Vec<Byte> = vec![0; op_state_len as usize];
+        let mut op_state: Vec<u8> = vec![0; op_state_len as usize];
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
@@ -111,7 +111,7 @@ impl Session {
     /// [`get_operation_state`](Session::get_operation_state).
     pub fn set_operation_state(
         &self,
-        operation_state: Vec<Byte>,
+        operation_state: Vec<u8>,
         encryption_key: Option<ObjectHandle>,
         authentication_key: Option<ObjectHandle>,
     ) -> Result<()> {

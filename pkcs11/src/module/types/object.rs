@@ -297,7 +297,7 @@ impl AttributeValue for String {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorDefinedAttribute {
     pub attr_type: AttributeType,
-    pub value: Vec<Byte>,
+    pub value: Vec<u8>,
 }
 
 pub trait TryFromCkAttribute: Sized {
@@ -353,14 +353,14 @@ impl TryFromCkAttribute for String {
     }
 }
 
-impl TryFromCkAttribute for Vec<Byte> {
+impl TryFromCkAttribute for Vec<u8> {
     fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
         if ck_attribute.pValue.is_null() || ck_attribute.ulValueLen == 0 {
             return Ok(Vec::new());
         }
-        let value: &[Byte] = unsafe {
+        let value: &[u8] = unsafe {
             std::slice::from_raw_parts(
-                ck_attribute.pValue as *const Byte,
+                ck_attribute.pValue as *const u8,
                 ck_attribute.ulValueLen as CK_ULONG as usize,
             )
         };
@@ -400,9 +400,9 @@ impl TryFromCkAttribute for VendorDefinedAttribute {
                 value: Vec::new(),
             });
         }
-        let value: &[Byte] = unsafe {
+        let value: &[u8] = unsafe {
             std::slice::from_raw_parts(
-                ck_attribute.pValue as *const Byte,
+                ck_attribute.pValue as *const u8,
                 ck_attribute.ulValueLen as CK_ULONG as usize,
             )
         };
@@ -436,29 +436,29 @@ pkcs11_attribute_type!(
         /// Description of the application that manages the object.
         CKA_APPLICATION: String,
         /// Value of the object.
-        CKA_VALUE: Vec<Byte>,
+        CKA_VALUE: Vec<u8>,
         /// DER-encoding of the object identifier indicating the data object type.
-        CKA_OBJECT_ID: Vec<Byte>,
+        CKA_OBJECT_ID: Vec<u8>,
         /// Type of certificate.
         CKA_CERTIFICATE_TYPE: CertificateType,
         /// Certificate issuer name.
-        CKA_ISSUER: Vec<Byte>,
+        CKA_ISSUER: Vec<u8>,
         /// Serial number.
-        CKA_SERIAL_NUMBER: Vec<Byte>,
+        CKA_SERIAL_NUMBER: Vec<u8>,
         /// DER-encoding of the attribute certificate's issuer field. This is
         /// distinct from the `ISSUER` attribute contained in CKC_X_509
         /// certificates because the ASN.1 syntax and encoding are different.
-        CKA_AC_ISSUER: Vec<Byte>,
+        CKA_AC_ISSUER: Vec<u8>,
         /// DER-encoding of the attribute certificate's subject field. This is
         /// distinct from the `SUBJECT`attribute contained in CKC_X_509
         /// certificates because the ASN.1 syntax and encoding are different.
-        CKA_OWNER: Vec<Byte>,
+        CKA_OWNER: Vec<u8>,
         /// BER-encoding of a sequence of object identifier values corresponding
         /// to the attribute types contained in the certificate. When present,
         /// this field offers an opportunity for applications to search for a
         /// particular attribute certificate without fetching and parsing the
         /// certificate itself.
-        CKA_ATTR_TYPES: Vec<Byte>,
+        CKA_ATTR_TYPES: Vec<u8>,
         /// The object can be trusted for the application that it was created.
         CKA_TRUSTED: bool,
         /// Is used to indicate if a stored certificate is a user certificate
@@ -474,22 +474,22 @@ pkcs11_attribute_type!(
         CKA_URL: String,
         /// Hash of the subject public key (default empty).
         /// Hash algorithm is defined by `NAME_HASH_ALGORITHM`.
-        CKA_HASH_OF_SUBJECT_PUBLIC_KEY: Vec<Byte>,
+        CKA_HASH_OF_SUBJECT_PUBLIC_KEY: Vec<u8>,
         /// Hash of the issuer public key (default empty).
         /// Hash algorithm is defined by `NAME_HASH_ALGORITHM`.
-        CKA_HASH_OF_ISSUER_PUBLIC_KEY: Vec<Byte>,
+        CKA_HASH_OF_ISSUER_PUBLIC_KEY: Vec<u8>,
         /// Defines the mechanism used to calculate `HASH_OF_SUBJECT_PUBLIC_KEY`
         /// and `HASH_OF_ISSUER_PUBLIC_KEY`. If the attribute is not present then
         /// the type defaults to SHA-1.
         CKA_NAME_HASH_ALGORITHM: MechanismType,
         /// Object checksum.
-        CKA_CHECK_VALUE: Vec<Byte>,
+        CKA_CHECK_VALUE: Vec<u8>,
         /// Type of key.
         CKA_KEY_TYPE: KeyType,
         /// Object subject name.
-        CKA_SUBJECT: Vec<Byte>,
+        CKA_SUBJECT: Vec<u8>,
         /// Key identifier.
-        CKA_ID: Vec<Byte>,
+        CKA_ID: Vec<u8>,
         /// Identifies whether the object is sensitive.
         CKA_SENSITIVE: bool,
         /// Identifies whether the key supports encryption.
@@ -520,31 +520,31 @@ pkcs11_attribute_type!(
         /// End date for the object.
         CKA_END_DATE: Date,
         /// Modulus n for an RSA private key.
-        CKA_MODULUS: Vec<Byte>,
+        CKA_MODULUS: Vec<u8>,
         /// Length in bits of the modulus of a key.
         CKA_MODULUS_BITS: Ulong,
         /// Public exponent e for an RSA private key.
-        CKA_PUBLIC_EXPONENT: Vec<Byte>,
+        CKA_PUBLIC_EXPONENT: Vec<u8>,
         /// Private exponent d for an RSA private key.
-        CKA_PRIVATE_EXPONENT: Vec<Byte>,
+        CKA_PRIVATE_EXPONENT: Vec<u8>,
         /// Prime p for an RSA private key.
-        CKA_PRIME_1: Vec<Byte>,
+        CKA_PRIME_1: Vec<u8>,
         /// Prime q for an RSA private key.
-        CKA_PRIME_2: Vec<Byte>,
+        CKA_PRIME_2: Vec<u8>,
         /// Private exponent d modulo p-1 for an RSA private key.
-        CKA_EXPONENT_1: Vec<Byte>,
+        CKA_EXPONENT_1: Vec<u8>,
         /// Private exponent d modulo q-1 for an RSA private key.
-        CKA_EXPONENT_2: Vec<Byte>,
+        CKA_EXPONENT_2: Vec<u8>,
         /// CRT coefficient q^{-1} mod p for an RSA private key.
-        CKA_COEFFICIENT: Vec<Byte>,
+        CKA_COEFFICIENT: Vec<u8>,
         /// DER-encoding of the SubjectPublicKeyInfo for the public key.
-        CKA_PUBLIC_KEY_INFO: Vec<Byte>,
+        CKA_PUBLIC_KEY_INFO: Vec<u8>,
         /// Prime number value of a key.
-        CKA_PRIME: Vec<Byte>,
+        CKA_PRIME: Vec<u8>,
         /// Subprime number value of a key.
-        CKA_SUBPRIME: Vec<Byte>,
+        CKA_SUBPRIME: Vec<u8>,
         /// Base number value of a key.
-        CKA_BASE: Vec<Byte>,
+        CKA_BASE: Vec<u8>,
         /// Length in bits of the prime number of a key.
         CKA_PRIME_BITS: Ulong,
         /// Length in bits of the subprime number of a key.
@@ -575,9 +575,9 @@ pkcs11_attribute_type!(
         /// Identifies whether the object can be destroyed.
         CKA_DESTROYABLE: bool,
         /// Parameters that define an elliptic curve.
-        CKA_EC_PARAMS: Vec<Byte>,
+        CKA_EC_PARAMS: Vec<u8>,
         /// Parameters that define an elliptic curve point.
-        CKA_EC_POINT: Vec<Byte>,
+        CKA_EC_POINT: Vec<u8>,
         /// Can be used to force re-authentication (i.e. force the user
         /// to provide a PIN) for each use of a private key.
         CKA_ALWAYS_AUTHENTICATE: bool,
@@ -624,26 +624,26 @@ pkcs11_attribute_type!(
         /// OTP values.
         CKA_OTP_PIN_REQUIREMENT: Ulong,
         /// Value of the associated internal counter.
-        CKA_OTP_COUNTER: Vec<Byte>,
+        CKA_OTP_COUNTER: Vec<u8>,
         /// Value of the associated internal UTC time in the form YYYYMMDDhhmmss.
-        CKA_OTP_TIME: Vec<Byte>,
+        CKA_OTP_TIME: Vec<u8>,
         /// Text string that identifies a user associated with the OTP key (may be
         /// used to enhance the user experience).
-        CKA_OTP_USER_IDENTIFIER: Vec<Byte>,
+        CKA_OTP_USER_IDENTIFIER: Vec<u8>,
         /// Text string that identifies a service that may validate OTPs
         /// generated by this key.
-        CKA_OTP_SERVICE_IDENTIFIER: Vec<Byte>,
+        CKA_OTP_SERVICE_IDENTIFIER: Vec<u8>,
         /// Logotype image that identifies a service that may validate OTPs
         /// generated by this key.
-        CKA_OTP_SERVICE_LOGO: Vec<Byte>,
+        CKA_OTP_SERVICE_LOGO: Vec<u8>,
         /// MIME type of the `OTP_SERVICE_LOGO` attribute value.
-        CKA_OTP_SERVICE_LOGO_TYPE: Vec<Byte>,
+        CKA_OTP_SERVICE_LOGO_TYPE: Vec<u8>,
         /// Parameters that define GOST R 34.10.
-        CKA_GOSTR3410_PARAMS: Vec<Byte>,
+        CKA_GOSTR3410_PARAMS: Vec<u8>,
         /// Parameters that define GOST R 34.11.
-        CKA_GOSTR3411_PARAMS: Vec<Byte>,
+        CKA_GOSTR3411_PARAMS: Vec<u8>,
         /// Parameters that define GOST 28147.
-        CKA_GOST28147_PARAMS: Vec<Byte>,
+        CKA_GOST28147_PARAMS: Vec<u8>,
         /// Identifies a hardware feature type of a device.
         CKA_HW_FEATURE_TYPE: HwFeatureType,
         /// The value of the counter will reset to a previously returned value if
@@ -672,28 +672,28 @@ pkcs11_attribute_type!(
         /// sets (www.iana.org). Supported character sets are separated with ";".
         /// E.g. a token supporting iso-8859-1 and US-ASCII would set the attribute
         /// value to "4;3".
-        CKA_CHAR_SETS: Vec<Byte>,
+        CKA_CHAR_SETS: Vec<u8>,
         /// String indicating supported content transfer encoding methods, as
         /// defined by IANA (www.iana.org). Supported methods are separated
         /// with ";". E.g. a token supporting 7bit, 8bit and base64 could set
         /// the attribute value to "7bit;8bit;base64".
-        CKA_ENCODING_METHODS: Vec<Byte>,
+        CKA_ENCODING_METHODS: Vec<u8>,
         /// String indicating supported (presentable) MIME-types, as defined by
         /// IANA (www.iana.org). Supported types are separated with ";".
         /// E.g. a token supporting MIME types "a/b", "a/c" and "a/d" would set
         /// the attribute value to "a/b;a/c;a/d".
-        CKA_MIME_TYPES: Vec<Byte>,
+        CKA_MIME_TYPES: Vec<u8>,
         /// The type of mechanism object.
         CKA_MECHANISM_TYPE: MechanismType,
         /// Attributes the token always will include in the set of CMS signed
         /// attributes.
-        CKA_REQUIRED_CMS_ATTRIBUTES: Vec<Byte>,
+        CKA_REQUIRED_CMS_ATTRIBUTES: Vec<u8>,
         /// Attributes the token will include in the set of CMS signed attributes
         /// in the absence of any attributes specified by the application.
-        CKA_DEFAULT_CMS_ATTRIBUTES: Vec<Byte>,
+        CKA_DEFAULT_CMS_ATTRIBUTES: Vec<u8>,
         /// Attributes the token may include in the set of CMS signed attributes
         /// upon request by the application.
-        CKA_SUPPORTED_CMS_ATTRIBUTES: Vec<Byte>,
+        CKA_SUPPORTED_CMS_ATTRIBUTES: Vec<u8>,
         /// A list of mechanisms allowed to be used with this key.
         CKA_ALLOWED_MECHANISMS: Vec<MechanismType>,
         CKA_PROFILE_ID,

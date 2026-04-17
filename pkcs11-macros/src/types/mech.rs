@@ -167,7 +167,7 @@ pub(crate) fn pkcs11_mechanism_type_impl(input: TokenStream) -> TokenStream {
         impl<'a> #type_name<'a> {
             pub fn new_vendor_defined(
                 mechanism_type: #attr_type_name,
-                param: Option<&'a [Byte]>,
+                param: Option<&'a [u8]>,
             ) -> Result<Self> {
                 if !mechanism_type.is_vendor_defined() {
                     return Err(crate::error::Error::InvalidInput);
