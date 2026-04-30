@@ -1,5 +1,5 @@
 use crate::{
-    error::{CryptokiRetVal, Result},
+    error::{CryptokiRetVal, Error, Result},
     module::{general_purpose::*, session::*, types::*},
 };
 
@@ -9,23 +9,23 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SeedRandom,
-            self.handle(),
+            self.handle().into(),
             seed.as_ptr() as CK_BYTE_PTR,
-            seed.len() as Ulong
+            seed.len().try_into().map_err(|_| Error::InvalidInput)?
         ))
         .into_result()
     }
 
     /// Generates random or pseudo-random data of the given length in bytes.
-    pub fn generate_random(&self, random_len: Ulong) -> Result<Vec<u8>> {
+    pub fn generate_random(&self, random_len: u32) -> Result<Vec<u8>> {
         let mut random_data: Vec<u8> = vec![0; random_len as usize];
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_GenerateRandom,
-            self.handle(),
+            self.handle().into(),
             random_data.as_mut_ptr() as CK_BYTE_PTR,
-            random_len
+            random_len.into()
         ))
         .into_result()?;
 

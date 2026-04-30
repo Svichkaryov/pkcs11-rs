@@ -8,7 +8,38 @@ use crate::error::{Error, Result};
 
 use super::{MechanismType, general::*};
 
-pub type ObjectHandle = CK_OBJECT_HANDLE;
+#[derive(Debug, Clone, Copy)]
+pub struct ObjectHandle(CK_OBJECT_HANDLE);
+
+impl From<CK_OBJECT_HANDLE> for ObjectHandle {
+    fn from(v: CK_OBJECT_HANDLE) -> Self {
+        Self(v)
+    }
+}
+
+impl From<ObjectHandle> for CK_OBJECT_HANDLE {
+    fn from(v: ObjectHandle) -> Self {
+        v.0
+    }
+}
+
+impl std::fmt::Display for ObjectHandle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Object handle: {}", self.0)
+    }
+}
+
+impl std::fmt::LowerHex for ObjectHandle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Object handle: {:08x}", self.0)
+    }
+}
+
+impl std::fmt::UpperHex for ObjectHandle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Object handle: {:08X}", self.0)
+    }
+}
 
 pkcs11_type!(
     /// Identifies the classes (or types) of objects that Cryptoki recognizes.
@@ -249,7 +280,7 @@ pkcs11_type!(
 #[allow(clippy::len_without_is_empty)]
 pub trait AttributeValue {
     fn as_ck_ptr(&self) -> CK_VOID_PTR;
-    fn len(&self) -> Ulong;
+    fn len(&self) -> CK_ULONG;
 }
 
 pub trait CkPodType: Sized {}
@@ -269,8 +300,8 @@ impl<T: CkPodType> AttributeValue for T {
         self as *const T as CK_VOID_PTR
     }
 
-    fn len(&self) -> Ulong {
-        std::mem::size_of::<T>() as Ulong
+    fn len(&self) -> CK_ULONG {
+        std::mem::size_of::<T>() as CK_ULONG
     }
 }
 
@@ -279,8 +310,8 @@ impl<T> AttributeValue for Vec<T> {
         self.as_ptr() as CK_VOID_PTR
     }
 
-    fn len(&self) -> Ulong {
-        std::mem::size_of_val(self.as_slice()) as Ulong
+    fn len(&self) -> CK_ULONG {
+        std::mem::size_of_val(self.as_slice()) as CK_ULONG
     }
 }
 
@@ -289,8 +320,8 @@ impl AttributeValue for String {
         self.as_ptr() as CK_VOID_PTR
     }
 
-    fn len(&self) -> Ulong {
-        self.len() as Ulong
+    fn len(&self) -> CK_ULONG {
+        self.len() as CK_ULONG
     }
 }
 
@@ -319,12 +350,12 @@ impl TryFromCkAttribute for bool {
 impl TryFromCkAttribute for Ulong {
     fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
         if ck_attribute.pValue.is_null() {
-            return Ok(0);
+            return Ok(Ulong::from(0));
         }
         let value: CK_ULONG =
             unsafe { std::ptr::read(ck_attribute.pValue as *const CK_ULONG) };
 
-        Ok(value)
+        Ok(value.into())
     }
 }
 

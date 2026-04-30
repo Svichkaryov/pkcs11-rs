@@ -10,7 +10,7 @@ use super::general::*;
 bitflags! {
     /// Token information flags for [`TokenInfo`].
     #[derive(Debug, Clone)]
-    pub struct TokenInfoFlags: CK_FLAGS {
+    struct TokenInfoFlags: CK_FLAGS {
         const RNG = CKF_RNG;
         const WRITE_PROTECTED = CKF_WRITE_PROTECTED;
         const LOGIN_REQUIRED = CKF_LOGIN_REQUIRED;
@@ -82,72 +82,67 @@ pub enum SessionLimit {
 /// the information is not available.
 #[derive(Debug, Clone)]
 pub struct TokenInfo {
-    /// Application-defined label, assigned during token initialization.
-    /// Max length is 32 bytes.
-    pub label: String,
-    /// ID of the device manufacturer. Max length is 32 bytes.
-    pub manufacturer_id: String,
-    /// Model of the device. Max length is 16 bytes.
-    pub model: String,
-    /// Character-string serial number of the device. Max length is 16 bytes.
-    pub serial_number: String,
-    /// Bit flags indicating capabilities and status of the device.
-    pub flags: TokenInfoFlags,
-    /// Maximum number of sessions that can be opened with the token at
-    /// one time by a single application.
-    pub max_session_count: Option<SessionLimit>,
-    /// Number of sessions that this application currently has open with the
-    /// token.
-    pub session_count: Option<u64>,
-    /// Maximum number of read/write sessions that can be opened with
-    /// the token at one time by a single application.
-    pub max_rw_session_count: Option<SessionLimit>,
-    /// Number of read/write sessions that this application currently has
-    /// open with the token.
-    pub rw_session_count: Option<u64>,
-    /// Maximum length in bytes of the PIN.
-    pub max_pin_len: u64,
-    /// Minimum length in bytes of the PIN.
-    pub min_pin_len: u64,
-    /// The total amount of memory on the token in bytes in which public
-    /// objects may be stored.
-    pub total_public_memory: Option<u64>,
-    /// The amount of free (unused) memory on the token in bytes for public
-    /// objects.
-    pub free_public_memory: Option<u64>,
-    /// The total amount of memory on the token in bytes in which private
-    /// objects may be stored.
-    pub total_private_memory: Option<u64>,
-    /// The amount of free (unused) memory on the token in bytes for
-    /// private objects.
-    pub free_private_memory: Option<u64>,
-    /// Version number of hardware.
-    pub hardware_version: Version,
-    /// Version number of firmware.
-    pub firmware_version: Version,
-    /// The value of this field only makes sense for tokens equipped with
-    /// a clock, as indicated in the token information flags.
-    pub utc_time: Option<UtcTime>,
+    label: String,
+    manufacturer_id: String,
+    model: String,
+    serial_number: String,
+    flags: TokenInfoFlags,
+    max_session_count: Option<SessionLimit>,
+    session_count: Option<u64>,
+    max_rw_session_count: Option<SessionLimit>,
+    rw_session_count: Option<u64>,
+    max_pin_len: u64,
+    min_pin_len: u64,
+    total_public_memory: Option<u64>,
+    free_public_memory: Option<u64>,
+    total_private_memory: Option<u64>,
+    free_private_memory: Option<u64>,
+    hardware_version: Version,
+    firmware_version: Version,
+    utc_time: Option<UtcTime>,
 }
 
+#[allow(clippy::useless_conversion)]
 fn maybe_unavailable(value: CK_ULONG) -> Option<u64> {
     match value {
         CK_UNAVAILABLE_INFORMATION => None,
-        _ => Some(value),
+        _ => Some(value.into()),
     }
 }
 
 impl SessionLimit {
+    #[allow(clippy::useless_conversion)]
     fn from_ck_ulong(value: CK_ULONG) -> Option<SessionLimit> {
         match value {
             CK_UNAVAILABLE_INFORMATION => None,
             CK_EFFECTIVELY_INFINITE => Some(SessionLimit::Infinite),
-            _ => Some(SessionLimit::Max(value)),
+            _ => Some(SessionLimit::Max(value.into())),
         }
     }
 }
 
 impl TokenInfo {
+    /// Application-defined label, assigned during token initialization.
+    /// Max length is 32 bytes.
+    pub fn label(&self) -> &str {
+        &self.label
+    }
+
+    /// ID of the device manufacturer. Max length is 32 bytes.
+    pub fn manufacturer_id(&self) -> &str {
+        &self.manufacturer_id
+    }
+
+    /// Model of the device. Max length is 16 bytes.
+    pub fn model(&self) -> &str {
+        &self.model
+    }
+
+    /// Character-string serial number of the device. Max length is 16 bytes.
+    pub fn serial_number(&self) -> &str {
+        &self.serial_number
+    }
+
     /// True if the token has its own random number generator.
     pub fn rng(&self) -> bool {
         self.flags.contains(TokenInfoFlags::RNG)
@@ -305,11 +300,86 @@ impl TokenInfo {
     pub fn error_state(&self) -> bool {
         self.flags.contains(TokenInfoFlags::ERROR_STATE)
     }
+
+    /// Maximum number of sessions that can be opened with the token at
+    /// one time by a single application.
+    pub fn max_session_count(&self) -> Option<SessionLimit> {
+        self.max_session_count
+    }
+
+    /// Number of sessions that this application currently has open with the
+    /// token.
+    pub fn session_count(&self) -> Option<u64> {
+        self.session_count
+    }
+
+    /// Maximum number of read/write sessions that can be opened with
+    /// the token at one time by a single application.
+    pub fn max_rw_session_count(&self) -> Option<SessionLimit> {
+        self.max_rw_session_count
+    }
+
+    /// Number of read/write sessions that this application currently has
+    /// open with the token.
+    pub fn rw_session_count(&self) -> Option<u64> {
+        self.rw_session_count
+    }
+
+    /// Maximum length in bytes of the PIN.
+    pub fn max_pin_len(&self) -> u64 {
+        self.max_pin_len
+    }
+
+    /// Minimum length in bytes of the PIN.
+    pub fn min_pin_len(&self) -> u64 {
+        self.min_pin_len
+    }
+
+    /// The total amount of memory on the token in bytes in which public
+    /// objects may be stored.
+    pub fn total_public_memory(&self) -> Option<u64> {
+        self.total_public_memory
+    }
+
+    /// The amount of free (unused) memory on the token in bytes for public
+    /// objects.
+    pub fn free_public_memory(&self) -> Option<u64> {
+        self.free_public_memory
+    }
+
+    /// The total amount of memory on the token in bytes in which private
+    /// objects may be stored.
+    pub fn total_private_memory(&self) -> Option<u64> {
+        self.total_private_memory
+    }
+
+    /// The amount of free (unused) memory on the token in bytes for
+    /// private objects.
+    pub fn free_private_memory(&self) -> Option<u64> {
+        self.free_private_memory
+    }
+
+    /// Version number of hardware.
+    pub fn hardware_version(&self) -> Version {
+        self.hardware_version
+    }
+
+    /// Version number of firmware.
+    pub fn firmware_version(&self) -> Version {
+        self.firmware_version
+    }
+
+    /// The value of this field only makes sense for tokens equipped with
+    /// a clock, as indicated in the token information flags.
+    pub fn utc_time(&self) -> Option<UtcTime> {
+        self.utc_time
+    }
 }
 
 impl TryFrom<CK_TOKEN_INFO> for TokenInfo {
     type Error = Error;
 
+    #[allow(clippy::useless_conversion)]
     fn try_from(ck_toke_info: CK_TOKEN_INFO) -> Result<Self> {
         let flags = TokenInfoFlags::from_bits_truncate(ck_toke_info.flags);
         let utc_time = if flags.contains(TokenInfoFlags::CLOCK_ON_TOKEN) {
@@ -332,8 +402,8 @@ impl TryFrom<CK_TOKEN_INFO> for TokenInfo {
                 ck_toke_info.ulMaxRwSessionCount,
             ),
             rw_session_count: maybe_unavailable(ck_toke_info.ulRwSessionCount),
-            max_pin_len: ck_toke_info.ulMaxPinLen,
-            min_pin_len: ck_toke_info.ulMinPinLen,
+            max_pin_len: ck_toke_info.ulMaxPinLen.into(),
+            min_pin_len: ck_toke_info.ulMinPinLen.into(),
             total_public_memory: maybe_unavailable(ck_toke_info.ulTotalPublicMemory),
             free_public_memory: maybe_unavailable(ck_toke_info.ulFreePublicMemory),
             total_private_memory: maybe_unavailable(ck_toke_info.ulTotalPrivateMemory),

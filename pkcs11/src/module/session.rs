@@ -57,7 +57,7 @@ impl std::fmt::UpperHex for Session {
 }
 
 impl Session {
-    pub fn new(module: Pkcs11Module<Initialized>, handle: SessionHandle) -> Self {
+    pub(crate) fn new(module: Pkcs11Module<Initialized>, handle: SessionHandle) -> Self {
         Self {
             module,
             handle,
@@ -67,8 +67,12 @@ impl Session {
 
     // Called on drop.
     pub(crate) fn close(&self) -> Result<()> {
-        CryptokiRetVal::from(invoke_pkcs11!(self.module(), C_CloseSession, self.handle()))
-            .into_result()
+        CryptokiRetVal::from(invoke_pkcs11!(
+            self.module(),
+            C_CloseSession,
+            self.handle().into()
+        ))
+        .into_result()
     }
 
     pub(crate) fn module(&self) -> &Pkcs11Module<Initialized> {

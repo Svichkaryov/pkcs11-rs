@@ -12,7 +12,7 @@ macro_rules! invoke_pkcs11 {
     ($p11_mod:expr, $func_name:ident, $($params:expr),*) => {
         // Unwrap always return Some because there is a check in `check_ck_functional_list_valid`
         // that each cryptoki function should point to a function stub.
-        $p11_mod.impl_.function_list.$func_name.unwrap()($($params),*)
+        $p11_mod.get_function_list().$func_name.unwrap()($($params),*)
     };
 }
 
@@ -21,7 +21,7 @@ pub(crate) use invoke_pkcs11;
 #[derive(Debug)]
 pub(crate) struct Pkcs11ModuleImpl {
     _library: libloading::Library,
-    pub(crate) function_list: CK_FUNCTION_LIST,
+    function_list: CK_FUNCTION_LIST,
 }
 
 impl Pkcs11ModuleImpl {
@@ -58,6 +58,13 @@ impl ModuleState for Initialized {}
 pub struct Pkcs11Module<S: ModuleState> {
     pub(crate) impl_: Arc<Pkcs11ModuleImpl>,
     _phantom: std::marker::PhantomData<S>,
+}
+
+impl<S: ModuleState> Pkcs11Module<S> {
+    /// Obtains the Cryptoki library's list of function pointers.
+    pub(crate) fn get_function_list(&self) -> CK_FUNCTION_LIST {
+        self.impl_.function_list
+    }
 }
 
 impl Pkcs11Module<Uninitialized> {
@@ -107,11 +114,6 @@ impl Pkcs11Module<Uninitialized> {
             impl_: self.impl_,
             _phantom: std::marker::PhantomData,
         })
-    }
-
-    /// Obtains the Cryptoki library's list of function pointers.
-    pub fn get_function_list(&self) -> Result<FunctionList> {
-        Ok(self.impl_.function_list)
     }
 }
 

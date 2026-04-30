@@ -38,7 +38,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_InitPIN,
-            self.handle(),
+            self.handle().into(),
             pin_ptr,
             pin_len
         ))
@@ -89,7 +89,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SetPIN,
-            self.handle(),
+            self.handle().into(),
             old_pin_ptr,
             old_pin_len,
             new_pin_ptr,

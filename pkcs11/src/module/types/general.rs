@@ -10,7 +10,38 @@ use crate::{
     },
 };
 
-pub type Ulong = CK_ULONG;
+// Ulong
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Ulong(CK_ULONG);
+
+impl From<CK_ULONG> for Ulong {
+    fn from(v: CK_ULONG) -> Self {
+        Self(v)
+    }
+}
+
+impl From<Ulong> for CK_ULONG {
+    fn from(v: Ulong) -> Self {
+        v.0
+    }
+}
+
+impl TryFrom<usize> for Ulong {
+    type Error = Error;
+
+    fn try_from(ulong: usize) -> Result<Self> {
+        Ok(Ulong(ulong.try_into().map_err(|_| Error::InvalidValue)?))
+    }
+}
+
+impl From<Ulong> for usize {
+    fn from(ulong: Ulong) -> Self {
+        ulong.0 as usize
+    }
+}
+
+// Version
 
 #[derive(Debug, Clone, Copy)]
 pub struct Version(CK_VERSION);
@@ -21,18 +52,10 @@ impl Version {
     }
 
     pub fn major(&self) -> u8 {
-        self.major
+        self.0.major
     }
     pub fn minor(&self) -> u8 {
-        self.minor
-    }
-}
-
-impl std::ops::Deref for Version {
-    type Target = CK_VERSION;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
+        self.0.minor
     }
 }
 
@@ -44,13 +67,13 @@ impl From<CK_VERSION> for Version {
 
 impl From<Version> for CK_VERSION {
     fn from(v: Version) -> Self {
-        *v
+        v.0
     }
 }
 
 impl PartialEq for Version {
     fn eq(&self, other: &Self) -> bool {
-        self.major == other.major && self.minor == other.minor
+        self.major() == other.major() && self.minor() == other.minor()
     }
 }
 
@@ -58,11 +81,44 @@ impl Eq for Version {}
 
 impl std::fmt::Display for Version {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}.{}", self.major, self.minor)
+        write!(f, "{}.{}", self.major(), self.minor())
     }
 }
 
-pub type Slot = CK_SLOT_ID;
+// Slot
+
+#[derive(Debug, Clone, Copy)]
+pub struct Slot(CK_SLOT_ID);
+
+impl From<CK_SLOT_ID> for Slot {
+    fn from(v: CK_SLOT_ID) -> Self {
+        Self(v)
+    }
+}
+
+impl From<Slot> for CK_SLOT_ID {
+    fn from(v: Slot) -> Self {
+        v.0
+    }
+}
+
+impl std::fmt::Display for Slot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Slot id: {}", self.0)
+    }
+}
+
+impl std::fmt::LowerHex for Slot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Slot id: {:08x}", self.0)
+    }
+}
+
+impl std::fmt::UpperHex for Slot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Slot id: {:08X}", self.0)
+    }
+}
 
 pub type SecretPin = SecretString;
 
@@ -172,17 +228,35 @@ bitflags! {
 /// General information about Cryptoki.
 #[derive(Debug, Clone)]
 pub struct Info {
-    /// Cryptoki interface version number, for compatibility with future
-    /// revisions of this interface.
-    pub cryptoki_version: Version,
-    /// ID of the Cryptoki library manufacturer. Max length is 32 bytes.
-    pub manufacturer_id: String,
+    cryptoki_version: Version,
+    manufacturer_id: String,
     /// Bit flags reserved for future versions. MUST be zero for this version.
     _flags: InfoFlags,
+    library_description: String,
+    library_version: Version,
+}
+
+impl Info {
+    /// Cryptoki interface version number, for compatibility with future
+    /// revisions of this interface.
+    pub fn cryptoki_version(&self) -> Version {
+        self.cryptoki_version
+    }
+
+    /// ID of the Cryptoki library manufacturer. Max length is 32 bytes.
+    pub fn manufacturer_id(&self) -> &str {
+        &self.manufacturer_id
+    }
+
     /// Character-string description of the library. Max length is 32 bytes.
-    pub library_description: String,
+    pub fn library_description(&self) -> &str {
+        &self.library_description
+    }
+
     /// Cryptoki library version number.
-    pub library_version: Version,
+    pub fn library_version(&self) -> Version {
+        self.library_version
+    }
 }
 
 impl TryFrom<CK_INFO> for Info {

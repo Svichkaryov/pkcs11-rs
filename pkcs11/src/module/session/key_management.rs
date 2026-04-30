@@ -15,12 +15,12 @@ impl Session {
         let template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
 
-        let mut object_handle: ObjectHandle = ObjectHandle::default();
+        let mut object_handle: CK_OBJECT_HANDLE = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_GenerateKey,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
             template.as_ptr() as CK_ATTRIBUTE_PTR,
             template.len() as CK_ULONG,
@@ -28,7 +28,7 @@ impl Session {
         ))
         .into_result()?;
 
-        Ok(object_handle)
+        Ok(object_handle.into())
     }
 
     /// Generates a public/private key pair, creating new key objects.
@@ -46,13 +46,13 @@ impl Session {
             .map(|attr| attr.into())
             .collect();
 
-        let mut pub_key_obj_handle: ObjectHandle = ObjectHandle::default();
-        let mut pr_key_obj_handle: ObjectHandle = ObjectHandle::default();
+        let mut pub_key_obj_handle: CK_OBJECT_HANDLE = 0;
+        let mut pr_key_obj_handle: CK_OBJECT_HANDLE = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_GenerateKeyPair,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
             pub_key_tmpl.as_ptr() as CK_ATTRIBUTE_PTR,
             pub_key_tmpl.len() as CK_ULONG,
@@ -63,7 +63,7 @@ impl Session {
         ))
         .into_result()?;
 
-        Ok((pub_key_obj_handle, pr_key_obj_handle))
+        Ok((pub_key_obj_handle.into(), pr_key_obj_handle.into()))
     }
 
     /// Wraps (i.e., encrypts) a private or secret key.
@@ -80,10 +80,10 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_WrapKey,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
-            wrapping_key as CK_OBJECT_HANDLE,
-            key as CK_OBJECT_HANDLE,
+            wrapping_key.into(),
+            key.into(),
             std::ptr::null_mut() as CK_BYTE_PTR,
             &mut wrapped_key_len
         ))
@@ -94,10 +94,10 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_WrapKey,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
-            wrapping_key as CK_OBJECT_HANDLE,
-            key as CK_OBJECT_HANDLE,
+            wrapping_key.into(),
+            key.into(),
             wrapped_key.as_mut_ptr() as CK_BYTE_PTR,
             &mut wrapped_key_len
         ))
@@ -121,14 +121,14 @@ impl Session {
         let new_key_tmpl: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
 
-        let mut object_handle: ObjectHandle = ObjectHandle::default();
+        let mut object_handle: CK_OBJECT_HANDLE = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_UnwrapKey,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
-            unwrapping_key as CK_OBJECT_HANDLE,
+            unwrapping_key.into(),
             wrapped_key.as_ptr() as CK_BYTE_PTR,
             wrapped_key.len() as CK_ULONG,
             new_key_tmpl.as_ptr() as CK_ATTRIBUTE_PTR,
@@ -137,7 +137,7 @@ impl Session {
         ))
         .into_result()?;
 
-        Ok(object_handle)
+        Ok(object_handle.into())
     }
 
     /// Derives a key from a base key, creating a new key object.
@@ -151,20 +151,20 @@ impl Session {
         let template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
 
-        let mut object_handle: ObjectHandle = ObjectHandle::default();
+        let mut object_handle: CK_OBJECT_HANDLE = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_DeriveKey,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
-            base_key as CK_OBJECT_HANDLE,
+            base_key.into(),
             template.as_ptr() as CK_ATTRIBUTE_PTR,
             template.len() as CK_ULONG,
             &mut object_handle
         ))
         .into_result()?;
 
-        Ok(object_handle)
+        Ok(object_handle.into())
     }
 }

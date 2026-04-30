@@ -150,15 +150,15 @@ pub(crate) fn pkcs11_mechanism_type_impl(input: TokenStream) -> TokenStream {
             Some(ty) => {
                 if is_vec_type(ty) {
                     quote! {
-                        #type_name::#mech_name(param) => std::mem::size_of_val(param.as_slice()) as Ulong,
+                        #type_name::#mech_name(param) => std::mem::size_of_val(param.as_slice()) as CK_ULONG,
                     }
                 } else {
                     quote! {
-                        #type_name::#mech_name(param) => std::mem::size_of_val(param) as Ulong,
+                        #type_name::#mech_name(param) => std::mem::size_of_val(param) as CK_ULONG,
                     }
                 }
             }
-            None => quote! { #type_name::#mech_name => 0 as Ulong, },
+            None => quote! { #type_name::#mech_name => 0 as CK_ULONG, },
         }
     });
 
@@ -196,11 +196,11 @@ pub(crate) fn pkcs11_mechanism_type_impl(input: TokenStream) -> TokenStream {
                 }
             }
 
-            pub fn len(&self) -> Ulong {
+            pub fn len(&self) -> CK_ULONG {
                 match self {
                     #(#len_arms)*
                     #type_name::VendorDefined(m) => {
-                        m.param.map_or(0, |p| std::mem::size_of_val(p) as Ulong)
+                        m.param.map_or(0, |p| std::mem::size_of_val(p) as CK_ULONG)
                     }
                 }
             }

@@ -9,19 +9,19 @@ impl Session {
         let template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
 
-        let mut object_handle: ObjectHandle = ObjectHandle::default();
+        let mut object_handle: CK_OBJECT_HANDLE = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_CreateObject,
-            self.handle(),
+            self.handle().into(),
             template.as_ptr() as CK_ATTRIBUTE_PTR,
             template.len() as CK_ULONG,
             &mut object_handle as CK_OBJECT_HANDLE_PTR
         ))
         .into_result()?;
 
-        Ok(object_handle)
+        Ok(object_handle.into())
     }
 
     /// Copies an object, creating a new object for the copy.
@@ -36,20 +36,20 @@ impl Session {
         let template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
 
-        let mut new_object_handle: ObjectHandle = ObjectHandle::default();
+        let mut new_object_handle: CK_OBJECT_HANDLE = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_CopyObject,
-            self.handle(),
-            object as CK_OBJECT_HANDLE,
+            self.handle().into(),
+            object.into(),
             template.as_ptr() as CK_ATTRIBUTE_PTR,
             template.len() as CK_ULONG,
             &mut new_object_handle as CK_OBJECT_HANDLE_PTR
         ))
         .into_result()?;
 
-        Ok(new_object_handle)
+        Ok(new_object_handle.into())
     }
 
     /// Destroys an object.
@@ -57,26 +57,26 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_DestroyObject,
-            self.handle(),
-            object as CK_OBJECT_HANDLE
+            self.handle().into(),
+            object.into()
         ))
         .into_result()
     }
 
     /// Gets the size of an object in bytes.
-    pub fn get_object_size(&self, object: ObjectHandle) -> Result<Ulong> {
-        let mut object_size: Ulong = Ulong::default();
+    pub fn get_object_size(&self, object: ObjectHandle) -> Result<usize> {
+        let mut object_size: CK_ULONG = 0;
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_GetObjectSize,
-            self.handle(),
-            object as CK_OBJECT_HANDLE,
+            self.handle().into(),
+            object.into(),
             &mut object_size as CK_ULONG_PTR
         ))
         .into_result()?;
 
-        Ok(object_size)
+        Ok(object_size as usize)
     }
 
     /// Obtains the value of one or more attributes of an object.
@@ -110,8 +110,8 @@ impl Session {
         let ck_rv: CK_RV = invoke_pkcs11!(
             self.module(),
             C_GetAttributeValue,
-            self.handle(),
-            object,
+            self.handle().into(),
+            object.into(),
             template.as_mut_ptr(),
             template.len() as CK_ULONG
         );
@@ -150,8 +150,8 @@ impl Session {
         let ck_rv: CK_RV = invoke_pkcs11!(
             self.module(),
             C_GetAttributeValue,
-            self.handle(),
-            object,
+            self.handle().into(),
+            object.into(),
             template.as_mut_ptr(),
             template.len() as CK_ULONG
         );
@@ -178,8 +178,8 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SetAttributeValue,
-            self.handle(),
-            object,
+            self.handle().into(),
+            object.into(),
             template.as_ptr() as CK_ATTRIBUTE_PTR,
             template.len() as CK_ULONG
         ))
@@ -199,14 +199,14 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_FindObjectsInit,
-            self.handle(),
+            self.handle().into(),
             template.as_mut_ptr(),
             template.len() as CK_ULONG
         ))
         .into_result()?;
 
-        let mut object_handle: ObjectHandle = ObjectHandle::default();
-        let mut object_count: Ulong = Ulong::default();
+        let mut object_handle: CK_OBJECT_HANDLE = 0;
+        let mut object_count: CK_ULONG = 0;
         let mut ck_ret: CK_RV;
         let mut object_list: Vec<ObjectHandle> = Vec::new();
 
@@ -218,7 +218,7 @@ impl Session {
             ck_ret = invoke_pkcs11!(
                 self.module(),
                 C_FindObjects,
-                self.handle(),
+                self.handle().into(),
                 &mut object_handle as CK_OBJECT_HANDLE_PTR,
                 1,
                 &mut object_count as CK_ULONG_PTR
@@ -228,13 +228,13 @@ impl Session {
                 break;
             }
 
-            object_list.push(object_handle);
+            object_list.push(object_handle.into());
         }
 
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_FindObjectsFinal,
-            self.handle()
+            self.handle().into()
         ))
         .into_result()?;
 

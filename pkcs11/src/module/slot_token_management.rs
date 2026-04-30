@@ -23,7 +23,7 @@ impl Pkcs11Module<Initialized> {
         ))
         .into_result()?;
 
-        let mut slot_list: Vec<Slot> = vec![0; slot_count as usize];
+        let mut slot_list: Vec<CK_SLOT_ID> = vec![0; slot_count as usize];
         let mut ck_ret: CK_RV;
         loop {
             // A race condition may occur. If someone calls the C_GetSlotList
@@ -47,7 +47,7 @@ impl Pkcs11Module<Initialized> {
 
         slot_list.truncate(slot_count as usize);
 
-        Ok(slot_list)
+        Ok(slot_list.into_iter().map(Slot::from).collect())
     }
 
     /// Obtain a list of all slots in the system.
@@ -85,7 +85,7 @@ impl Pkcs11Module<Initialized> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
             C_GetSlotInfo,
-            slot,
+            slot.into(),
             &mut ck_slot_info as CK_SLOT_INFO_PTR
         ))
         .into_result()?;
@@ -99,7 +99,7 @@ impl Pkcs11Module<Initialized> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
             C_GetTokenInfo,
-            slot,
+            slot.into(),
             &mut ck_token_info as CK_TOKEN_INFO_PTR
         ))
         .into_result()?;
@@ -117,7 +117,7 @@ impl Pkcs11Module<Initialized> {
     /// threads of a single application make simultaneous calls to
     /// [`Pkcs11Module::wait_for_slot_event`][crate::module::slot_token_management::Pkcs11Module::wait_for_slot_event].
     pub fn wait_for_slot_event(&self) -> Result<Option<Slot>> {
-        let mut slot = Slot::default();
+        let mut slot: CK_SLOT_ID = 0;
         match invoke_pkcs11!(
             self,
             C_WaitForSlotEvent,
@@ -125,7 +125,7 @@ impl Pkcs11Module<Initialized> {
             &mut slot,
             std::ptr::null_mut()
         ) {
-            CKR_OK => Ok(Some(slot)),
+            CKR_OK => Ok(Some(slot.into())),
             CKR_NO_EVENT => Ok(None),
             err => Err(Error::Pkcs11(CryptokiRetVal::from(err))),
         }
@@ -142,7 +142,7 @@ impl Pkcs11Module<Initialized> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
             C_GetMechanismInfo,
-            slot,
+            slot.into(),
             mech_type.into(),
             &mut ck_mechanism_info as CK_MECHANISM_INFO_PTR
         ))
@@ -157,7 +157,7 @@ impl Pkcs11Module<Initialized> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
             C_GetMechanismList,
-            slot,
+            slot.into(),
             std::ptr::null_mut() as CK_SLOT_ID_PTR,
             &mut mech_type_count
         ))
@@ -169,7 +169,7 @@ impl Pkcs11Module<Initialized> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
             C_GetMechanismList,
-            slot,
+            slot.into(),
             mech_type_list.as_mut_ptr() as CK_SLOT_ID_PTR,
             &mut mech_type_count
         ))
@@ -209,7 +209,7 @@ impl Pkcs11Module<Initialized> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
             C_InitToken,
-            slot,
+            slot.into(),
             pin_ptr,
             pin_len,
             c_label.as_mut_ptr() as CK_UTF8CHAR_PTR

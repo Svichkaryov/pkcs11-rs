@@ -18,9 +18,9 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_EncryptInit,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
-            key as CK_OBJECT_HANDLE
+            key.into()
         ))
         .into_result()?;
 
@@ -29,7 +29,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_Encrypt,
-            self.handle(),
+            self.handle().into(),
             data.as_ptr() as CK_BYTE_PTR,
             data.len() as CK_ULONG,
             std::ptr::null_mut() as CK_BYTE_PTR,
@@ -42,7 +42,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_Encrypt,
-            self.handle(),
+            self.handle().into(),
             data.as_ptr() as CK_BYTE_PTR,
             data.len() as CK_ULONG,
             encrypted_data.as_mut_ptr() as CK_BYTE_PTR,
@@ -69,9 +69,9 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_DecryptInit,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
-            key as CK_OBJECT_HANDLE
+            key.into()
         ))
         .into_result()?;
 
@@ -80,7 +80,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_Decrypt,
-            self.handle(),
+            self.handle().into(),
             encrypted_data.as_ptr() as CK_BYTE_PTR,
             encrypted_data.len() as CK_ULONG,
             std::ptr::null_mut() as CK_BYTE_PTR,
@@ -93,7 +93,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_Decrypt,
-            self.handle(),
+            self.handle().into(),
             encrypted_data.as_ptr() as CK_BYTE_PTR,
             encrypted_data.len() as CK_ULONG,
             decrypted_data.as_mut_ptr() as CK_BYTE_PTR,
@@ -115,7 +115,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_DigestInit,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR
         ))
         .into_result()?;
@@ -125,7 +125,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_Digest,
-            self.handle(),
+            self.handle().into(),
             data.as_ptr() as CK_BYTE_PTR,
             data.len() as CK_ULONG,
             std::ptr::null_mut() as CK_BYTE_PTR,
@@ -138,7 +138,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_Digest,
-            self.handle(),
+            self.handle().into(),
             data.as_ptr() as CK_BYTE_PTR,
             data.len() as CK_ULONG,
             digest_data.as_mut_ptr() as CK_BYTE_PTR,
@@ -166,9 +166,9 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SignInit,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
-            key as CK_OBJECT_HANDLE
+            key.into()
         ))
         .into_result()?;
 
@@ -177,7 +177,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_Sign,
-            self.handle(),
+            self.handle().into(),
             data.as_ptr() as CK_BYTE_PTR,
             data.len() as CK_ULONG,
             std::ptr::null_mut() as CK_BYTE_PTR,
@@ -190,7 +190,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_Sign,
-            self.handle(),
+            self.handle().into(),
             data.as_ptr() as CK_BYTE_PTR,
             data.len() as CK_ULONG,
             signature.as_mut_ptr() as CK_BYTE_PTR,
@@ -216,9 +216,9 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SignRecoverInit,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
-            key as CK_OBJECT_HANDLE
+            key.into()
         ))
         .into_result()?;
 
@@ -227,7 +227,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SignRecover,
-            self.handle(),
+            self.handle().into(),
             data.as_ptr() as CK_BYTE_PTR,
             data.len() as CK_ULONG,
             std::ptr::null_mut() as CK_BYTE_PTR,
@@ -240,7 +240,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SignRecover,
-            self.handle(),
+            self.handle().into(),
             data.as_ptr() as CK_BYTE_PTR,
             data.len() as CK_ULONG,
             signature.as_mut_ptr() as CK_BYTE_PTR,
@@ -267,16 +267,16 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_VerifyInit,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
-            key as CK_OBJECT_HANDLE
+            key.into()
         ))
         .into_result()?;
 
         match invoke_pkcs11!(
             self.module(),
             C_Verify,
-            self.handle(),
+            self.handle().into(),
             data.as_ptr() as CK_BYTE_PTR,
             data.len() as CK_ULONG,
             signature.as_ptr() as CK_BYTE_PTR,
@@ -301,9 +301,9 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_VerifyRecoverInit,
-            self.handle(),
+            self.handle().into(),
             &mut ck_mech as CK_MECHANISM_PTR,
-            key as CK_OBJECT_HANDLE
+            key.into()
         ))
         .into_result()?;
 
@@ -312,7 +312,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_VerifyRecover,
-            self.handle(),
+            self.handle().into(),
             signature.as_ptr() as CK_BYTE_PTR,
             signature.len() as CK_ULONG,
             std::ptr::null_mut() as CK_BYTE_PTR,
@@ -325,7 +325,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_VerifyRecover,
-            self.handle(),
+            self.handle().into(),
             signature.as_ptr() as CK_BYTE_PTR,
             signature.len() as CK_ULONG,
             data.as_mut_ptr() as CK_BYTE_PTR,

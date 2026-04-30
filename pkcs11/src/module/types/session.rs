@@ -4,14 +4,45 @@ use crate::error::{Error, Result};
 
 use super::general::*;
 
-pub type SessionHandle = CK_SESSION_HANDLE;
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct SessionHandle(CK_SESSION_HANDLE);
+
+impl From<CK_SESSION_HANDLE> for SessionHandle {
+    fn from(v: CK_SESSION_HANDLE) -> Self {
+        Self(v)
+    }
+}
+
+impl From<SessionHandle> for CK_SESSION_HANDLE {
+    fn from(v: SessionHandle) -> Self {
+        v.0
+    }
+}
+
+impl std::fmt::Display for SessionHandle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Session handle: {}", self.0)
+    }
+}
+
+impl std::fmt::LowerHex for SessionHandle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Session handle: {:08x}", self.0)
+    }
+}
+
+impl std::fmt::UpperHex for SessionHandle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Session handle: {:08X}", self.0)
+    }
+}
 
 // CK_SESSION_INFO
 
 bitflags! {
     /// Session Information Flags for [`CK_SESSION_INFO`]
     #[derive(Debug, Clone)]
-    pub struct SessionInfoFlags: CK_FLAGS {
+    pub(crate) struct SessionInfoFlags: CK_FLAGS {
         const RW_SESSION = CKF_RW_SESSION;
         const SERIAL_SESSION = CKF_SERIAL_SESSION;
     }
@@ -69,23 +100,27 @@ impl std::fmt::Display for SessionState {
     }
 }
 
-pub type DeviceError = u64;
-
 // Provides information about a session.
 #[derive(Debug, Clone)]
 pub struct SessionInfo {
-    /// ID of the slot that interfaces with the token
-    pub slot_id: Slot,
-    /// The state of the session
-    pub state: SessionState,
+    slot_id: Slot,
+    state: SessionState,
     /// Bit flags that define the type of session
-    pub flags: SessionInfoFlags,
-    /// An error code defined by the cryptographic device. Used for errors
-    /// not covered by Cryptoki.
-    pub device_error: DeviceError,
+    flags: SessionInfoFlags,
+    device_error: u64,
 }
 
 impl SessionInfo {
+    /// ID of the slot that interfaces with the token
+    pub fn slot_id(&self) -> Slot {
+        self.slot_id
+    }
+
+    /// The state of the session
+    pub fn session_state(&self) -> SessionState {
+        self.state
+    }
+
     /// True if the session is read/write; false if the
     /// session is read-only
     pub fn rw_session(&self) -> bool {
@@ -97,6 +132,12 @@ impl SessionInfo {
     pub fn serial_session(&self) -> bool {
         self.flags.contains(SessionInfoFlags::SERIAL_SESSION)
     }
+
+    /// An error code defined by the cryptographic device. Used for errors
+    /// not covered by Cryptoki.
+    pub fn device_error(&self) -> u64 {
+        self.device_error
+    }
 }
 
 impl TryFrom<CK_SESSION_INFO> for SessionInfo {
@@ -104,10 +145,11 @@ impl TryFrom<CK_SESSION_INFO> for SessionInfo {
 
     fn try_from(session_info: CK_SESSION_INFO) -> Result<Self> {
         Ok(Self {
-            slot_id: session_info.slotID,
+            slot_id: session_info.slotID.into(),
             state: SessionState::try_from(session_info.state)?,
             flags: SessionInfoFlags::from_bits_truncate(session_info.flags),
-            device_error: session_info.ulDeviceError,
+            #[allow(clippy::useless_conversion)]
+            device_error: session_info.ulDeviceError.into(),
         })
     }
 }

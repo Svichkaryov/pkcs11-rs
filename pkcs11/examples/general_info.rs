@@ -52,10 +52,10 @@ fn print_library_info(p: &Printer, pkcs11: &Pkcs11Module<Initialized>) {
     let info = pkcs11.get_info().unwrap();
     p.group("Cryptoki general info:", |p| {
         println_aligned!(p,
-            "Cryptoki version:": info.cryptoki_version,
-            "Manufacturer id:": info.manufacturer_id,
-            "Library description:": info.library_description,
-            "Library version:": info.library_version,
+            "Cryptoki version:": info.cryptoki_version(),
+            "Manufacturer id:": info.manufacturer_id(),
+            "Library description:": info.library_description(),
+            "Library version:": info.library_version(),
         );
     });
     p.blank_line();
@@ -74,10 +74,10 @@ fn print_slot_token_list_info(
         let slot_info = pkcs11.get_slot_info(slot).unwrap();
         p.group(format!("Slot (#{slot:#?}) info:"), |p| {
             println_aligned!(p,
-                "Description:": slot_info.slot_description,
-                "Manufacturer id:": slot_info.manufacturer_id,
-                "Hardware version:": slot_info.hardware_version,
-                "Firmware version:": slot_info.firmware_version,
+                "Description:": slot_info.slot_description(),
+                "Manufacturer id:": slot_info.manufacturer_id(),
+                "Hardware version:": slot_info.hardware_version(),
+                "Firmware version:": slot_info.firmware_version(),
             );
             p.group("Flags:", |p| {
                 println_aligned!(p,
@@ -94,20 +94,20 @@ fn print_slot_token_list_info(
         let token_info = pkcs11.get_token_info(slot).unwrap();
         p.group(format!("Token (#{slot:#?}) info:"), |p| {
             println_aligned!(p,
-                "Label:": token_info.label,
-                "Manufacturer id:": token_info.manufacturer_id,
-                "Model:": token_info.model,
-                "Serial number:": token_info.serial_number,
-                "Max session count:": format!("{:?}", token_info.max_session_count),
-                "Session count:": format!("{:?}", token_info.session_count),
-                "Max rw session count:": format!("{:?}", token_info.max_rw_session_count),
-                "Rw session count:": format!("{:?}", token_info.rw_session_count),
-                "Max pin length:": token_info.max_pin_len,
-                "Min pin length:": token_info.min_pin_len,
-                "Total public memory:": format!("{:?}", token_info.total_public_memory),
-                "Hardware version:": token_info.hardware_version,
-                "Firmware version:": token_info.firmware_version,
-                "UTC time:": format!("{:?}", token_info.utc_time),
+                "Label:": token_info.label(),
+                "Manufacturer id:": token_info.manufacturer_id(),
+                "Model:": token_info.model(),
+                "Serial number:": token_info.serial_number(),
+                "Max session count:": format!("{:?}", token_info.max_session_count()),
+                "Session count:": format!("{:?}", token_info.session_count()),
+                "Max rw session count:": format!("{:?}", token_info.max_rw_session_count()),
+                "Rw session count:": format!("{:?}", token_info.rw_session_count()),
+                "Max pin length:": token_info.max_pin_len(),
+                "Min pin length:": token_info.min_pin_len(),
+                "Total public memory:": format!("{:?}", token_info.total_public_memory()),
+                "Hardware version:": token_info.hardware_version(),
+                "Firmware version:": token_info.firmware_version(),
+                "UTC time:": format!("{:?}", token_info.utc_time()),
             );
             p.group("Flags:", |p| {
                 println_aligned!(p,
@@ -130,7 +130,6 @@ fn print_slot_token_list_info(
                     "SO pin locked:": token_info.so_pin_locked(),
                     "SO pin to be changed:": token_info.so_pin_to_be_changed(),
                     "Error state:": token_info.error_state(),
-                    "UTC time:": format!("{:?}", token_info.utc_time),
                 );
             });
         });
@@ -159,8 +158,8 @@ fn print_mechanism_info(
         let mech_info = pkcs11.get_mechanism_info(slot, mech_type).unwrap();
         p.group(format!("Mechanism ({mech_type}) info:"), |p| {
             println_aligned!(p,
-                "Min key size:": mech_info.min_key_size,
-                "Max key size:": mech_info.max_key_size,
+                "Min key size:": mech_info.min_key_size(),
+                "Max key size:": mech_info.max_key_size(),
             );
             p.group("Flags:", |p| {
                 println_aligned!(p,

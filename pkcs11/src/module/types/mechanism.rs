@@ -870,7 +870,7 @@ pkcs11_mechanism_type!(
 bitflags! {
     /// Flags specifying mechanism capabilities for [`CK_MECHANISM_INFO`].
     #[derive(Debug, Clone)]
-    pub struct MechanismInfoFlags: CK_FLAGS {
+    struct MechanismInfoFlags: CK_FLAGS {
         const HW = CKF_HW;
         const ENCRYPT = CKF_ENCRYPT;
         const DECRYPT = CKF_DECRYPT;
@@ -897,19 +897,27 @@ bitflags! {
 /// Information about a particular mechanism
 #[derive(Debug, Clone)]
 pub struct MechanismInfo {
-    /// The minimum size of the key for the mechanism (whether this is
-    /// measured in bits or in bytes is mechanism-dependent).
-    /// For some mechanisms has meaningless values.
-    pub min_key_size: Ulong,
-    /// The maximum size of the key for the mechanism (whether this is
-    /// measured in bits or in bytes is mechanism-dependent).
-    /// For some mechanisms has meaningless values.
-    pub max_key_size: Ulong,
+    min_key_size: usize,
+    max_key_size: usize,
     /// Flags specifying mechanism capabilities.
-    pub flags: MechanismInfoFlags,
+    flags: MechanismInfoFlags,
 }
 
 impl MechanismInfo {
+    /// The minimum size of the key for the mechanism (whether this is
+    /// measured in bits or in bytes is mechanism-dependent).
+    /// For some mechanisms has meaningless values.
+    pub fn min_key_size(&self) -> usize {
+        self.min_key_size
+    }
+
+    /// The maximum size of the key for the mechanism (whether this is
+    /// measured in bits or in bytes is mechanism-dependent).
+    /// For some mechanisms has meaningless values.
+    pub fn max_key_size(&self) -> usize {
+        self.max_key_size
+    }
+
     /// True if the mechanism is performed by the device;
     /// false if the mechanism is performed in software.
     pub fn hardware(&self) -> bool {
@@ -1039,8 +1047,8 @@ impl MechanismInfo {
 impl From<CK_MECHANISM_INFO> for MechanismInfo {
     fn from(ck_mechanism_info: CK_MECHANISM_INFO) -> Self {
         Self {
-            min_key_size: ck_mechanism_info.ulMinKeySize,
-            max_key_size: ck_mechanism_info.ulMaxKeySize,
+            min_key_size: ck_mechanism_info.ulMinKeySize as usize,
+            max_key_size: ck_mechanism_info.ulMaxKeySize as usize,
             flags: MechanismInfoFlags::from_bits_truncate(ck_mechanism_info.flags),
         }
     }
@@ -1161,15 +1169,15 @@ impl<'a> Ecdh1DeriveParams<'a> {
     ///   responsible for converting the offered public key to the compressed
     ///   or uncompressed forms of these encodings if the token does not
     ///   support the offered form.
-    pub fn new(kdf: KeyDerivationFunction<'a>, public_data: &'a [u8]) -> Self {
-        Self {
+    pub fn new(kdf: KeyDerivationFunction<'a>, public_data: &'a [u8]) -> Result<Self> {
+        Ok(Self {
             kdf: kdf.kdf_type,
-            shared_data_len: kdf.shared_data.map_or(0, <[u8]>::len) as Ulong,
+            shared_data_len: kdf.shared_data.map_or(0, <[u8]>::len).try_into()?,
             shared_data: kdf.shared_data.map_or(std::ptr::null(), <[u8]>::as_ptr),
-            public_data_len: public_data.len() as Ulong,
+            public_data_len: public_data.len().try_into()?,
             public_data: public_data.as_ptr(),
             _phantom: std::marker::PhantomData,
-        }
+        })
     }
 }
 
@@ -1202,15 +1210,15 @@ impl<'a> X9_42Dh1DeriveParams<'a> {
     ///
     /// * `kdf` - The key derivation function to use.
     /// * `public_data` - The other party's X9.42 Diffie-Hellman public key value.
-    pub fn new(kdf: KeyDerivationFunction<'a>, public_data: &'a [u8]) -> Self {
-        Self {
+    pub fn new(kdf: KeyDerivationFunction<'a>, public_data: &'a [u8]) -> Result<Self> {
+        Ok(Self {
             kdf: kdf.kdf_type,
-            other_info_len: kdf.shared_data.map_or(0, <[u8]>::len) as Ulong,
+            other_info_len: kdf.shared_data.map_or(0, <[u8]>::len).try_into()?,
             other_info: kdf.shared_data.map_or(std::ptr::null(), <[u8]>::as_ptr),
-            public_data_len: public_data.len() as Ulong,
+            public_data_len: public_data.len().try_into()?,
             public_data: public_data.as_ptr(),
             _phantom: std::marker::PhantomData,
-        }
+        })
     }
 }
 

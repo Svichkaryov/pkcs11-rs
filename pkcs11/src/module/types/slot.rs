@@ -7,7 +7,7 @@ use super::general::*;
 bitflags! {
     #[derive(Debug, Clone)]
     /// Slot information flags for [`CK_SLOT_INFO`]
-    pub struct SlotInfoFlags: CK_FLAGS {
+    struct SlotInfoFlags: CK_FLAGS {
         const TOKEN_PRESENT = CKF_TOKEN_PRESENT;
         const REMOVABLE_DEVICE = CKF_REMOVABLE_DEVICE;
         const HW_SLOT = CKF_HW_SLOT;
@@ -17,19 +17,35 @@ bitflags! {
 /// Information about a slot.
 #[derive(Debug, Clone)]
 pub struct SlotInfo {
-    /// Character-string description of the slot. Max length is 64 bytes.
-    pub slot_description: String,
-    /// ID of the slot manufacturer. Max length is 32 bytes.
-    pub manufacturer_id: String,
+    slot_description: String,
+    manufacturer_id: String,
     /// Bits flags that provide capabilities of the slot.
-    pub flags: SlotInfoFlags,
-    /// Version number of the slot's hardware.
-    pub hardware_version: Version,
-    /// Version number of the slot's firmware.
-    pub firmware_version: Version,
+    flags: SlotInfoFlags,
+    hardware_version: Version,
+    firmware_version: Version,
 }
 
 impl SlotInfo {
+    /// Character-string description of the slot. Max length is 64 bytes.
+    pub fn slot_description(&self) -> &str {
+        &self.slot_description
+    }
+
+    /// ID of the slot manufacturer. Max length is 32 bytes.
+    pub fn manufacturer_id(&self) -> &str {
+        &self.manufacturer_id
+    }
+
+    /// Version number of the slot's hardware.
+    pub fn hardware_version(&self) -> Version {
+        self.hardware_version
+    }
+
+    /// Version number of the slot's firmware.
+    pub fn firmware_version(&self) -> Version {
+        self.firmware_version
+    }
+
     /// True if a token is present in the slot (e.g., a device is
     /// in the reader).
     pub fn token_present(&self) -> bool {

@@ -129,7 +129,7 @@ pub(crate) fn pkcs11_attribute_type_impl(input: TokenStream) -> TokenStream {
                 self.inner_value().as_ck_ptr()
             }
 
-            pub fn len(&self) -> Ulong {
+            pub fn len(&self) -> CK_ULONG {
                 self.inner_value().len()
             }
         }

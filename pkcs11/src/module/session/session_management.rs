@@ -23,7 +23,7 @@ impl Pkcs11Module<Initialized> {
     /// [`write-protected`]: TokenInfo::write_protected
     /// [`PKCS11-UG`]: http://docs.oasis-open.org/pkcs11/pkcs11-ug/v2.40/pkcs11-ug-v2.40.html
     pub fn open_session(&self, slot: Slot, rw: bool) -> Result<Session> {
-        let mut session_handle = SessionHandle::default();
+        let mut session_handle = CK_SESSION_HANDLE::default();
         let mut flags = SessionInfoFlags::SERIAL_SESSION;
         if rw {
             flags |= SessionInfoFlags::RW_SESSION;
@@ -32,7 +32,7 @@ impl Pkcs11Module<Initialized> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self,
             C_OpenSession,
-            slot,
+            slot.into(),
             flags.bits(),
             std::ptr::null_mut(),
             None,
@@ -40,7 +40,7 @@ impl Pkcs11Module<Initialized> {
         ))
         .into_result()?;
 
-        Ok(Session::new(self.clone(), session_handle))
+        Ok(Session::new(self.clone(), session_handle.into()))
     }
 
     /// Opens a read/write session between an application and a token in
@@ -57,7 +57,8 @@ impl Pkcs11Module<Initialized> {
 
     /// Closes all sessions an application has with a token.
     pub fn close_all_session(&self, slot: Slot) -> Result<()> {
-        CryptokiRetVal::from(invoke_pkcs11!(self, C_CloseAllSessions, slot)).into_result()
+        CryptokiRetVal::from(invoke_pkcs11!(self, C_CloseAllSessions, slot.into()))
+            .into_result()
     }
 }
 
@@ -68,7 +69,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_GetSessionInfo,
-            self.handle(),
+            self.handle().into(),
             &mut info
         ))
         .into_result()?;
@@ -84,7 +85,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_GetOperationState,
-            self.handle(),
+            self.handle().into(),
             std::ptr::null_mut() as CK_BYTE_PTR,
             &mut op_state_len
         ))
@@ -95,7 +96,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_GetOperationState,
-            self.handle(),
+            self.handle().into(),
             op_state.as_mut_ptr() as CK_BYTE_PTR,
             &mut op_state_len
         ))
@@ -118,11 +119,11 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_SetOperationState,
-            self.handle(),
+            self.handle().into(),
             operation_state.as_ptr() as CK_BYTE_PTR,
             operation_state.len() as CK_ULONG,
-            encryption_key.unwrap_or(0),
-            authentication_key.unwrap_or(0)
+            encryption_key.map(ObjectHandle::into).unwrap_or(0),
+            authentication_key.map(ObjectHandle::into).unwrap_or(0)
         ))
         .into_result()
     }
@@ -184,7 +185,7 @@ impl Session {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
             C_Login,
-            self.handle(),
+            self.handle().into(),
             user_type.into(),
             pin_ptr,
             pin_len
@@ -210,7 +211,11 @@ impl Session {
     /// operations are still active. Therefore, before logging out, any active
     /// operations should be finished.
     pub fn logout(&self) -> Result<()> {
-        CryptokiRetVal::from(invoke_pkcs11!(self.module(), C_Logout, self.handle()))
-            .into_result()
+        CryptokiRetVal::from(invoke_pkcs11!(
+            self.module(),
+            C_Logout,
+            self.handle().into()
+        ))
+        .into_result()
     }
 }

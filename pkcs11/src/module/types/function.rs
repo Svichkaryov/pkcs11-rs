@@ -1,7 +1,5 @@
 use super::general::*;
 
-pub type FunctionList = CK_FUNCTION_LIST;
-
 // CK_C_INITIALIZE_ARGS
 
 /// Structure containing information on how the library should deal with
