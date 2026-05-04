@@ -153,23 +153,13 @@ impl Date {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.year == <[u8; 4]>::default()
-            && self.month == <[u8; 2]>::default()
-            && self.day == <[u8; 2]>::default()
-    }
-}
-
-impl std::ops::Deref for Date {
-    type Target = CK_DATE;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
+        self.year() == 0 && self.month() == 0 && self.day() == 0
     }
 }
 
 impl From<Date> for CK_DATE {
     fn from(v: Date) -> Self {
-        *v
+        v.0
     }
 }
 
@@ -201,16 +191,18 @@ impl std::fmt::Display for Date {
         write!(
             f,
             "{:04}-{:02}-{:02}",
-            u32::from_be_bytes(self.year),
-            u16::from_be_bytes(self.month),
-            u16::from_be_bytes(self.day)
+            self.year(),
+            self.month(),
+            self.day()
         )
     }
 }
 
 impl PartialEq for Date {
     fn eq(&self, other: &Self) -> bool {
-        self.year == other.year && self.month == other.month && self.day == other.day
+        self.year() == other.year()
+            && self.month() == other.month()
+            && self.day() == other.day()
     }
 }
 

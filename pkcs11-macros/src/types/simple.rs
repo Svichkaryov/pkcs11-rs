@@ -91,20 +91,10 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
             }
         });
 
-    let deref_ts = quote! {
-        impl ::std::ops::Deref for #type_name {
-            type Target = #inner_type;
-
-            fn deref(&self) -> &Self::Target {
-                &self.0
-            }
-        }
-    };
-
     let from_ts = quote! {
         impl ::std::convert::From<#type_name> for #inner_type {
             fn from(val: #type_name) -> Self {
-                *val
+                val.0
             }
         }
     };
@@ -166,7 +156,7 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
                 match *self {
                     #(#display_arms)*
                     #display_vendor_defined_ext
-                    other => ::std::write!(f, "Unknown {}: {:#x}", #type_name_str, *other),
+                    other => ::std::write!(f, "Unknown {}: {:#x}", #type_name_str, other.0),
                 }
             }
         }
@@ -201,7 +191,7 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
                 match *self {
                     #(#debug_arms)*
                     #debug_vendor_defined_ext
-                    other => ::std::write!(f, "Unknown {}({:#x})", #type_name_str, *other),
+                    other => ::std::write!(f, "Unknown {}({:#x})", #type_name_str, other.0),
                 }
             }
         }
@@ -211,7 +201,6 @@ pub(crate) fn pkcs11_type_impl(input: TokenStream) -> TokenStream {
     quote! {
         #impl_ts
         #optional_vendor_defined_impl
-        #deref_ts
         #from_ts
         #try_from_ts
         #display_ts
