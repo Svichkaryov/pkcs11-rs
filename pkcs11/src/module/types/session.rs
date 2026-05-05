@@ -100,7 +100,7 @@ impl std::fmt::Display for SessionState {
     }
 }
 
-// Provides information about a session.
+/// Provides information about a session.
 #[derive(Debug, Clone)]
 pub struct SessionInfo {
     slot_id: Slot,

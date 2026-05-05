@@ -4,7 +4,8 @@ use crate::{
 };
 
 impl Session {
-    /// Mixes additional seed material into the token's random number generator.
+    /// Mixes additional `seed` material into the token's random number
+    /// generator.
     pub fn seed_random(&self, seed: &[u8]) -> Result<()> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),

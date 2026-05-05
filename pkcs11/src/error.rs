@@ -3,6 +3,7 @@ mod cryptoki_rv;
 
 pub use cryptoki_rv::*;
 
+/// Main Error type.
 #[derive(Debug)]
 pub enum Error {
     LibraryLoading(libloading::Error),
@@ -61,5 +62,5 @@ impl From<CryptokiRetVal> for Error {
     }
 }
 
-/// Main Result type
+/// Main Result type.
 pub type Result<T> = core::result::Result<T, Error>;

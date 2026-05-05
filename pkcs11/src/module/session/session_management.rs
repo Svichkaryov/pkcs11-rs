@@ -6,7 +6,8 @@ use crate::{
 };
 
 impl Pkcs11Module<Initialized> {
-    /// Opens a session between an application and a token in a particular slot.
+    /// Opens a session between an application and a token in a particular
+    /// `slot`.
     ///
     /// There may be a limit on the number of concurrent sessions an
     /// application may have with the token, which may depend on whether the
@@ -17,7 +18,8 @@ impl Pkcs11Module<Initialized> {
     ///
     /// If the application calling this function already has a R/W SO session
     /// open with the token, then any attempt to open a R/O session with the
-    /// token fails with error code [`CryptokiRetVal::SessionReadWriteSoExists`]
+    /// token fails with error code
+    /// [`SessionReadWriteSoExists`](CryptokiRetVal::SessionReadWriteSoExists)
     /// (see [`PKCS11-UG`] for further details).
     ///
     /// [`write-protected`]: TokenInfo::write_protected
@@ -44,13 +46,13 @@ impl Pkcs11Module<Initialized> {
     }
 
     /// Opens a read/write session between an application and a token in
-    /// a particular slot.
+    /// a particular `slot`.
     pub fn open_rw_session(&self, slot: Slot) -> Result<Session> {
         self.open_session(slot, true)
     }
 
     /// Opens a read-only session session between an application and a token in
-    /// a particular slot.
+    /// a particular `slot`.
     pub fn open_ro_session(&self, slot: Slot) -> Result<Session> {
         self.open_session(slot, false)
     }
@@ -130,13 +132,19 @@ impl Session {
 
     /// Logs a user into a token.
     ///
-    /// When the `user_type` is either [`So`] or [`User`], if the call
-    /// succeeds, each of the application's sessions will enter either the
-    /// [`SessionState::RwSecurityOfficer`] state, the [`SessionState::RwUser`]
-    /// state, or the [`SessionState::RoUser`] state. If the `user_type` is
-    /// [`UserType::ContextSpecific`], the behavior of this function depends on
-    /// the context in which it is called. Improper use of this `user type`
-    /// will result in a return value [`CryptokiRetVal::OperationNotInitialized`].
+    /// PKCS#11 standard allows PIN values to contain any valid UTF8 character,
+    /// but the token may impose subset restrictions.
+    ///
+    /// When the `user_type` is either [`So`](UserType::So) or
+    /// [`User`](UserType::User), if the call succeeds, each of the
+    /// application's sessions will enter either the
+    /// [`RwSecurityOfficer`](SessionState::RwSecurityOfficer) state, the
+    /// [`RwUser`](SessionState::RwUser) state, or the
+    /// [`RoUser`](SessionState::RoUser) state. If the `user_type` is
+    /// [`ContextSpecific`](UserType::ContextSpecific), the behavior of this
+    /// function depends on the context in which it is called. Improper use of
+    /// this `user type` will result in a return value
+    /// [`OperationNotInitialized`](CryptokiRetVal::OperationNotInitialized).
     ///
     /// If the token has a [`protected authentication path`], then that means
     /// that there is some way for a user to be authenticated to the token
@@ -149,7 +157,8 @@ impl Session {
     /// When this function returns, whatever authentication method supported by
     /// the token will have been performed; a return value `Ok(())` means that
     /// the user was successfully authenticated, and a return value of
-    /// [`CryptokiRetVal::PinIncorrect`] means that the user was denied access.
+    /// [`PinIncorrect`](CryptokiRetVal::PinIncorrect) means that the user was
+    /// denied access.
     ///
     /// If there are any active cryptographic or object finding operations in
     /// an application's session, and then this function is successfully
@@ -159,20 +168,20 @@ impl Session {
     ///
     /// If the application calling this function has a R/O session open with
     /// the token, then it will be unable to log the SO into a session (see
-    /// [`PKCS11-UG`] for further details). An attempt to do this will result in
-    /// the error code [`CryptokiRetVal::SessionReadOnlyExists`].
+    /// [`PKCS11-UG`] for further details). An attempt to do this will result
+    /// in the error code
+    /// [`SessionReadOnlyExists`](CryptokiRetVal::SessionReadOnlyExists).
     ///
     /// This function may be called repeatedly, without intervening [`logout`]
-    /// calls, if (and only if) a key with the [`ALWAYS_AUTHENTICATE`]
-    /// attribute set to true exists, and the user needs to do cryptographic
-    /// operation on this key. See further Section 4.9.
+    /// calls, if (and only if) a key with the
+    /// [`AlwaysAuthenticate`](Attribute::AlwaysAuthenticate) attribute set to
+    /// `true` exists, and the user needs to do cryptographic operation on this
+    /// key. See further [`Section 4.10`].
     ///
-    /// [`So`]: UserType::So
-    /// [`User`]: `UserType::User`
     /// [`protected authentication path`]: TokenInfo::protected_authentication_path
     /// [`PKCS11-UG`]: http://docs.oasis-open.org/pkcs11/pkcs11-ug/v2.40/pkcs11-ug-v2.40.html
     /// [`logout`]: Self::logout
-    /// [`ALWAYS_AUTHENTICATE`]: AttributeType::ALWAYS_AUTHENTICATE
+    /// [`Section 4.10`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693098
     pub fn login(&self, user_type: UserType, pin: Option<&SecretPin>) -> Result<()> {
         let (pin_ptr, pin_len) = match pin {
             Some(pin) => (
@@ -196,8 +205,9 @@ impl Session {
     /// Logs a user out from a token.
     ///
     /// Depending on the current user type, if the call succeeds, each of the
-    /// application's sessions will enter either the [`SessionState::RwPublic`]
-    /// state or the [`SessionState::RoPublic`] state.
+    /// application's sessions will enter either the
+    /// [`RwPublic`](SessionState::RwPublic) state or the
+    /// [`RoPublic`](SessionState::RoPublic) state.
     ///
     /// When this function successfully executes, any of the application's
     /// handles to private objects become invalid (even if a user is later

@@ -5,6 +5,25 @@ use crate::{
 
 impl Session {
     /// Creates a new object.
+    ///
+    /// If a call to it cannot support the precise `template` supplied to it,
+    /// it will fail and return without creating any object.
+    ///
+    /// If it is used to create a key object, pass [`Attribute::Local(true)`]
+    /// in the `template`. If that key object is a secret or private key then
+    /// pass [`Attribute::AlwaysSensitive(false)`] and
+    /// [`Attribute::NeverExtractable(false)`].
+    ///
+    /// Only session objects can be created during a read-only session. Only
+    /// public objects can be created unless the normal user is logged in.
+    ///
+    /// Whenever an object is created, a value for [`Attribute::UniqueId`] is
+    /// generated and assigned to the new object (See [`Section 4.4.1`]).
+    ///
+    /// [`Attribute::Local(true)`]: crate::module::types::Attribute::Local
+    /// [`Attribute::AlwaysSensitive(false)`]: crate::module::types::Attribute::AlwaysSensitive
+    /// [`Attribute::NeverExtractable(false)`]: crate::module::types::Attribute::NeverExtractable
+    /// [`Section 4.4.1`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693081
     pub fn create_object(&self, template: &[Attribute]) -> Result<ObjectHandle> {
         let template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();
@@ -24,10 +43,39 @@ impl Session {
         Ok(object_handle.into())
     }
 
-    /// Copies an object, creating a new object for the copy.
+    /// Copies an `object`, creating a new object for the copy.
     ///
-    /// The template may specify new values for any attributes of the
-    /// object that can ordinarily be modified.
+    /// The `template` may specify new values for any attributes of the
+    /// `object` that can ordinarily be modified (e.g., in the course of
+    /// copying a secret key, a key's [`Extractable`](Attribute::Extractable)
+    /// attribute may be changed from `true` to `false`, but not the other way
+    /// around. If this change is made, the new key's
+    /// [`NeverExtractable`](Attribute::NeverExtractable) attribute will have
+    /// the value `false`. Similarly, the `template` may specify that the new
+    /// key's [`Sensitive`](Attribute::Sensitive) attribute be `true`; the new
+    /// key will have the same value for its
+    /// [`AlwaysSensitive`](Attribute::AlwaysSensitive) attribute as the
+    /// original key). It may also specify new values of the
+    /// [`Token`](Attribute::Token) and [`Private`](Attribute::Private)
+    /// attributes (e.g., to copy a session object to a token object). If the
+    /// `template` specifies a value of an attribute which is incompatible with
+    /// other existing attributes of the object, the call fails with the return
+    /// code [`TemplateInconsistent`](CryptokiRetVal::TemplateInconsistent).
+    ///
+    /// If a call to it cannot support the precise `template` supplied to it,
+    /// it will fail and return without creating any object. If the object
+    /// indicated by `object` has its [`Copyable`](Attribute::Copyable)
+    /// attribute set to `false`, it will return
+    /// [`ActionProhibited`](CryptokiRetVal::ActionProhibited).
+    ///
+    /// Whenever an object is copied, a new value for
+    /// [`UniqueId`](Attribute::UniqueId) is generated and assigned to the new
+    /// object (See [`Section 4.4.1`]).
+    ///
+    /// Only session objects can be created during a read-only session. Only
+    /// public objects can be created unless the normal user is logged in.
+    ///
+    /// [`Section 4.4.1`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693081
     pub fn copy_object(
         &self,
         object: ObjectHandle,
@@ -52,7 +100,16 @@ impl Session {
         Ok(new_object_handle.into())
     }
 
-    /// Destroys an object.
+    /// Destroys an `object`.
+    ///
+    /// Only session objects can be destroyed during a read-only session. Only
+    /// public objects can be destroyed unless the normal user is logged in.
+    ///
+    /// Certain objects may not be destroyed. Calling it on such objects will
+    /// result in the [`ActionProhibited`](CryptokiRetVal::ActionProhibited)
+    /// error code. An application can consult the object's
+    /// [`Destroyable`](Attribute::Destroyable) attribute to determine if an
+    /// object may be destroyed or not.
     pub fn destroy_object(&self, object: ObjectHandle) -> Result<()> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),
@@ -63,7 +120,14 @@ impl Session {
         .into_result()
     }
 
-    /// Gets the size of an object in bytes.
+    /// Gets the size of an `object` in bytes.
+    ///
+    /// Cryptoki does not specify what the precise meaning of an object's size
+    /// is. Intuitively, it is some measure of how much token memory the object
+    /// takes up. If an application deletes (say) a private object of size S,
+    /// it might be reasonable to assume that the `ulFreePrivateMemory` field
+    /// (returned by [`free_private_memory`](TokenInfo::free_private_memory))
+    /// of the token's [`TokenInfo`] structure increases by approximately S.
     pub fn get_object_size(&self, object: ObjectHandle) -> Result<usize> {
         let mut object_size: CK_ULONG = 0;
 
@@ -79,11 +143,11 @@ impl Session {
         Ok(object_size as usize)
     }
 
-    /// Obtains the value of one or more attributes of an object.
+    /// Obtains the value of one or more attributes of an `object`.
     ///
-    /// If a value is unavailable (CK_UNAVAILABLE_INFORMATION) for any attribute
-    /// type, then that attribute is skipped. So you have to manually check
-    /// if that an attribute was missing in the resulting vector.
+    /// If a value is unavailable for any `attribute type`, then that attribute
+    /// is skipped. So you have to manually check if that an attribute was
+    /// missing in the resulting vector.
     pub fn get_attributes(
         &self,
         object: ObjectHandle,
@@ -166,7 +230,26 @@ impl Session {
         template.into_iter().map(Attribute::try_from).collect()
     }
 
-    /// Modifies the value of one or more attributes of an object.
+    /// Modifies the value of one or more attributes of an `object`.
+    ///
+    /// Certain objects may not be modified. Calling it on such objects will
+    /// result in the [`ActionProhibited`](CryptokiRetVal::ActionProhibited)
+    /// error code. An application can consult the object's
+    /// [`Modifiable`](Attribute::Modifiable) attribute to determine if an
+    /// object may be modified or not.
+    ///
+    /// Only session objects can be modified during a read-only session.
+    ///
+    /// The `template` may specify new values for any attributes of the
+    /// `object` that can be modified. If the `template` specifies a value of
+    /// an attribute which is incompatible with other existing attributes of
+    /// the `object`, the call fails with the return code
+    /// [`TemplateInconsistent`](CryptokiRetVal::TemplateInconsistent).
+    ///
+    /// Not all attributes can be modified; see [`Section 4.1.2`] for more
+    /// details.
+    ///
+    /// [`Section 4.1.2`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693065
     pub fn set_attribute_value(
         &self,
         object: ObjectHandle,
@@ -188,10 +271,27 @@ impl Session {
         Ok(())
     }
 
-    /// Search for token and session objects that match a template.
+    /// Search for token and session objects that match a `template`.
     ///
-    /// At most one search operation may be active at a given time
-    /// in a given session.
+    /// The matching criterion is an exact byte-for-byte match with all
+    /// attributes in the `template`. To find all objects pass an empty
+    /// `template`.
+    ///
+    /// The object search operation will only find objects that the session can
+    /// view. For example, an object search in an "R/W Public Session" will not
+    /// find any private objects (even if one of the attributes in the search
+    /// template specifies that the search is for private objects).
+    ///
+    /// If a search operation is active, and objects are created or destroyed
+    /// which fit the search `template` for the active search operation, then
+    /// those objects may or may not be found by the search operation. Note
+    /// that this means that, under these circumstances, the search operation
+    /// may return invalid object handles.
+    ///
+    /// If the [`UniqueId`](Attribute::UniqueId) attribute is present in the
+    /// search `template`, either zero or one objects will be found, since at
+    /// most one object can have any particular
+    /// [`UniqueId`](Attribute::UniqueId) value.
     pub fn find_objects(&self, template: &[Attribute]) -> Result<Vec<ObjectHandle>> {
         let mut template: Vec<CK_ATTRIBUTE> =
             template.iter().map(|attr| attr.into()).collect();

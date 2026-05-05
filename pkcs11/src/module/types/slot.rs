@@ -55,10 +55,10 @@ impl SlotInfo {
     /// True if the reader supports removable devices.
     ///
     /// For a given slot, this flag *never changes*.
-    /// In addition, if this flag is not set for a given slot, then the
-    /// [`TOKEN_PRESENT`](SlotInfoFlags::TOKEN_PRESENT)
-    /// flag for that slot is always set. That is, if a slot does not support
-    /// a removable device, then that slot always has a token in it.
+    /// In addition, if this return `false` for a given slot, then the
+    /// [`token_present`](Self::token_present) for that slot is always `true`.
+    /// That is, if a slot does not support a removable device, then that slot
+    /// always has a token in it.
     pub fn removable_device(&self) -> bool {
         self.flags.contains(SlotInfoFlags::REMOVABLE_DEVICE)
     }

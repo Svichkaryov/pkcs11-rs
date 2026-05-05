@@ -107,15 +107,17 @@ impl Pkcs11Module<Initialized> {
         TokenInfo::try_from(ck_token_info)
     }
 
-    /// Waits for a slot event, such as token insertion or token removal, to occur.
+    /// Waits for a slot event, such as token insertion or token removal,
+    /// to occur.
     ///
-    /// Although the parameters supplied to
-    /// [`Pkcs11Module::initialize`][crate::module::general_purpose::Pkcs11Module::initialize]
-    /// can in general allow for safe multi-threaded access to a Cryptoki library,
-    /// [`Pkcs11Module::wait_for_slot_event`][crate::module::slot_token_management::Pkcs11Module::wait_for_slot_event]
-    /// is exceptional in that the behavior of Cryptoki is undefined if multiple
-    /// threads of a single application make simultaneous calls to
-    /// [`Pkcs11Module::wait_for_slot_event`][crate::module::slot_token_management::Pkcs11Module::wait_for_slot_event].
+    /// Although the parameters supplied to [`initialize`] can in general
+    /// allow for safe multi-threaded access to a Cryptoki library,
+    /// [`wait_for_slot_event`] is exceptional in that the behavior of Cryptoki
+    /// is undefined if multiple threads of a single application make
+    /// simultaneous calls to [`wait_for_slot_event`].
+    ///
+    /// [`initialize`]: crate::module::general_purpose::Pkcs11Module::initialize
+    /// [`wait_for_slot_event`]: crate::module::slot_token_management::Pkcs11Module::wait_for_slot_event
     pub fn wait_for_slot_event(&self) -> Result<Option<Slot>> {
         let mut slot: CK_SLOT_ID = 0;
         match invoke_pkcs11!(
@@ -184,6 +186,60 @@ impl Pkcs11Module<Initialized> {
     }
 
     /// Initializes a token.
+    ///
+    /// This standard allows PIN values to contain any valid UTF8 character,
+    /// but the token may impose subset restrictions.
+    ///
+    /// If the token has not been initialized (i.e. new from the factory), then
+    /// the `pin` parameter becomes the initial value of the SO PIN. If the
+    /// token is being reinitialized, the `pin` parameter is checked against
+    /// the existing SO PIN to authorize the initialization operation. In both
+    /// cases, the SO PIN is the value `pin` after the function completes
+    /// successfully. If the SO PIN is lost, then the card MUST be
+    /// reinitialized using a mechanism outside the scope of this standard.
+    /// The [`token_initialized`] indicates the action that will result from
+    /// calling [`init_token`]. If `true`, the token will be reinitialized, and
+    /// the client MUST supply the existing SO password in `pin`.
+    ///
+    /// When a token is initialized, all objects that can be destroyed are
+    /// destroyed (i.e., all except for "indestructible" objects such as keys
+    /// built into the token). Also, access by the normal user is disabled
+    /// until the SO sets the normal user’s PIN. Depending on the token, some
+    /// "default" objects may be created, and attributes of some objects may be
+    /// set to default values.
+    ///
+    /// If the token has a [`protected authentication path`], then that means
+    /// that there is some way for a user to be authenticated to the token
+    /// without having the application send a PIN through the Cryptoki library.
+    /// One such possibility is that the user enters a PIN on a PINpad on the
+    /// token itself, or on the slot device. To initialize a token with such a
+    /// [`protected authentication path`], the `pin` parameter to
+    /// [`init_token`] should be `None`. During the execution of
+    /// [`init_token`], the SO’s PIN will be entered through the
+    /// [`protected authentication path`].
+    ///
+    /// If the token has a [`protected authentication path`] other than a
+    /// PINpad, then it is token-dependent whether or not [`init_token`] can be
+    /// used to initialize the token.
+    ///
+    /// A token cannot be initialized if Cryptoki detects that any application
+    /// has an open session with it; when a call to [`init_token`] is made
+    /// under such circumstances, the call fails with error
+    /// [`SessionExists`](CryptokiRetVal::SessionExists). Unfortunately, it may
+    /// happen when [`init_token`] is called that some other application does
+    /// have an open session with the token, but Cryptoki cannot detect this,
+    /// because it cannot detect anything about other applications using the
+    /// token. If this is the case, then the consequences of the [`init_token`]
+    /// call are undefined.
+    ///
+    /// The [`init_token`] function may not be sufficient to properly
+    /// initialize complex tokens. In these situations, an initialization
+    /// mechanism outside the scope of Cryptoki MUST be employed. The
+    /// definition of "complex token" is product specific.
+    ///
+    /// [`init_token`]: Self::init_token
+    /// [`token_initialized`]: crate::module::TokenInfo::token_initialized
+    /// [`protected authentication path`]: TokenInfo::protected_authentication_path
     pub fn init_token(
         &self,
         slot: Slot,

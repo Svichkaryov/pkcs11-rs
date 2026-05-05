@@ -1,7 +1,5 @@
 use super::general::*;
 
-// CK_C_INITIALIZE_ARGS
-
 /// Structure containing information on how the library should deal with
 /// multi-threaded access.
 #[derive(Debug, Copy, Clone)]
@@ -13,7 +11,9 @@ pub enum InitializeArgs {
     /// The application will be performing multi-threaded Cryptoki access, and
     /// the library needs to use the native operating system primitives
     /// to ensure safe multi-threaded access. If the library is unable
-    /// to do this, C_Initialize should return with the value CKR_CANT_LOCK.
+    /// to do this, [`initialize`](crate::module::Pkcs11Module::initialize)
+    /// should return with the value
+    /// [`CantLock`](crate::error::CryptokiRetVal::CantLock).
     OsLocking,
 }
 

@@ -78,7 +78,7 @@ pub enum SessionLimit {
 
 /// Information about a token.
 ///
-/// If the Option fields contains None, this means that
+/// If getters that return `Option` fields contain `None`, this means that
 /// the information is not available.
 #[derive(Debug, Clone)]
 pub struct TokenInfo {
@@ -150,23 +150,22 @@ impl TokenInfo {
 
     /// True if the token is write-protected.
     ///
-    /// Exactly what this flag means is not specified in Cryptoki.
-    /// An application may be unable to perform certain actions on
-    /// a write-protected token; these actions can include any of the
-    /// following, among others:
-    /// * Creating/modifying/deleting any object on the token.
-    /// * Creating/modifying/deleting a token object on the token.
-    /// * Changing the SO's PIN.
-    /// * Changing the normal user's PIN.
+    /// Exactly what this flag means is not specified in Cryptoki. An
+    /// application may be unable to perform certain actions on a
+    /// write-protected token; these actions can include any of the following,
+    /// among others:
+    ///   - Creating/modifying/deleting any object on the token.
+    ///   - Creating/modifying/deleting a token object on the token.
+    ///   - Changing the SO's PIN.
+    ///   - Changing the normal user's PIN.
     ///
-    /// The token may change the value of the [`TokenInfoFlags::WRITE_PROTECTED`]
-    /// flag depending on the session state to implement its object management
-    /// policy. For instance, the token may set the
-    /// [`TokenInfoFlags::WRITE_PROTECTED`] flag unless the session state is
-    /// R/W SO or R/W User to implement a policy that does not allow any
-    /// objects, public or private, to be created, modified, or deleted unless
-    /// the user has successfully called
-    /// [`Session::login`](crate::module::session::Session::login).
+    /// The token may change the value of the this flag depending on the
+    /// session state to implement its object management policy. For instance,
+    /// the token may set this flag unless the session state is R/W SO or
+    /// R/W User to implement a policy that does not allow any objects, public
+    /// or private, to be created, modified, or deleted unless the user has
+    /// successfully called
+    /// [`login`](crate::module::session::Session::login).
     pub fn write_protected(&self) -> bool {
         self.flags.contains(TokenInfoFlags::WRITE_PROTECTED)
     }
@@ -206,12 +205,12 @@ impl TokenInfo {
         self.flags.contains(TokenInfoFlags::DUAL_CRYPTO_OPERATIONS)
     }
 
-    /// True if the token has been initialized with [`Pkcs11Module::init_token`]
-    /// or an equivalent mechanism outside the scope of the PKCS#11 standard.
-    /// Calling [`Pkcs11Module::init_token`] when this flag is set will cause
-    /// the token to be reinitialized.
+    /// True if the token has been initialized with [`init_token`] or an
+    /// equivalent mechanism outside the scope of the PKCS#11 standard.
+    /// Calling [`init_token`] when this flag is set will cause the token
+    /// to be reinitialized.
     ///
-    /// [`Pkcs11Module::init_token`]: crate::module::Pkcs11Module::init_token
+    /// [`init_token`]: crate::module::Pkcs11Module::init_token
     pub fn token_initialized(&self) -> bool {
         self.flags.contains(TokenInfoFlags::TOKEN_INITIALIZED)
     }
@@ -257,12 +256,11 @@ impl TokenInfo {
     ///
     /// If a PIN is set to the default value or has expired, this function
     /// returns `true`. When true, logging in with the corresponding PIN will
-    /// succeed, but only the [`Session::set_pin`] function can be called.
-    /// Calling any other function that required the user to be logged in will
-    /// cause [`PinExpired`] to be returned until [`Session::set_pin`] is
-    /// called successfully.
+    /// succeed, but only the [`set_pin`] function can be called. Calling any
+    /// other function that required the user to be logged in will cause
+    /// [`PinExpired`] to be returned until [`set_pin`] is called successfully.
     ///
-    /// [`Session::set_pin`]: crate::module::session::Session::set_pin
+    /// [`set_pin`]: crate::module::session::Session::set_pin
     /// [`PinExpired`]: crate::error::CryptokiRetVal::PinExpired
     pub fn user_pin_to_be_changed(&self) -> bool {
         self.flags.contains(TokenInfoFlags::USER_PIN_TO_BE_CHANGED)

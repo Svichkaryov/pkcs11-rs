@@ -8,9 +8,10 @@ use crate::{
 impl Session {
     /// Initializes the normal user's PIN.
     ///
-    /// Can only be called in the [`SessionState::RwSecurityOfficer`] state.
+    /// Can only be called in the
+    /// [`RwSecurityOfficer`](SessionState::RwSecurityOfficer) state.
     /// An attempt to call it from a session in any other state fails with
-    /// error [`CryptokiRetVal::UserNotLoggedIn`].
+    /// error [`UserNotLoggedIn`](CryptokiRetVal::UserNotLoggedIn).
     ///
     /// If the token has a [`protected authentication path`], then that means
     /// that there is some way for a user to be authenticated to the token
@@ -46,12 +47,13 @@ impl Session {
     }
 
     /// Modifies the PIN of the user that is currently logged in, or the
-    /// [`UserType::User`] PIN if the session is not logged in.
+    /// [`User`](UserType::User) PIN if the session is not logged in.
     ///
-    /// Can only be called in the [`SessionState::RwPublic`] state,
-    /// [`SessionState::RwSecurityOfficer`] state, or [`SessionState::RwUser`]
-    /// state. An attempt to call it from a session in any other state fails
-    /// with error [`CryptokiRetVal::SessionReadOnly`].
+    /// Can only be called in the [`RwPublic`](SessionState::RwPublic) state,
+    /// [`RwSecurityOfficer`](SessionState::RwSecurityOfficer) state, or
+    /// [`RwUser`](SessionState::RwUser) state. An attempt to call it from a
+    /// session in any other state fails with error
+    /// [`SessionReadOnly`](CryptokiRetVal::SessionReadOnly).
     ///
     /// If the token has a [`protected authentication path`], then that means
     /// that there is some way for a user to be authenticated to the token
