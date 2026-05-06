@@ -3,10 +3,14 @@ use bitflags::bitflags;
 use pkcs11_macros::{
     AttributePodType, TryFromCkAttribute, pkcs11_mechanism_type, pkcs11_type,
 };
+use pkcs11_sys::*;
 
-use crate::error::{Error, Result};
+use crate::{
+    error::{Error, Result},
+    types::Ulong,
+};
 
-use super::{CkPodType, ObjectHandle, TryFromCkAttribute, general::*};
+use super::{CkPodType, ObjectHandle, TryFromCkAttribute};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorDefinedMechanism<'a> {
@@ -925,78 +929,78 @@ impl MechanismInfo {
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::encrypt_init`](crate::module::session::Session::encrypt_init) or
-    /// [`Session::encrypt`](crate::module::session::Session::encrypt).
+    /// [`Session::encrypt_init`](crate::session::Session::encrypt_init) or
+    /// [`Session::encrypt`](crate::session::Session::encrypt).
     pub fn encrypt(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::ENCRYPT)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::decrypt_init`](crate::module::session::Session::decrypt_init) or
-    /// [`Session::decrypt`](crate::module::session::Session::decrypt).
+    /// [`Session::decrypt_init`](crate::session::Session::decrypt_init) or
+    /// [`Session::decrypt`](crate::session::Session::decrypt).
     pub fn decrypt(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::DECRYPT)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::digest_init`](crate::module::session::Session::digest_init) or
-    /// [`Session::digest`](crate::module::session::Session::digest).
+    /// [`Session::digest_init`](crate::session::Session::digest_init) or
+    /// [`Session::digest`](crate::session::Session::digest).
     pub fn digest(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::DIGEST)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::sign_init`](crate::module::session::Session::sign_init) or
-    /// [`Session::sign`](crate::module::session::Session::sign).
+    /// [`Session::sign_init`](crate::session::Session::sign_init) or
+    /// [`Session::sign`](crate::session::Session::sign).
     pub fn sign(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::SIGN)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::sign_recover`](crate::module::session::Session::sign_recover).
+    /// [`Session::sign_recover`](crate::session::Session::sign_recover).
     pub fn sign_recover(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::SIGN_RECOVER)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::verify_init`](crate::module::session::Session::verify_init) or
-    /// [`Session::verify`](crate::module::session::Session::verify).
+    /// [`Session::verify_init`](crate::session::Session::verify_init) or
+    /// [`Session::verify`](crate::session::Session::verify).
     pub fn verify(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::VERIFY)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::verify_recover`](crate::module::session::Session::verify_recover).
+    /// [`Session::verify_recover`](crate::session::Session::verify_recover).
     pub fn verify_recover(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::VERIFY_RECOVER)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::generate_key`](crate::module::session::Session::generate_key).
+    /// [`Session::generate_key`](crate::session::Session::generate_key).
     pub fn generate(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::GENERATE)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::generate_key_pair`](crate::module::session::Session::generate_key_pair).
+    /// [`Session::generate_key_pair`](crate::session::Session::generate_key_pair).
     pub fn generate_key_pair(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::GENERATE_KEY_PAIR)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::wrap_key`](crate::module::session::Session::wrap_key).
+    /// [`Session::wrap_key`](crate::session::Session::wrap_key).
     pub fn wrap(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::WRAP)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::unwrap_key`](crate::module::session::Session::unwrap_key).
+    /// [`Session::unwrap_key`](crate::session::Session::unwrap_key).
     pub fn unwrap(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::UNWRAP)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::derive_key`](crate::module::session::Session::derive_key).
+    /// [`Session::derive_key`](crate::session::Session::derive_key).
     pub fn derive(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::DERIVE)
     }
@@ -1164,7 +1168,7 @@ impl<'a> Ecdh1DeriveParams<'a> {
     ///   be able to accept this value encoded as a raw octet string (as per
     ///   section A.5.2 of [ANSI X9.62]). A token MAY, in addition, support
     ///   accepting this value as a DER-encoded
-    ///   [`Attribute::EcPoint`](crate::module::types::Attribute::EcPoint)
+    ///   [`Attribute::EcPoint`](crate::types::Attribute::EcPoint)
     ///   (as per section E.6 of [ANSI X9.62]). The calling application is
     ///   responsible for converting the offered public key to the compressed
     ///   or uncompressed forms of these encodings if the token does not

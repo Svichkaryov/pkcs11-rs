@@ -2,7 +2,10 @@
 
 use std::env;
 
-use pkcs11::module::{InitializeArgs, Initialized, Pkcs11Module, SecretPin, UserType};
+use pkcs11::{
+    module::{Initialized, Pkcs11Module},
+    types::{InitializeArgs, SecretPin, UserType},
+};
 
 pub(crate) fn get_pkcs11_module() -> Pkcs11Module<Initialized> {
     let path = env::var("EXAMPLE_PKCS11_PATH")

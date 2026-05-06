@@ -1,11 +1,12 @@
 use {bitflags::bitflags, std::convert::TryFrom};
 
-use crate::{
-    error::{Error, Result},
-    module::ck_util::{from_byte_slice_to_num, string_from_blank_padded},
-};
+use pkcs11_sys::*;
 
-use super::general::*;
+use crate::{
+    ck_util::{from_byte_slice_to_num, string_from_blank_padded},
+    error::{Error, Result},
+    types::Version,
+};
 
 bitflags! {
     /// Token information flags for [`TokenInfo`].
@@ -165,7 +166,7 @@ impl TokenInfo {
     /// R/W User to implement a policy that does not allow any objects, public
     /// or private, to be created, modified, or deleted unless the user has
     /// successfully called
-    /// [`login`](crate::module::session::Session::login).
+    /// [`login`](crate::session::Session::login).
     pub fn write_protected(&self) -> bool {
         self.flags.contains(TokenInfoFlags::WRITE_PROTECTED)
     }
@@ -260,7 +261,7 @@ impl TokenInfo {
     /// other function that required the user to be logged in will cause
     /// [`PinExpired`] to be returned until [`set_pin`] is called successfully.
     ///
-    /// [`set_pin`]: crate::module::session::Session::set_pin
+    /// [`set_pin`]: crate::session::Session::set_pin
     /// [`PinExpired`]: crate::error::CryptokiRetVal::PinExpired
     pub fn user_pin_to_be_changed(&self) -> bool {
         self.flags.contains(TokenInfoFlags::USER_PIN_TO_BE_CHANGED)

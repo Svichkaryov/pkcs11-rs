@@ -8,7 +8,8 @@ mod slot_token_management;
 
 use crate::{
     error::{CryptokiRetVal, Result},
-    module::{general_purpose::*, types::*},
+    module::{Initialized, Pkcs11Module, invoke_pkcs11},
+    types::SessionHandle,
 };
 
 /// Session between an application and a token in a particular slot.

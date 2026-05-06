@@ -1,4 +1,7 @@
-use pkcs11::module::{Initialized, MechanismType, Pkcs11Module, Slot};
+use pkcs11::{
+    module::{Initialized, Pkcs11Module},
+    types::{MechanismType, Slot},
+};
 
 mod common;
 

@@ -1,4 +1,4 @@
-use super::general::*;
+use pkcs11_sys::{CK_C_INITIALIZE_ARGS, CKF_OS_LOCKING_OK};
 
 /// Structure containing information on how the library should deal with
 /// multi-threaded access.

@@ -1,7 +1,12 @@
+use pkcs11_sys::*;
+
 use crate::{
     error::{CryptokiRetVal, Error, Result},
-    module::{general_purpose::*, session::*, types::*},
+    module::invoke_pkcs11,
+    types::{Attribute, AttributeType, ObjectHandle},
 };
+
+use super::Session;
 
 impl Session {
     /// Creates a new object.
@@ -20,9 +25,9 @@ impl Session {
     /// Whenever an object is created, a value for [`Attribute::UniqueId`] is
     /// generated and assigned to the new object (See [`Section 4.4.1`]).
     ///
-    /// [`Attribute::Local(true)`]: crate::module::types::Attribute::Local
-    /// [`Attribute::AlwaysSensitive(false)`]: crate::module::types::Attribute::AlwaysSensitive
-    /// [`Attribute::NeverExtractable(false)`]: crate::module::types::Attribute::NeverExtractable
+    /// [`Attribute::Local(true)`]: crate::types::Attribute::Local
+    /// [`Attribute::AlwaysSensitive(false)`]: crate::types::Attribute::AlwaysSensitive
+    /// [`Attribute::NeverExtractable(false)`]: crate::types::Attribute::NeverExtractable
     /// [`Section 4.4.1`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693081
     pub fn create_object(&self, template: &[Attribute]) -> Result<ObjectHandle> {
         let template: Vec<CK_ATTRIBUTE> =
@@ -126,8 +131,11 @@ impl Session {
     /// is. Intuitively, it is some measure of how much token memory the object
     /// takes up. If an application deletes (say) a private object of size S,
     /// it might be reasonable to assume that the `ulFreePrivateMemory` field
-    /// (returned by [`free_private_memory`](TokenInfo::free_private_memory))
-    /// of the token's [`TokenInfo`] structure increases by approximately S.
+    /// (returned by [`free_private_memory`]) of the token's [`TokenInfo`]
+    /// structure increases by approximately S.
+    ///
+    /// [`free_private_memory`]: crate::types::TokenInfo::free_private_memory
+    /// [`TokenInfo`]: crate::types::TokenInfo
     pub fn get_object_size(&self, object: ObjectHandle) -> Result<usize> {
         let mut object_size: CK_ULONG = 0;
 

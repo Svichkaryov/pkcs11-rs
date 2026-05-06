@@ -1,7 +1,11 @@
+use pkcs11_sys::*;
+
 use crate::{
     error::{CryptokiRetVal, Error, Result},
-    module::{general_purpose::*, session::*, types::*},
+    module::invoke_pkcs11,
 };
+
+use super::Session;
 
 impl Session {
     /// Mixes additional `seed` material into the token's random number

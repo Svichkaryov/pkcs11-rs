@@ -1,4 +1,4 @@
-use pkcs11::module::{Attribute, AttributeType, ObjectClass, SecretPin, UserType};
+use pkcs11::types::{Attribute, AttributeType, ObjectClass, SecretPin, UserType};
 
 mod common;
 

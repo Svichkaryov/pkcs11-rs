@@ -1,13 +1,13 @@
 use {bitflags::bitflags, secrecy::SecretString, std::convert::TryFrom};
 
-pub use pkcs11_sys::*;
+use pkcs11_sys::*;
 
 use crate::{
-    error::{Error, Result},
-    module::ck_util::{
+    ck_util::{
         from_byte_slice_to_num, from_byte_slice_to_num_unchecked,
         string_from_blank_padded,
     },
+    error::{Error, Result},
 };
 
 // Ulong
@@ -82,41 +82,6 @@ impl Eq for Version {}
 impl std::fmt::Display for Version {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}.{}", self.major(), self.minor())
-    }
-}
-
-// Slot
-
-#[derive(Debug, Clone, Copy)]
-pub struct Slot(CK_SLOT_ID);
-
-impl From<CK_SLOT_ID> for Slot {
-    fn from(v: CK_SLOT_ID) -> Self {
-        Self(v)
-    }
-}
-
-impl From<Slot> for CK_SLOT_ID {
-    fn from(v: Slot) -> Self {
-        v.0
-    }
-}
-
-impl std::fmt::Display for Slot {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Slot id: {}", self.0)
-    }
-}
-
-impl std::fmt::LowerHex for Slot {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Slot id: {:08x}", self.0)
-    }
-}
-
-impl std::fmt::UpperHex for Slot {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Slot id: {:08X}", self.0)
     }
 }
 

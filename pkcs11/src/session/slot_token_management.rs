@@ -1,17 +1,21 @@
 use secrecy::ExposeSecret;
 
+use pkcs11_sys::*;
+
 use crate::{
     error::{CryptokiRetVal, Error, Result},
-    module::{general_purpose::*, session::*, types::*},
+    module::invoke_pkcs11,
+    types::SecretPin,
 };
+
+use super::Session;
 
 impl Session {
     /// Initializes the normal user's PIN.
     ///
-    /// Can only be called in the
-    /// [`RwSecurityOfficer`](SessionState::RwSecurityOfficer) state.
-    /// An attempt to call it from a session in any other state fails with
-    /// error [`UserNotLoggedIn`](CryptokiRetVal::UserNotLoggedIn).
+    /// Can only be called in the [`RwSecurityOfficer`] state. An attempt to
+    /// call it from a session in any other state fails with error
+    /// [`UserNotLoggedIn`].
     ///
     /// If the token has a [`protected authentication path`], then that means
     /// that there is some way for a user to be authenticated to the token
@@ -26,7 +30,9 @@ impl Session {
     /// then it is token-dependent whether or not this function can be used to
     /// initialize the normal user's token access.
     ///
-    /// [`protected authentication path`]: TokenInfo::protected_authentication_path
+    /// [`RwSecurityOfficer`]: crate::types::SessionState::RwSecurityOfficer
+    /// [`UserNotLoggedIn`]: crate::error::CryptokiRetVal::UserNotLoggedIn
+    /// [`protected authentication path`]: crate::types::TokenInfo::protected_authentication_path
     pub fn init_pin(&self, pin: Option<&SecretPin>) -> Result<()> {
         let (pin_ptr, pin_len) = match pin {
             Some(pin) => (
@@ -47,13 +53,11 @@ impl Session {
     }
 
     /// Modifies the PIN of the user that is currently logged in, or the
-    /// [`User`](UserType::User) PIN if the session is not logged in.
+    /// [`User`] PIN if the session is not logged in.
     ///
-    /// Can only be called in the [`RwPublic`](SessionState::RwPublic) state,
-    /// [`RwSecurityOfficer`](SessionState::RwSecurityOfficer) state, or
-    /// [`RwUser`](SessionState::RwUser) state. An attempt to call it from a
-    /// session in any other state fails with error
-    /// [`SessionReadOnly`](CryptokiRetVal::SessionReadOnly).
+    /// Can only be called in the [`RwPublic`] state, [`RwSecurityOfficer`]
+    /// state, or [`RwUser`] state. An attempt to call it from a session in
+    /// any other state fails with error [`SessionReadOnly`].
     ///
     /// If the token has a [`protected authentication path`], then that means
     /// that there is some way for a user to be authenticated to the token
@@ -70,7 +74,12 @@ impl Session {
     /// then it is token-dependent whether or not this function can be used to
     /// modify the current user's PIN.
     ///
-    /// [`protected authentication path`]: TokenInfo::protected_authentication_path
+    /// [`SessionReadOnly`]: crate::error::CryptokiRetVal::SessionReadOnly
+    /// [`User`]: crate::types::UserType::User
+    /// [`RwPublic`]: crate::types::SessionState::RwPublic
+    /// [`RwSecurityOfficer`]: crate::types::SessionState::RwSecurityOfficer
+    /// [`RwUser`]: crate::types::SessionState::RwUser
+    /// [`protected authentication path`]: crate::types::TokenInfo::protected_authentication_path
     pub fn set_pin(
         &self,
         old_pin: Option<&SecretPin>,

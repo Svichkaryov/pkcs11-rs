@@ -3,10 +3,14 @@ use std::convert::TryFrom;
 use pkcs11_macros::{
     AttributePodType, TryFromCkAttribute, pkcs11_attribute_type, pkcs11_type,
 };
+use pkcs11_sys::*;
 
-use crate::error::{Error, Result};
+use crate::{
+    error::{Error, Result},
+    types::{Date, Ulong},
+};
 
-use super::{MechanismType, general::*};
+use super::MechanismType;
 
 #[derive(Debug, Clone, Copy)]
 pub struct ObjectHandle(CK_OBJECT_HANDLE);
@@ -46,7 +50,7 @@ pkcs11_type!(
     ///
     /// Object classes are defined with the objects that use them. The type
     /// is specified on an object through the
-    /// [`Attribute::Class`](crate::module::types::Attribute::Class)
+    /// [`Attribute::Class`](crate::types::Attribute::Class)
     /// attribute of the object.
     #[derive(AttributePodType, TryFromCkAttribute)]
     ObjectClass: CK_OBJECT_CLASS, naming = ScreamingSnakeCase;
@@ -92,7 +96,7 @@ pkcs11_type!(
     ///
     /// Hardware feature types are defined with the objects that use them.
     /// The type is specified on an object through the
-    /// [`Attribute::HwFeatureType`](crate::module::types::Attribute::HwFeatureType)
+    /// [`Attribute::HwFeatureType`](crate::types::Attribute::HwFeatureType)
     /// attribute of the object.
     #[derive(AttributePodType, TryFromCkAttribute)]
     HwFeatureType: CK_HW_FEATURE_TYPE, naming = ScreamingSnakeCase;
@@ -122,7 +126,7 @@ pkcs11_type!(
     ///
     /// Key types are defined with the objects and mechanisms that use them.
     /// The key type is specified on an object through the
-    /// [`Attribute::KeyType`](crate::module::types::Attribute::KeyType)
+    /// [`Attribute::KeyType`](crate::types::Attribute::KeyType)
     /// attribute of the object.
     #[derive(AttributePodType, TryFromCkAttribute)]
     KeyType: CK_KEY_TYPE, naming = ScreamingSnakeCase;
@@ -229,7 +233,7 @@ pkcs11_type!(
     ///
     /// Certificate types are defined with the objects and mechanisms that use
     /// them. The certificate type is specified on an object through the
-    /// [`Attribute::CertificateType`](crate::module::types::Attribute::CertificateType)
+    /// [`Attribute::CertificateType`](crate::types::Attribute::CertificateType)
     /// attribute of the object.
     #[derive(AttributePodType, TryFromCkAttribute)]
     CertificateType: CK_CERTIFICATE_TYPE, naming = ScreamingSnakeCase;

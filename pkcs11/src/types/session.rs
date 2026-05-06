@@ -1,8 +1,10 @@
 use {bitflags::bitflags, std::convert::TryFrom};
 
+use pkcs11_sys::*;
+
 use crate::error::{Error, Result};
 
-use super::general::*;
+use super::slot::Slot;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct SessionHandle(CK_SESSION_HANDLE);

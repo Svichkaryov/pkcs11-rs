@@ -1,8 +1,43 @@
 use bitflags::bitflags;
 
-use crate::module::ck_util::string_from_blank_padded;
+use pkcs11_sys::*;
 
-use super::general::*;
+use crate::{ck_util::string_from_blank_padded, types::Version};
+
+#[derive(Debug, Clone, Copy)]
+pub struct Slot(CK_SLOT_ID);
+
+impl From<CK_SLOT_ID> for Slot {
+    fn from(v: CK_SLOT_ID) -> Self {
+        Self(v)
+    }
+}
+
+impl From<Slot> for CK_SLOT_ID {
+    fn from(v: Slot) -> Self {
+        v.0
+    }
+}
+
+impl std::fmt::Display for Slot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Slot id: {}", self.0)
+    }
+}
+
+impl std::fmt::LowerHex for Slot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Slot id: {:08x}", self.0)
+    }
+}
+
+impl std::fmt::UpperHex for Slot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Slot id: {:08X}", self.0)
+    }
+}
+
+//
 
 bitflags! {
     #[derive(Debug, Clone)]

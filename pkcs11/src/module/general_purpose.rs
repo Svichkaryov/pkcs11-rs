@@ -3,9 +3,12 @@ use {
     std::{path::Path, sync::Arc},
 };
 
+use pkcs11_sys::*;
+
 use crate::{
+    ck_util,
     error::{CryptokiRetVal, Error, Result},
-    module::{ck_util, types::*},
+    types::{Info, InitializeArgs},
 };
 
 macro_rules! invoke_pkcs11 {

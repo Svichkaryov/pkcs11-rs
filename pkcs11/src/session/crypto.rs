@@ -1,7 +1,12 @@
+use pkcs11_sys::*;
+
 use crate::{
     error::{CryptokiRetVal, Error, Result},
-    module::{general_purpose::*, session::*, types::*},
+    module::invoke_pkcs11,
+    types::{Mechanism, ObjectHandle},
 };
+
+use super::Session;
 
 impl Session {
     // Encryption functions

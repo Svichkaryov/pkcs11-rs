@@ -1,32 +1,40 @@
+use pkcs11_sys::*;
+
 use crate::{
     error::{CryptokiRetVal, Result},
-    module::{general_purpose::*, session::*, types::*},
+    module::invoke_pkcs11,
+    types::{Attribute, Mechanism, ObjectHandle},
 };
+
+use super::Session;
 
 impl Session {
     /// Generates a secret key or set of domain parameters, creating a new
     /// object.
     ///
     /// If the generation `mechanism` is for domain parameter generation, the
-    /// [`Class`](Attribute::Class) attribute will have the value
-    /// [`DOMAIN_PARAMETERS`](ObjectClass::DOMAIN_PARAMETERS); otherwise, it
-    /// will have the value [`SECRET_KEY`](ObjectClass::SECRET_KEY).
+    /// [`Class`] attribute will have the value [`DOMAIN_PARAMETERS`];
+    /// otherwise, it will have the value [`SECRET_KEY`].
     ///
     /// Since the type of key or domain parameters to be generated is implicit
     /// in the generation `mechanism`, the `template` does not need to supply a
     /// key type. If it does supply a key type which is inconsistent with the
     /// generation `mechanism`, it fails and returns the error code
-    /// [`TemplateInconsistent`](CryptokiRetVal::TemplateInconsistent). The
-    /// [`Class`](Attribute::Class) attribute is treated similarly.
+    /// [`TemplateInconsistent`]. The [`Class`] attribute is treated similarly.
     ///
     /// If a call to it cannot support the precise `template` supplied to it,
     /// it will fail and return without creating an object.
     ///
-    /// The object created by a successful call to it will have its
-    /// [`Local`](Attribute::Local) attribute set to `true`. In addition, the
-    /// object created will have a value for [`UniqueId`](Attribute::UniqueId)
-    /// generated and assigned (See [`Section 4.4.1`]).
+    /// The object created by a successful call to it will have its [`Local`]
+    /// attribute set to `true`. In addition, the object created will have a
+    /// value for [`UniqueId`] generated and assigned (See [`Section 4.4.1`]).
     ///
+    /// [`Class`]: crate::types::Attribute::Class
+    /// [`DOMAIN_PARAMETERS`]: crate::types::ObjectClass::DOMAIN_PARAMETERS
+    /// [`SECRET_KEY`]: crate::types::ObjectClass::SECRET_KEY
+    /// [`TemplateInconsistent`]: crate::error::CryptokiRetVal::TemplateInconsistent
+    /// [`Local`]: crate::types::Attribute::Local
+    /// [`UniqueId`]: crate::types::Attribute::UniqueId
     /// [`Section 4.4.1`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693081
     pub fn generate_key(
         &self,

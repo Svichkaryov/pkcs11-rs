@@ -41,9 +41,9 @@ pub enum CryptokiRetVal {
     /// what the root cause of the error actually was, it is possible that an
     /// attempt to make the exact same function call again would succeed.
     ///
-    /// [`SessionInfo`]: crate::module::SessionInfo
-    /// [`get_session_info`]: crate::module::Session::get_session_info
-    /// [`device_error`]: crate::module::SessionInfo::device_error
+    /// [`SessionInfo`]: crate::types::SessionInfo
+    /// [`get_session_info`]: crate::session::Session::get_session_info
+    /// [`device_error`]: crate::types::SessionInfo::device_error
     FunctionFailed,
 
 
@@ -170,12 +170,12 @@ pub enum CryptokiRetVal {
     /// [`Copyable`], [`Modifiable`] or [`Destroyable`] policy attribute set to
     /// `false`.
     ///
-    /// [`copy_object`]: crate::module::Session::copy_object
-    /// [`set_attribute_value`]: crate::module::Session::set_attribute_value
-    /// [`destroy_object`]: crate::module::Session::destroy_object
-    /// [`Copyable`]: crate::module::Attribute::Copyable
-    /// [`Modifiable`]: crate::module::Attribute::Modifiable
-    /// [`Destroyable`]: crate::module::Attribute::Destroyable
+    /// [`copy_object`]: crate::session::Session::copy_object
+    /// [`set_attribute_value`]: crate::session::Session::set_attribute_value
+    /// [`destroy_object`]: crate::session::Session::destroy_object
+    /// [`Copyable`]: crate::types::Attribute::Copyable
+    /// [`Modifiable`]: crate::types::Attribute::Modifiable
+    /// [`Destroyable`]: crate::types::Attribute::Destroyable
     ActionProhibited,
 
     /// This is a rather generic error code which indicates that the arguments
@@ -287,9 +287,9 @@ pub enum CryptokiRetVal {
     /// consistency test failed.
     ///
     /// [`initialize`]: crate::module::Pkcs11Module::initialize
-    /// [`generate_random`]: crate::module::Session::generate_random
-    /// [`seed_random`]: crate::module::Session::seed_random
-    /// [`generate_key_pair`]: crate::module::Session::generate_key_pair
+    /// [`generate_random`]: crate::session::Session::generate_random
+    /// [`seed_random`]: crate::session::Session::seed_random
+    /// [`generate_key_pair`]: crate::session::Session::generate_key_pair
     FipsSelfTestFailed,
 
     /// The function was canceled in mid-execution. This happens to a
@@ -322,7 +322,7 @@ pub enum CryptokiRetVal {
     /// that one of the keys specified is not the same key that was being used
     /// in the original saved session.
     ///
-    /// [`set_operation_state`]: crate::module::Session::set_operation_state
+    /// [`set_operation_state`]: crate::session::Session::set_operation_state
     KeyChanged,
 
     /// An attempt has been made to use a key for a cryptographic purpose that
@@ -333,7 +333,7 @@ pub enum CryptokiRetVal {
     /// value has lower priority than
     /// [`KeyTypeInconsistent`](Self::KeyTypeInconsistent).
     ///
-    /// [`Encrypt`]: crate::module::Attribute::Encrypt
+    /// [`Encrypt`]: crate::types::Attribute::Encrypt
     KeyFunctionNotPermitted,
 
     /// The specified key handle is not valid. It may be the case that
@@ -346,7 +346,7 @@ pub enum CryptokiRetVal {
     /// (perhaps the key isn't a secret key, or perhaps the token simply can't
     /// digest this kind of key).
     ///
-    /// [`digest_key`]: crate::module::Session::digest_key
+    /// [`digest_key`]: crate::session::Session::digest_key
     KeyIndigestible,
 
     /// This value is only returned by [`set_operation_state`]. It
@@ -354,14 +354,14 @@ pub enum CryptokiRetVal {
     /// [`set_operation_state`] needs to be supplied with one or more
     /// keys that were being used in the original saved session.
     ///
-    /// [`set_operation_state`]: crate::module::Session::set_operation_state
+    /// [`set_operation_state`]: crate::session::Session::set_operation_state
     KeyNeeded,
 
     /// An extraneous key was supplied to [`set_operation_state`]. For example,
     /// an attempt was made to restore a session that had been performing
     /// a message digesting operation, and an encryption key was supplied.
     ///
-    /// [`set_operation_state`]: crate::module::Session::set_operation_state
+    /// [`set_operation_state`]: crate::session::Session::set_operation_state
     KeyNotNeeded,
 
     /// Although the specified private or secret key does not have
@@ -371,7 +371,7 @@ pub enum CryptokiRetVal {
     /// specified is not one of these types).
     /// Compare with [`KeyUnextractable`](Self::KeyUnextractable).
     ///
-    /// [`Extractable`]: crate::module::Attribute::Extractable
+    /// [`Extractable`]: crate::types::Attribute::Extractable
     KeyNotWrappable,
 
     /// Although the requested keyed cryptographic operation could in principle
@@ -389,7 +389,7 @@ pub enum CryptokiRetVal {
     /// its [`Extractable`] attribute is set to `false`.
     /// Compare with [`KeyNotWrappable`](Self::KeyNotWrappable).
     ///
-    /// [`Extractable`]: crate::module::Attribute::Extractable
+    /// [`Extractable`]: crate::types::Attribute::Extractable
     KeyUnextractable,
 
     /// The Cryptoki library could not load a dependent shared library.
@@ -438,8 +438,8 @@ pub enum CryptokiRetVal {
     /// [`dual_crypto_operations`] function), an active signature operation
     /// would prevent Cryptoki from activating an encryption operation.
     ///
-    /// [`encrypt_init`]: crate::module::Session::encrypt_init
-    /// [`dual_crypto_operations`]: crate::module::TokenInfo::dual_crypto_operations
+    /// [`encrypt_init`]: crate::session::Session::encrypt_init
+    /// [`dual_crypto_operations`]: crate::types::TokenInfo::dual_crypto_operations
     OperationActive,
 
     /// There is no active operation of an appropriate type in the specified
@@ -447,8 +447,8 @@ pub enum CryptokiRetVal {
     /// a session without having called [`encrypt_init`] first to activate
     /// an encryption operation.
     ///
-    /// [`encrypt`]: crate::module::Session::encrypt
-    /// [`encrypt_init`]: crate::module::Session::encrypt_init
+    /// [`encrypt`]: crate::session::Session::encrypt
+    /// [`encrypt_init`]: crate::session::Session::encrypt_init
     OperationNotInitialized,
 
     /// The specified PIN has expired, and the requested operation cannot
@@ -456,7 +456,7 @@ pub enum CryptokiRetVal {
     /// Whether or not the normal user's PIN on a token ever expires varies
     /// from token to token.
     ///
-    /// [`set_pin`]: crate::module::Session::set_pin
+    /// [`set_pin`]: crate::session::Session::set_pin
     PinExpired,
 
     /// The specified PIN is incorrect, i.e., does not match the PIN stored
@@ -495,9 +495,9 @@ pub enum CryptokiRetVal {
     /// if the other party's public key specified in the mechanism's parameters
     /// is invalid.
     ///
-    /// [`create_object`]: crate::module::Session::create_object
-    /// [`verify_init`]: crate::module::Session::verify_init
-    /// [`derive_key`]: crate::module::Session::derive_key
+    /// [`create_object`]: crate::session::Session::create_object
+    /// [`verify_init`]: crate::session::Session::verify_init
+    /// [`derive_key`]: crate::session::Session::derive_key
     /// [`MechanismParamInvalid`]: Self::MechanismParamInvalid
     PublicKeyInvalid,
 
@@ -506,8 +506,8 @@ pub enum CryptokiRetVal {
     /// generator. This return value has higher priority
     /// than [`RandomSeedNotSupported`](Self::RandomSeedNotSupported).
     ///
-    /// [`seed_random`]: crate::module::Session::seed_random
-    /// [`generate_random`]: crate::module::Session::generate_random
+    /// [`seed_random`]: crate::session::Session::seed_random
+    /// [`generate_random`]: crate::session::Session::generate_random
     RandomNoRng,
 
     /// This value can only be returned by [`seed_random`]. It indicates that
@@ -515,14 +515,14 @@ pub enum CryptokiRetVal {
     /// an application. This return value has lower priority
     /// than [`RandomNoRng`](Self::RandomNoRng).
     ///
-    /// [`seed_random`]: crate::module::Session::seed_random
+    /// [`seed_random`]: crate::session::Session::seed_random
     RandomSeedNotSupported,
 
     /// This value can only be returned by [`set_operation_state`]. It indicates
     /// that the supplied saved cryptographic operations state is invalid,
     /// and so it cannot be restored to the specified session.
     ///
-    /// [`set_operation_state`]: crate::module::Session::set_operation_state
+    /// [`set_operation_state`]: crate::session::Session::set_operation_state
     SavedStateInvalid,
 
     /// This value can only be returned by [`open_session`]. It indicates
@@ -604,7 +604,7 @@ pub enum CryptokiRetVal {
     /// This value can only be returned by [`unwrap_key`]. It indicates that
     /// the key handle specified to be used to unwrap another key is not valid.
     ///
-    /// [`unwrap_key`]: crate::module::Session::unwrap_key
+    /// [`unwrap_key`]: crate::session::Session::unwrap_key
     UnwrappingKeyHandleInvalid,
 
     /// This value can only be returned by [`unwrap_key`]. It indicates that
@@ -613,14 +613,14 @@ pub enum CryptokiRetVal {
     /// unable to actually do it because the supplied key's size is outside
     /// the range of key sizes that it can handle.
     ///
-    /// [`unwrap_key`]: crate::module::Session::unwrap_key
+    /// [`unwrap_key`]: crate::session::Session::unwrap_key
     UnwrappingKeySizeRange,
 
     /// This value can only be returned by [`unwrap_key`]. It indicates that
     /// the type of the key specified to unwrap another key is not consistent
     /// with the mechanism specified for unwrapping.
     ///
-    /// [`unwrap_key`]: crate::module::Session::unwrap_key
+    /// [`unwrap_key`]: crate::session::Session::unwrap_key
     UnwrappingKeyTypeInconsistent,
 
     /// This value can only be returned by [`login`]. It indicates that
@@ -629,7 +629,7 @@ pub enum CryptokiRetVal {
     /// an open SO session, and it attempts to log the SO into it, it will
     /// receive this error code.
     ///
-    /// [`login`]: crate::module::Session::login
+    /// [`login`]: crate::session::Session::login
     UserAlreadyLoggedIn,
 
     /// This value can only be returned by [`login`]. It indicates that
@@ -638,7 +638,7 @@ pub enum CryptokiRetVal {
     /// has an open SO session, and it attempts to log the normal user into it,
     /// it will receive this error code.
     ///
-    /// [`login`]: crate::module::Session::login
+    /// [`login`]: crate::session::Session::login
     UserAnotherAlreadyLoggedIn,
 
     /// The desired action cannot be performed because the appropriate
@@ -654,8 +654,8 @@ pub enum CryptokiRetVal {
     /// that the normal user's PIN has not yet been initialized with
     /// [`init_pin`].
     ///
-    /// [`login`]: crate::module::Session::login
-    /// [`init_pin`]: crate::module::Session::init_pin
+    /// [`login`]: crate::session::Session::login
+    /// [`init_pin`]: crate::session::Session::init_pin
     UserPinNotInitialized,
 
     /// An attempt was made to have more distinct users simultaneously logged
@@ -667,16 +667,16 @@ pub enum CryptokiRetVal {
     /// this value. Note that this error code generalizes to
     /// true multi-user tokens.
     ///
-    /// [`login`]: crate::module::Session::login
+    /// [`login`]: crate::session::Session::login
     UserTooManyTypes,
 
     /// An invalid value was specified as a [`UserType`].
     /// Valid types are [`So`], [`User`], and [`ContextSpecific`].
     ///
-    /// [`UserType`]: crate::module::UserType
-    /// [`So`]: crate::module::UserType::So
-    /// [`User`]: crate::module::UserType::User
-    /// [`ContextSpecific`]: crate::module::UserType::ContextSpecific
+    /// [`UserType`]: crate::types::UserType
+    /// [`So`]: crate::types::UserType::So
+    /// [`User`]: crate::types::UserType::User
+    /// [`ContextSpecific`]: crate::types::UserType::ContextSpecific
     UserTypeInvalid,
 
     /// This value can only be returned by [`unwrap_key`]. It indicates
@@ -688,7 +688,7 @@ pub enum CryptokiRetVal {
     /// then [`unwrap_key`] should return [`WrappedKeyInvalid`]. This return
     /// value has lower priority than [`WrappedKeyLenRange`].
     ///
-    /// [`unwrap_key`]: crate::module::Session::unwrap_key
+    /// [`unwrap_key`]: crate::session::Session::unwrap_key
     /// [`WrappedKeyInvalid`]: Self::WrappedKeyInvalid
     /// [`WrappedKeyLenRange`]: Self::WrappedKeyLenRange
     WrappedKeyInvalid,
@@ -698,14 +698,14 @@ pub enum CryptokiRetVal {
     /// the basis of its length. This return value has higher priority
     /// than [`WrappedKeyInvalid`].
     ///
-    /// [`unwrap_key`]: crate::module::Session::unwrap_key
+    /// [`unwrap_key`]: crate::session::Session::unwrap_key
     /// [`WrappedKeyInvalid`]: Self::WrappedKeyInvalid
     WrappedKeyLenRange,
 
     /// This value can only be returned by [`wrap_key`]. It indicates that
     /// the key handle specified to be used to wrap another key is not valid.
     ///
-    /// [`wrap_key`]: crate::module::Session::wrap_key
+    /// [`wrap_key`]: crate::session::Session::wrap_key
     WrappingKeyHandleInvalid,
 
     /// This value can only be returned by [`wrap_key`]. It indicates
@@ -714,14 +714,14 @@ pub enum CryptokiRetVal {
     /// to actually do it because the supplied wrapping key's size is outside
     /// the range of key sizes that it can handle.
     ///
-    /// [`wrap_key`]: crate::module::Session::wrap_key
+    /// [`wrap_key`]: crate::session::Session::wrap_key
     WrappingKeySizeRange,
 
     /// This value can only be returned by [`wrap_key`]. It indicates that
     /// the type of the key specified to wrap another key is not consistent
     /// with the mechanism specified for wrapping.
     ///
-    /// [`wrap_key`]: crate::module::Session::wrap_key
+    /// [`wrap_key`]: crate::session::Session::wrap_key
     WrappingKeyTypeInconsistent,
 
     /// The supplied OTP was not accepted and the library requests a new OTP

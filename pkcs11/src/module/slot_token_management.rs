@@ -1,8 +1,12 @@
 use secrecy::ExposeSecret;
 
+use pkcs11_sys::*;
+
 use crate::{
+    ck_util,
     error::{CryptokiRetVal, Error, Result},
-    module::{ck_util::*, general_purpose::*, types::*},
+    module::{Initialized, Pkcs11Module, invoke_pkcs11},
+    types::{MechanismInfo, MechanismType, SecretPin, Slot, SlotInfo, TokenInfo},
 };
 
 impl Pkcs11Module<Initialized> {
@@ -238,7 +242,7 @@ impl Pkcs11Module<Initialized> {
     /// definition of "complex token" is product specific.
     ///
     /// [`init_token`]: Self::init_token
-    /// [`token_initialized`]: crate::module::TokenInfo::token_initialized
+    /// [`token_initialized`]: crate::types::TokenInfo::token_initialized
     /// [`protected authentication path`]: TokenInfo::protected_authentication_path
     pub fn init_token(
         &self,
@@ -246,7 +250,7 @@ impl Pkcs11Module<Initialized> {
         pin: Option<&SecretPin>,
         label: &str,
     ) -> Result<()> {
-        let mut c_label = c_label_from_str(label)?.to_vec();
+        let mut c_label = ck_util::c_label_from_str(label)?.to_vec();
 
         let (pin_ptr, pin_len) = match pin {
             Some(pin) => {
