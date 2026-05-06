@@ -1,8 +1,6 @@
 use pkcs11_sys::*;
 
-use crate::{
-    error::{Error, Result}
-};
+use crate::error::{Error, Result};
 
 macro_rules! check_ck_func {
     ($fl:expr, [ $( $func_name:ident),* ] ) => {
@@ -20,35 +18,84 @@ macro_rules! check_ck_func {
 // Every function in the Cryptoki API MUST have an entry point defined in the
 // Cryptoki library's CK_FUNCTION_LIST structure.
 pub(crate) fn check_ck_functional_list_valid(
-    ck_func_list_ptr: *const CK_FUNCTION_LIST
+    ck_func_list_ptr: *const CK_FUNCTION_LIST,
 ) -> Result<()> {
     // Implementation via iteration over a pointer starting from
     // the C_Initialize field is not suitable due to the lack of retrieve
     // a function name.
     unsafe {
         let fl = *ck_func_list_ptr;
-        check_ck_func!(fl,
+        check_ck_func!(
+            fl,
             [
-                C_Initialize, C_Finalize, C_GetInfo, C_GetFunctionList,
-                C_GetSlotList, C_GetSlotInfo, C_GetTokenInfo, C_GetMechanismList,
-                C_GetMechanismInfo, C_InitToken, C_InitPIN, C_SetPIN,
-                C_OpenSession, C_CloseSession, C_CloseAllSessions, C_GetSessionInfo,
-                C_GetOperationState, C_SetOperationState, C_Login, C_Logout,
-                C_CreateObject, C_CopyObject, C_DestroyObject, C_GetObjectSize,
-                C_GetAttributeValue, C_SetAttributeValue,
-                C_FindObjectsInit, C_FindObjects, C_FindObjectsFinal,
-                C_EncryptInit, C_Encrypt, C_EncryptUpdate, C_EncryptFinal,
-                C_DecryptInit, C_Decrypt, C_DecryptUpdate, C_DecryptFinal,
-                C_DigestInit, C_Digest, C_DigestUpdate, C_DigestKey, C_DigestFinal,
-                C_SignInit, C_Sign, C_SignUpdate, C_SignFinal,
-                C_SignRecoverInit, C_SignRecover,
-                C_VerifyInit, C_Verify, C_VerifyUpdate, C_VerifyFinal,
-                C_VerifyRecoverInit, C_VerifyRecover,
-                C_DigestEncryptUpdate, C_DecryptDigestUpdate,
-                C_SignEncryptUpdate, C_DecryptVerifyUpdate,
-                C_GenerateKey, C_GenerateKeyPair, C_WrapKey, C_UnwrapKey,
-                C_DeriveKey, C_SeedRandom, C_GenerateRandom, C_GetFunctionStatus,
-                C_CancelFunction, C_WaitForSlotEvent
+                C_Initialize,
+                C_Finalize,
+                C_GetInfo,
+                C_GetFunctionList,
+                C_GetSlotList,
+                C_GetSlotInfo,
+                C_GetTokenInfo,
+                C_GetMechanismList,
+                C_GetMechanismInfo,
+                C_InitToken,
+                C_InitPIN,
+                C_SetPIN,
+                C_OpenSession,
+                C_CloseSession,
+                C_CloseAllSessions,
+                C_GetSessionInfo,
+                C_GetOperationState,
+                C_SetOperationState,
+                C_Login,
+                C_Logout,
+                C_CreateObject,
+                C_CopyObject,
+                C_DestroyObject,
+                C_GetObjectSize,
+                C_GetAttributeValue,
+                C_SetAttributeValue,
+                C_FindObjectsInit,
+                C_FindObjects,
+                C_FindObjectsFinal,
+                C_EncryptInit,
+                C_Encrypt,
+                C_EncryptUpdate,
+                C_EncryptFinal,
+                C_DecryptInit,
+                C_Decrypt,
+                C_DecryptUpdate,
+                C_DecryptFinal,
+                C_DigestInit,
+                C_Digest,
+                C_DigestUpdate,
+                C_DigestKey,
+                C_DigestFinal,
+                C_SignInit,
+                C_Sign,
+                C_SignUpdate,
+                C_SignFinal,
+                C_SignRecoverInit,
+                C_SignRecover,
+                C_VerifyInit,
+                C_Verify,
+                C_VerifyUpdate,
+                C_VerifyFinal,
+                C_VerifyRecoverInit,
+                C_VerifyRecover,
+                C_DigestEncryptUpdate,
+                C_DecryptDigestUpdate,
+                C_SignEncryptUpdate,
+                C_DecryptVerifyUpdate,
+                C_GenerateKey,
+                C_GenerateKeyPair,
+                C_WrapKey,
+                C_UnwrapKey,
+                C_DeriveKey,
+                C_SeedRandom,
+                C_GenerateRandom,
+                C_GetFunctionStatus,
+                C_CancelFunction,
+                C_WaitForSlotEvent
             ]
         );
     }
@@ -67,16 +114,16 @@ macro_rules! from_byte_slice_to_num {
 macro_rules! from_byte_slice_to_num_unchecked {
     ($char_slice:expr) => {
         std::str::from_utf8($char_slice)
-            .expect("CK_CHAR slice must hold numeric characters \
-                    from the character set in Table 3 from PKCS#11 spec")
+            .expect(
+                "CK_CHAR slice must hold numeric characters \
+                from the character set in Table 3 from PKCS#11 spec",
+            )
             .parse()
             .expect("CK_CHAR slice must represent a valid number per PKCS#11 spec")
     };
 }
 
-pub(crate) use {
-    from_byte_slice_to_num, from_byte_slice_to_num_unchecked
-};
+pub(crate) use {from_byte_slice_to_num, from_byte_slice_to_num_unchecked};
 
 pub(crate) fn string_from_blank_padded(field: &[CK_UTF8CHAR]) -> String {
     let decoded_str = String::from_utf8_lossy(field);

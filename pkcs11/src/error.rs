@@ -1,4 +1,3 @@
-#[rustfmt::skip]
 mod cryptoki_rv;
 
 pub use cryptoki_rv::*;
@@ -57,8 +56,8 @@ impl From<libloading::Error> for Error {
 }
 
 impl From<CryptokiRetVal> for Error {
-    fn from(ck_rv_error: CryptokiRetVal) -> Self {
-        Error::Pkcs11(ck_rv_error)
+    fn from(rv: CryptokiRetVal) -> Self {
+        Error::Pkcs11(rv)
     }
 }
 

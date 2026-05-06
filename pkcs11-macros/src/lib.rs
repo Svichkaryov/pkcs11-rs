@@ -102,3 +102,61 @@ pub fn pkcs11_attribute_type(input: TokenStream) -> TokenStream {
 pub fn pkcs11_mechanism_type(input: TokenStream) -> TokenStream {
     types::pkcs11_mechanism_type_impl(input)
 }
+
+/// Generate rust newtype and traits for a PKCS#11 return value type based on
+/// a list of C-style constants.
+///
+/// /// # Example:
+///
+/// ```rust
+/// pkcs11_rv_type!(
+///     /// Cryptoki function return values.
+///     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+///     CryptokiRetVal, naming = UpperCamelCase;
+///     [
+///         /// The function executed successfully.
+///         /// Technically, [`Ok`] is not quite a "universal" return value;
+///         /// in particular, the legacy functions C_GetFunctionStatus and
+///         /// C_CancelFunction (see [`Section 5.20`]) cannot return [`Ok`].
+///         ///
+///         /// [`Ok`]: Self::Ok
+///         /// [`Section 5.20`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693242
+///         CKR_OK,
+///
+///         /// Some horrible, unrecoverable error has occurred. In the worst case,
+///         /// it is possible that the function only partially succeeded, and that
+///         /// the computer and/or token is in an inconsistent state.
+///         CKR_GENERAL_ERROR,
+///
+///         /// The computer that the Cryptoki library is running on has insufficient
+///         /// memory to perform the requested function.
+///         CKR_HOST_MEMORY,
+///
+///         /// The requested function could not be performed, but detailed information
+///         /// about why not is not available in this error return. If the failed
+///         /// function uses a session, it is possible that the [`SessionInfo`]
+///         /// structure that can be obtained by calling [`get_session_info`] will
+///         /// hold useful information about what happened via [`device_error`]
+///         /// function. In any event, although the function call failed, the
+///         /// situation is not necessarily totally hopeless, as it is likely to be
+///         /// when [`GeneralError`] is returned. Depending on what the root cause
+///         /// of the error actually was, it is possible that an attempt to make the
+///         /// exact same function call again would succeed.
+///         ///
+///         /// [`SessionInfo`]: crate::types::SessionInfo
+///         /// [`get_session_info`]: crate::session::Session::get_session_info
+///         /// [`device_error`]: crate::types::SessionInfo::device_error
+///         ///[`GeneralError`]: Self::GeneralError
+///         CKR_FUNCTION_FAILED,
+///
+///         /// This value are permanently reserved for token vendors.
+///         /// For interoperability, vendors should register their return values
+///         /// through the PKCS process.
+///         CKR_VENDOR_DEFINED: CK_RV,
+///     ]
+/// );
+/// ```
+#[proc_macro]
+pub fn pkcs11_rv_type(input: TokenStream) -> TokenStream {
+    types::pkcs11_rv_type_impl(input)
+}
