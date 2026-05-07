@@ -22,8 +22,6 @@ use pkcs11::{
     types::{InitializeArgs, SecretPin, UserType},
 };
 
-mod common;
-
 fn main() -> Result<()> {
     let pkcs11 = Pkcs11Module::new("/usr/lib/libpkcs11.so")?;
     let pkcs11 = pkcs11.initialize(InitializeArgs::OsLocking)?;

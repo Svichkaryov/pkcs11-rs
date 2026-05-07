@@ -1,0 +1,27 @@
+name: Deploy docs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo doc --no-deps --all-features
+      - run: |
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=pkcs11\">" > target/doc/index.html
+          touch target/doc/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/doc
+      - id: deployment
+        uses: actions/deploy-pages@v4
