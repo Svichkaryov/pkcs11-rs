@@ -27,24 +27,43 @@ mod cryptoki_rv;
 
 pub use cryptoki_rv::*;
 
-/// Main Error type.
+/// The main error type.
+///
+/// This enum represents all possible errors that can occur during interaction
+/// with the crate, ranging from system-level issues (e.g., library
+/// loading) to protocol-level errors returned by the token.
 #[derive(Debug)]
 pub enum Error {
+    /// Error loading the shared PKCS#11 library (e.g., `.so`, `.dll`).
+    ///
+    /// This typically occurs if the specified path is incorrect, the file
+    /// does not exist or the library is not compatible with the current
+    /// architecture.
     LibraryLoading(libloading::Error),
 
+    /// General error originating from the PKCS#11 module state or logic.
+    ///
+    /// This wraps a string describing an issue that is not a return value
+    /// from a Cryptoki function.
     Module(String),
 
+    /// Error returned by the underlying Cryptoki function.
     Pkcs11(CryptokiRetVal),
 
+    /// Invalid value provided to a function.
+    ///
+    /// This indicates that an argument passed to a method was syntactically
+    /// correct but semantically invalid.
     InvalidValue,
 
+    /// Invalid input provided to a function.
+    ///
+    /// Similar to [`InvalidValue`](Self::InvalidValue), but specifically
+    /// refers to malformed input data.
     InvalidInput,
 
+    /// The requested operation or feature is not supported.
     NotSupported,
-
-    NotInitialized,
-
-    AlreadyInitialized,
 }
 
 impl std::fmt::Display for Error {
@@ -56,10 +75,6 @@ impl std::fmt::Display for Error {
             Error::InvalidValue => write!(f, "Invalid value"),
             Error::InvalidInput => write!(f, "Invalid input"),
             Error::NotSupported => write!(f, "Feature not supported"),
-            Error::NotInitialized => write!(f, "PKCS11 module not initialized"),
-            Error::AlreadyInitialized => {
-                write!(f, "PKCS11 module has already been initialized")
-            }
         }
     }
 }
