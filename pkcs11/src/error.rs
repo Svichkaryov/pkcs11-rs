@@ -1,3 +1,28 @@
+//! Encapsulated error type.
+//!
+//! This module defines the main [`Error`] enum and [`Result`] type used
+//! throughout the crate. Errors can originate from library loading, PKCS#11
+//! function calls or input validation.
+//!
+//! Most functions return a [`Result<T>`] where `T` is the success type.
+//! Use standard Rust error handling patterns:
+//!
+//! ```no_run
+//! use pkcs11::module::Pkcs11Module;
+//! use pkcs11::types::InitializeArgs;
+//!
+//! fn action() -> pkcs11::error::Result<()> {
+//!     let pkcs11 = Pkcs11Module::new("/usr/lib/libpkcs11.so")?;
+//!     let pkcs11 = pkcs11.initialize(InitializeArgs::OsLocking)?;
+//!     Ok(())
+//! }
+//!
+//! match action() {
+//!     Ok(()) => println!("Success"),
+//!     Err(e) => eprintln!("Error: {}", e),
+//! }
+//! ```
+
 mod cryptoki_rv;
 
 pub use cryptoki_rv::*;

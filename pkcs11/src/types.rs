@@ -1,3 +1,9 @@
+//! Data types.
+//!
+//! This module provides Rust types that correspond to PKCS#11 structures,
+//! enums, and handles. These types provide safe, idiomatic Rust interfaces
+//! to the underlying C structures defined in the PKCS#11 specification.
+
 mod function;
 mod general;
 mod mechanism;

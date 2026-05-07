@@ -12,6 +12,7 @@ use crate::{
 
 // Ulong
 
+/// An unsigned value.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Ulong(CK_ULONG);
 
@@ -43,6 +44,9 @@ impl From<Ulong> for usize {
 
 // Version
 
+/// Identifies the version of a Cryptoki interface, a Cryptoki library, or an
+/// SSL or TLS implementation, or the hardware or firmware version of a slot
+/// or token.
 #[derive(Debug, Clone, Copy)]
 pub struct Version(CK_VERSION);
 
@@ -89,6 +93,7 @@ pub type SecretPin = SecretString;
 
 // CK_DATE
 
+/// Identifies a date.
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Date(CK_DATE);
 

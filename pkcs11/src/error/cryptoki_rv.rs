@@ -46,9 +46,9 @@ pkcs11_rv_type!(
         /// possible that an attempt to make the exact same function call again
         /// would succeed.
         ///
-        /// [`SessionInfo`]: crate::types::SessionInfo
-        /// [`get_session_info`]: crate::session::Session::get_session_info
-        /// [`device_error`]: crate::types::SessionInfo::device_error
+        /// [`SessionInfo`]: crate::doc_links::SessionInfo
+        /// [`get_session_info`]: crate::doc_links::Session::get_session_info
+        /// [`device_error`]: crate::doc_links::SessionInfo::device_error
         /// [`GeneralError`]: Self::GeneralError
         CKR_FUNCTION_FAILED,
 
@@ -103,7 +103,7 @@ pkcs11_rv_type!(
         /// above; in particular, it is possible for [`get_slot_info`] to
         /// return [`DeviceError`].
         ///
-        /// [`get_slot_info`]: crate::module::Pkcs11Module::get_slot_info
+        /// [`get_slot_info`]: crate::doc_links::Pkcs11Module::get_slot_info
         /// [`DeviceError`]: Self::DeviceError
         CKR_DEVICE_ERROR,
 
@@ -170,12 +170,12 @@ pkcs11_rv_type!(
         /// relevant [`Copyable`], [`Modifiable`] or [`Destroyable`] policy
         /// attribute set to `false`.
         ///
-        /// [`copy_object`]: crate::session::Session::copy_object
-        /// [`set_attribute_value`]: crate::session::Session::set_attribute_value
-        /// [`destroy_object`]: crate::session::Session::destroy_object
-        /// [`Copyable`]: crate::types::Attribute::Copyable
-        /// [`Modifiable`]: crate::types::Attribute::Modifiable
-        /// [`Destroyable`]: crate::types::Attribute::Destroyable
+        /// [`copy_object`]: crate::doc_links::Session::copy_object
+        /// [`set_attribute_value`]: crate::doc_links::Session::set_attribute_value
+        /// [`destroy_object`]: crate::doc_links::Session::destroy_object
+        /// [`Copyable`]: crate::doc_links::Attribute::Copyable
+        /// [`Modifiable`]: crate::doc_links::Attribute::Modifiable
+        /// [`Destroyable`]: crate::doc_links::Attribute::Destroyable
         CKR_ACTION_PROHIBITED,
 
         /// This is a rather generic error code which indicates that the
@@ -216,7 +216,7 @@ pkcs11_rv_type!(
         /// is not available in this library, and so the application cannot
         /// make use of this library in the specified fashion.
         ///
-        /// [`initialize`]: crate::module::Pkcs11Module::initialize
+        /// [`initialize`]: crate::doc_links::Pkcs11Module::initialize
         CKR_CANT_LOCK,
 
         /// This value can only be returned by [`initialize`]. It means that
@@ -224,8 +224,8 @@ pkcs11_rv_type!(
         /// call to [`initialize`] which did not have a matching [`finalize`]
         /// call).
         ///
-        /// [`initialize`]: crate::module::Pkcs11Module::initialize
-        /// [`finalize`]: crate::module::Pkcs11Module::finalize
+        /// [`initialize`]: crate::doc_links::Pkcs11Module::initialize
+        /// [`finalize`]: crate::doc_links::Pkcs11Module::finalize
         CKR_CRYPTOKI_ALREADY_INITIALIZED,
 
         /// This value can be returned by any function other than
@@ -233,7 +233,7 @@ pkcs11_rv_type!(
         /// function cannot be executed because the Cryptoki library has not
         /// yet been initialized by a call to [`initialize`].
         ///
-        /// [`initialize`]: crate::module::Pkcs11Module::initialize
+        /// [`initialize`]: crate::doc_links::Pkcs11Module::initialize
         CKR_CRYPTOKI_NOT_INITIALIZED,
 
         /// This curve is not supported by this token.
@@ -297,10 +297,10 @@ pkcs11_rv_type!(
         ///
         /// [`GeneralError`]: Self::GeneralError
         /// [`FipsSelfTestFailed`]: Self::FipsSelfTestFailed
-        /// [`initialize`]: crate::module::Pkcs11Module::initialize
-        /// [`generate_random`]: crate::session::Session::generate_random
-        /// [`seed_random`]: crate::session::Session::seed_random
-        /// [`generate_key_pair`]: crate::session::Session::generate_key_pair
+        /// [`initialize`]: crate::doc_links::Pkcs11Module::initialize
+        /// [`generate_random`]: crate::doc_links::Session::generate_random
+        /// [`seed_random`]: crate::doc_links::Session::seed_random
+        /// [`generate_key_pair`]: crate::doc_links::Session::generate_key_pair
         CKR_FIPS_SELF_TEST_FAILED,
 
         /// The function was canceled in mid-execution. This happens to a
@@ -338,7 +338,7 @@ pkcs11_rv_type!(
         /// indicates that one of the keys specified is not the same key that
         /// was being used in the original saved session.
         ///
-        /// [`set_operation_state`]: crate::session::Session::set_operation_state
+        /// [`set_operation_state`]: crate::doc_links::Session::set_operation_state
         CKR_KEY_CHANGED,
 
         /// An attempt has been made to use a key for a cryptographic purpose
@@ -349,7 +349,7 @@ pkcs11_rv_type!(
         /// private key). This return value has lower priority than
         /// [`KeyTypeInconsistent`].
         ///
-        /// [`Encrypt`]: crate::types::Attribute::Encrypt
+        /// [`Encrypt`]: crate::doc_links::Attribute::Encrypt
         /// [`KeyTypeInconsistent`]: Self::KeyTypeInconsistent
         CKR_KEY_FUNCTION_NOT_PERMITTED,
 
@@ -363,7 +363,7 @@ pkcs11_rv_type!(
         /// for some reason (perhaps the key isn't a secret key, or perhaps the
         /// token simply can't digest this kind of key).
         ///
-        /// [`digest_key`]: crate::session::Session::digest_key
+        /// [`digest_key`]: crate::doc_links::Session::digest_key
         CKR_KEY_INDIGESTIBLE,
 
         /// This value is only returned by [`set_operation_state`]. It
@@ -371,7 +371,7 @@ pkcs11_rv_type!(
         /// [`set_operation_state`] needs to be supplied with one or more
         /// keys that were being used in the original saved session.
         ///
-        /// [`set_operation_state`]: crate::session::Session::set_operation_state
+        /// [`set_operation_state`]: crate::doc_links::Session::set_operation_state
         CKR_KEY_NEEDED,
 
         /// An extraneous key was supplied to [`set_operation_state`]. For
@@ -379,7 +379,7 @@ pkcs11_rv_type!(
         /// performing a message digesting operation, and an encryption key was
         /// supplied.
         ///
-        /// [`set_operation_state`]: crate::session::Session::set_operation_state
+        /// [`set_operation_state`]: crate::doc_links::Session::set_operation_state
         CKR_KEY_NOT_NEEDED,
 
         /// Although the specified private or secret key does not have its
@@ -389,7 +389,7 @@ pkcs11_rv_type!(
         /// specified is not one of these types). Compare with
         /// [`KeyUnextractable`].
         ///
-        /// [`Extractable`]: crate::types::Attribute::Extractable
+        /// [`Extractable`]: crate::doc_links::Attribute::Extractable
         /// [`KeyUnextractable`]: Self::KeyUnextractable
         CKR_KEY_NOT_WRAPPABLE,
 
@@ -410,7 +410,7 @@ pkcs11_rv_type!(
         /// [`Extractable`] attribute is set to `false`. Compare with
         /// [`KeyNotWrappable`].
         ///
-        /// [`Extractable`]: crate::types::Attribute::Extractable
+        /// [`Extractable`]: crate::doc_links::Attribute::Extractable
         /// [`KeyNotWrappable`]: Self::KeyNotWrappable
         CKR_KEY_UNEXTRACTABLE,
 
@@ -437,7 +437,7 @@ pkcs11_rv_type!(
         /// 2. The library cannot function properly without being able
         ///    to spawn new threads in the above fashion.
         ///
-        /// [`initialize`]: crate::module::Pkcs11Module::initialize
+        /// [`initialize`]: crate::doc_links::Pkcs11Module::initialize
         CKR_NEED_TO_CREATE_THREADS,
 
         /// This value can only be returned by C_GetSlotEvent. It is returned
@@ -461,8 +461,8 @@ pkcs11_rv_type!(
         /// signature operation would prevent Cryptoki from activating an
         /// encryption operation.
         ///
-        /// [`encrypt_init`]: crate::session::Session::encrypt_init
-        /// [`dual_crypto_operations`]: crate::types::TokenInfo::dual_crypto_operations
+        /// [`encrypt_init`]: crate::doc_links::Session::encrypt_init
+        /// [`dual_crypto_operations`]: crate::doc_links::TokenInfo::dual_crypto_operations
         CKR_OPERATION_ACTIVE,
 
         /// There is no active operation of an appropriate type in the
@@ -470,8 +470,8 @@ pkcs11_rv_type!(
         /// [`encrypt`] in a session without having called [`encrypt_init`]
         /// first to activate an encryption operation.
         ///
-        /// [`encrypt`]: crate::session::Session::encrypt
-        /// [`encrypt_init`]: crate::session::Session::encrypt_init
+        /// [`encrypt`]: crate::doc_links::Session::encrypt
+        /// [`encrypt_init`]: crate::doc_links::Session::encrypt_init
         CKR_OPERATION_NOT_INITIALIZED,
 
         /// The specified PIN has expired, and the requested operation cannot
@@ -479,7 +479,7 @@ pkcs11_rv_type!(
         /// value. Whether or not the normal user's PIN on a token ever expires
         /// varies from token to token.
         ///
-        /// [`set_pin`]: crate::session::Session::set_pin
+        /// [`set_pin`]: crate::doc_links::Session::set_pin
         CKR_PIN_EXPIRED,
 
         /// The specified PIN is incorrect, i.e., does not match the PIN stored
@@ -520,9 +520,9 @@ pkcs11_rv_type!(
         /// [`MechanismParamInvalid`], if the other party's public key
         /// specified in the mechanism's parameters is invalid.
         ///
-        /// [`create_object`]: crate::session::Session::create_object
-        /// [`verify_init`]: crate::session::Session::verify_init
-        /// [`derive_key`]: crate::session::Session::derive_key
+        /// [`create_object`]: crate::doc_links::Session::create_object
+        /// [`verify_init`]: crate::doc_links::Session::verify_init
+        /// [`derive_key`]: crate::doc_links::Session::derive_key
         /// [`MechanismParamInvalid`]: Self::MechanismParamInvalid
         CKR_PUBLIC_KEY_INVALID,
 
@@ -531,8 +531,8 @@ pkcs11_rv_type!(
         /// have a random number generator. This return value has higher
         /// priority than [`RandomSeedNotSupported`].
         ///
-        /// [`seed_random`]: crate::session::Session::seed_random
-        /// [`generate_random`]: crate::session::Session::generate_random
+        /// [`seed_random`]: crate::doc_links::Session::seed_random
+        /// [`generate_random`]: crate::doc_links::Session::generate_random
         /// [`RandomSeedNotSupported`]: Self::RandomSeedNotSupported
         CKR_RANDOM_NO_RNG,
 
@@ -541,7 +541,7 @@ pkcs11_rv_type!(
         /// from an application. This return value has lower priority than
         /// [`RandomNoRng`].
         ///
-        /// [`seed_random`]: crate::session::Session::seed_random
+        /// [`seed_random`]: crate::doc_links::Session::seed_random
         /// [`RandomNoRng`]: Self::RandomNoRng
         CKR_RANDOM_SEED_NOT_SUPPORTED,
 
@@ -549,7 +549,7 @@ pkcs11_rv_type!(
         /// indicates that the supplied saved cryptographic operations state is
         /// invalid, and so it cannot be restored to the specified session.
         ///
-        /// [`set_operation_state`]: crate::session::Session::set_operation_state
+        /// [`set_operation_state`]: crate::doc_links::Session::set_operation_state
         CKR_SAVED_STATE_INVALID,
 
         /// This value can only be returned by [`open_session`]. It indicates
@@ -557,14 +557,14 @@ pkcs11_rv_type!(
         /// has too many sessions already open, or because the token has too
         /// many read/write sessions already open.
         ///
-        /// [`open_session`]: crate::module::Pkcs11Module::open_session
+        /// [`open_session`]: crate::doc_links::Pkcs11Module::open_session
         CKR_SESSION_COUNT,
 
         /// This value can only be returned by [`init_token`]. It indicates
         /// that a session with the token is already open, and so the token
         /// cannot be initialized.
         ///
-        /// [`init_token`]: crate::module::Pkcs11Module::init_token
+        /// [`init_token`]: crate::doc_links::Pkcs11Module::init_token
         CKR_SESSION_EXISTS,
 
         /// The specified token does not support parallel sessions. This is a
@@ -574,7 +574,7 @@ pkcs11_rv_type!(
         /// when [`open_session`] is called in a particular deprecated way.
         ///
         /// [`SessionParallelNotSupported`]: Self::SessionParallelNotSupported
-        /// [`open_session`]: crate::module::Pkcs11Module::open_session
+        /// [`open_session`]: crate::doc_links::Pkcs11Module::open_session
         CKR_SESSION_PARALLEL_NOT_SUPPORTED,
 
         /// The specified session was unable to accomplish the desired action
@@ -644,7 +644,7 @@ pkcs11_rv_type!(
         /// that the key handle specified to be used to unwrap another key
         /// is not valid.
         ///
-        /// [`unwrap_key`]: crate::session::Session::unwrap_key
+        /// [`unwrap_key`]: crate::doc_links::Session::unwrap_key
         CKR_UNWRAPPING_KEY_HANDLE_INVALID,
 
         /// This value can only be returned by [`unwrap_key`]. It indicates
@@ -653,14 +653,14 @@ pkcs11_rv_type!(
         /// actually do it because the supplied key's size is outside the range
         /// of key sizes that it can handle.
         ///
-        /// [`unwrap_key`]: crate::session::Session::unwrap_key
+        /// [`unwrap_key`]: crate::doc_links::Session::unwrap_key
         CKR_UNWRAPPING_KEY_SIZE_RANGE,
 
         /// This value can only be returned by [`unwrap_key`]. It indicates
         /// that the type of the key specified to unwrap another key is not
         /// consistent with the mechanism specified for unwrapping.
         ///
-        /// [`unwrap_key`]: crate::session::Session::unwrap_key
+        /// [`unwrap_key`]: crate::doc_links::Session::unwrap_key
         CKR_UNWRAPPING_KEY_TYPE_INCONSISTENT,
 
         /// This value can only be returned by [`login`]. It indicates that the
@@ -669,7 +669,7 @@ pkcs11_rv_type!(
         /// an open SO session, and it attempts to log the SO into it, it will
         /// receive this error code.
         ///
-        /// [`login`]: crate::session::Session::login
+        /// [`login`]: crate::doc_links::Session::login
         CKR_USER_ALREADY_LOGGED_IN,
 
         /// This value can only be returned by [`login`]. It indicates that the
@@ -678,7 +678,7 @@ pkcs11_rv_type!(
         /// application has an open SO session, and it attempts to log the
         /// normal user into it, it will receive this error code.
         ///
-        /// [`login`]: crate::session::Session::login
+        /// [`login`]: crate::doc_links::Session::login
         CKR_USER_ANOTHER_ALREADY_LOGGED_IN,
 
         /// The desired action cannot be performed because the appropriate
@@ -694,8 +694,8 @@ pkcs11_rv_type!(
         /// This value can only be returned by [`login`]. It indicates that the
         /// normal user's PIN has not yet been initialized with [`init_pin`].
         ///
-        /// [`login`]: crate::session::Session::login
-        /// [`init_pin`]: crate::session::Session::init_pin
+        /// [`login`]: crate::doc_links::Session::login
+        /// [`init_pin`]: crate::doc_links::Session::init_pin
         CKR_USER_PIN_NOT_INITIALIZED,
 
         /// An attempt was made to have more distinct users simultaneously
@@ -707,16 +707,16 @@ pkcs11_rv_type!(
         /// [`login`] have to return this value. Note that this error code
         /// generalizes to true multi-user tokens.
         ///
-        /// [`login`]: crate::session::Session::login
+        /// [`login`]: crate::doc_links::Session::login
         CKR_USER_TOO_MANY_TYPES,
 
         /// An invalid value was specified as a [`UserType`]. Valid types are
         /// [`So`], [`User`], and [`ContextSpecific`].
         ///
-        /// [`UserType`]: crate::types::UserType
-        /// [`So`]: crate::types::UserType::So
-        /// [`User`]: crate::types::UserType::User
-        /// [`ContextSpecific`]: crate::types::UserType::ContextSpecific
+        /// [`UserType`]: crate::doc_links::UserType
+        /// [`So`]: crate::doc_links::UserType::So
+        /// [`User`]: crate::doc_links::UserType::User
+        /// [`ContextSpecific`]: crate::doc_links::UserType::ContextSpecific
         CKR_USER_TYPE_INVALID,
 
         /// This value can only be returned by [`unwrap_key`]. It indicates
@@ -728,7 +728,7 @@ pkcs11_rv_type!(
         /// [`unwrap_key`] should return [`WrappedKeyInvalid`]. This return
         /// value has lower priority than [`WrappedKeyLenRange`].
         ///
-        /// [`unwrap_key`]: crate::session::Session::unwrap_key
+        /// [`unwrap_key`]: crate::doc_links::Session::unwrap_key
         /// [`WrappedKeyInvalid`]: Self::WrappedKeyInvalid
         /// [`WrappedKeyLenRange`]: Self::WrappedKeyLenRange
         CKR_WRAPPED_KEY_INVALID,
@@ -738,7 +738,7 @@ pkcs11_rv_type!(
         /// the basis of its length. This return value has higher priority
         /// than [`WrappedKeyInvalid`].
         ///
-        /// [`unwrap_key`]: crate::session::Session::unwrap_key
+        /// [`unwrap_key`]: crate::doc_links::Session::unwrap_key
         /// [`WrappedKeyInvalid`]: Self::WrappedKeyInvalid
         CKR_WRAPPED_KEY_LEN_RANGE,
 
@@ -746,7 +746,7 @@ pkcs11_rv_type!(
         /// the key handle specified to be used to wrap another key is not
         /// valid.
         ///
-        /// [`wrap_key`]: crate::session::Session::wrap_key
+        /// [`wrap_key`]: crate::doc_links::Session::wrap_key
         CKR_WRAPPING_KEY_HANDLE_INVALID,
 
         /// This value can only be returned by [`wrap_key`]. It indicates that
@@ -755,14 +755,14 @@ pkcs11_rv_type!(
         /// actually do it because the supplied wrapping key's size is outside
         /// the range of key sizes that it can handle.
         ///
-        /// [`wrap_key`]: crate::session::Session::wrap_key
+        /// [`wrap_key`]: crate::doc_links::Session::wrap_key
         CKR_WRAPPING_KEY_SIZE_RANGE,
 
         /// This value can only be returned by [`wrap_key`]. It indicates that
         /// the type of the key specified to wrap another key is not consistent
         /// with the mechanism specified for wrapping.
         ///
-        /// [`wrap_key`]: crate::session::Session::wrap_key
+        /// [`wrap_key`]: crate::doc_links::Session::wrap_key
         CKR_WRAPPING_KEY_TYPE_INCONSISTENT,
 
         /// The supplied OTP was not accepted and the library requests a new

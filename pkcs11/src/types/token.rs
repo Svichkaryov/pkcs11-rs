@@ -34,6 +34,7 @@ bitflags! {
     }
 }
 
+/// Identifies a utc time.
 #[derive(Debug, Copy, Clone)]
 pub struct UtcTime {
     pub year: u16,
@@ -165,8 +166,9 @@ impl TokenInfo {
     /// the token may set this flag unless the session state is R/W SO or
     /// R/W User to implement a policy that does not allow any objects, public
     /// or private, to be created, modified, or deleted unless the user has
-    /// successfully called
-    /// [`login`](crate::session::Session::login).
+    /// successfully called [`login`].
+    ///
+    /// [`login`]: crate::doc_links::Session::login
     pub fn write_protected(&self) -> bool {
         self.flags.contains(TokenInfoFlags::WRITE_PROTECTED)
     }
@@ -201,7 +203,9 @@ impl TokenInfo {
     }
 
     /// True if a single session with the token can perform dual cryptographic
-    /// operations (see Section 5.12).
+    /// operations (see [`Section 5.17`]).
+    ///
+    /// [`Section 5.17`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693224
     pub fn dual_crypto_operations(&self) -> bool {
         self.flags.contains(TokenInfoFlags::DUAL_CRYPTO_OPERATIONS)
     }
@@ -211,7 +215,7 @@ impl TokenInfo {
     /// Calling [`init_token`] when this flag is set will cause the token
     /// to be reinitialized.
     ///
-    /// [`init_token`]: crate::module::Pkcs11Module::init_token
+    /// [`init_token`]: crate::doc_links::Pkcs11Module::init_token
     pub fn token_initialized(&self) -> bool {
         self.flags.contains(TokenInfoFlags::TOKEN_INITIALIZED)
     }
@@ -261,8 +265,8 @@ impl TokenInfo {
     /// other function that required the user to be logged in will cause
     /// [`PinExpired`] to be returned until [`set_pin`] is called successfully.
     ///
-    /// [`set_pin`]: crate::session::Session::set_pin
-    /// [`PinExpired`]: crate::error::CryptokiRetVal::PinExpired
+    /// [`set_pin`]: crate::doc_links::Session::set_pin
+    /// [`PinExpired`]: crate::doc_links::CryptokiRetVal::PinExpired
     pub fn user_pin_to_be_changed(&self) -> bool {
         self.flags.contains(TokenInfoFlags::USER_PIN_TO_BE_CHANGED)
     }

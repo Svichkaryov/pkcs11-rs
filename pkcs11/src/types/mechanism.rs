@@ -12,6 +12,11 @@ use crate::{
 
 use super::{CkPodType, ObjectHandle, TryFromCkAttribute};
 
+/// Mechanism vendor defined type.
+///
+/// Mechanism types are permanently reserved for token vendors. For
+/// interoperability, vendors should register their mechanism types
+/// through the PKCS process.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorDefinedMechanism<'a> {
     pub mechanism_type: MechanismType,
@@ -898,7 +903,7 @@ bitflags! {
     }
 }
 
-/// Information about a particular mechanism
+/// Information about a particular mechanism.
 #[derive(Debug, Clone)]
 pub struct MechanismInfo {
     min_key_size: usize,
@@ -928,79 +933,89 @@ impl MechanismInfo {
         self.flags.contains(MechanismInfoFlags::HW)
     }
 
-    /// True if the mechanism can be used with
-    /// [`Session::encrypt_init`](crate::session::Session::encrypt_init) or
-    /// [`Session::encrypt`](crate::session::Session::encrypt).
+    /// True if the mechanism can be used with [`Session::encrypt_init`] or
+    /// [`Session::encrypt`].
+    ///
+    /// [`Session::encrypt_init`]: crate::doc_links::Session::encrypt_init
+    /// [`Session::encrypt`]: crate::doc_links::Session::encrypt
     pub fn encrypt(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::ENCRYPT)
     }
 
-    /// True if the mechanism can be used with
-    /// [`Session::decrypt_init`](crate::session::Session::decrypt_init) or
-    /// [`Session::decrypt`](crate::session::Session::decrypt).
+    /// True if the mechanism can be used with [`Session::decrypt_init`] or
+    /// [`Session::decrypt`].
+    ///
+    /// [`Session::decrypt_init`]: crate::doc_links::Session::decrypt_init
+    /// [`Session::decrypt`]: crate::doc_links::Session::decrypt
     pub fn decrypt(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::DECRYPT)
     }
 
-    /// True if the mechanism can be used with
-    /// [`Session::digest_init`](crate::session::Session::digest_init) or
-    /// [`Session::digest`](crate::session::Session::digest).
+    /// True if the mechanism can be used with [`Session::digest_init`] or
+    /// [`Session::digest`].
+    ///
+    /// [`Session::digest_init`]: crate::doc_links::Session::digest_init
+    /// [`Session::digest`]: crate::doc_links::Session::digest
     pub fn digest(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::DIGEST)
     }
 
-    /// True if the mechanism can be used with
-    /// [`Session::sign_init`](crate::session::Session::sign_init) or
-    /// [`Session::sign`](crate::session::Session::sign).
+    /// True if the mechanism can be used with [`Session::sign_init`] or
+    /// [`Session::sign`].
+    ///
+    /// [`Session::sign_init`]: crate::doc_links::Session::sign_init
+    /// [`Session::sign`]: crate::doc_links::Session::sign
     pub fn sign(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::SIGN)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::sign_recover`](crate::session::Session::sign_recover).
+    /// [`Session::sign_recover`](crate::doc_links::Session::sign_recover).
     pub fn sign_recover(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::SIGN_RECOVER)
     }
 
-    /// True if the mechanism can be used with
-    /// [`Session::verify_init`](crate::session::Session::verify_init) or
-    /// [`Session::verify`](crate::session::Session::verify).
+    /// True if the mechanism can be used with [`Session::verify_init`] or
+    /// [`Session::verify`].
+    ///
+    /// [`Session::verify_init`]: crate::doc_links::Session::verify_init
+    /// [`Session::verify`]: crate::doc_links::Session::verify
     pub fn verify(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::VERIFY)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::verify_recover`](crate::session::Session::verify_recover).
+    /// [`Session::verify_recover`](crate::doc_links::Session::verify_recover).
     pub fn verify_recover(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::VERIFY_RECOVER)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::generate_key`](crate::session::Session::generate_key).
+    /// [`Session::generate_key`](crate::doc_links::Session::generate_key).
     pub fn generate(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::GENERATE)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::generate_key_pair`](crate::session::Session::generate_key_pair).
+    /// [`Session::generate_key_pair`](crate::doc_links::Session::generate_key_pair).
     pub fn generate_key_pair(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::GENERATE_KEY_PAIR)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::wrap_key`](crate::session::Session::wrap_key).
+    /// [`Session::wrap_key`](crate::doc_links::Session::wrap_key).
     pub fn wrap(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::WRAP)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::unwrap_key`](crate::session::Session::unwrap_key).
+    /// [`Session::unwrap_key`](crate::doc_links::Session::unwrap_key).
     pub fn unwrap(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::UNWRAP)
     }
 
     /// True if the mechanism can be used with
-    /// [`Session::derive_key`](crate::session::Session::derive_key).
+    /// [`Session::derive_key`](crate::doc_links::Session::derive_key).
     pub fn derive(&self) -> bool {
         self.flags.contains(MechanismInfoFlags::DERIVE)
     }
@@ -1168,7 +1183,7 @@ impl<'a> Ecdh1DeriveParams<'a> {
     ///   be able to accept this value encoded as a raw octet string (as per
     ///   section A.5.2 of [ANSI X9.62]). A token MAY, in addition, support
     ///   accepting this value as a DER-encoded
-    ///   [`Attribute::EcPoint`](crate::types::Attribute::EcPoint)
+    ///   [`Attribute::EcPoint`](crate::doc_links::Attribute::EcPoint)
     ///   (as per section E.6 of [ANSI X9.62]). The calling application is
     ///   responsible for converting the offered public key to the compressed
     ///   or uncompressed forms of these encodings if the token does not
@@ -1246,7 +1261,7 @@ pkcs11_type!(
     ]
 );
 
-/// Parameters of the RsaPkcsPss mechanism
+/// Parameters of the RsaPkcsPss mechanism.
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct RsaPkcsPssParams {

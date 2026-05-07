@@ -42,7 +42,7 @@ impl std::fmt::UpperHex for SessionHandle {
 // CK_SESSION_INFO
 
 bitflags! {
-    /// Session Information Flags for [`CK_SESSION_INFO`]
+    /// Session Information Flags for [`CK_SESSION_INFO`](crate::doc_links::CK_SESSION_INFO)
     #[derive(Debug, Clone)]
     pub(crate) struct SessionInfoFlags: CK_FLAGS {
         const RW_SESSION = CKF_RW_SESSION;
@@ -158,7 +158,7 @@ impl TryFrom<CK_SESSION_INFO> for SessionInfo {
 
 // CK_USER_TYPE
 
-/// Holds the types of Cryptoki users
+/// Holds the types of Cryptoki users.
 #[derive(Debug, Copy, Clone)]
 pub enum UserType {
     /// Security Officer

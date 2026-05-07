@@ -12,6 +12,17 @@ use crate::{
 
 use super::MechanismType;
 
+/// Token-specific identifier for an object.
+///
+/// When an object is created or found on a token by an application, Cryptoki
+/// assigns it an object handle for that application’s sessions to use to
+/// access it. A particular object on a token does not necessarily have a
+/// handle which is fixed for the lifetime of the object; however, if a
+/// particular session can use a particular handle to access a particular
+/// object, then that session will continue to be able to use that handle to
+/// access that object as long as the session continues to exist, the object
+/// continues to exist, and the object continues to be accessible to the
+/// session.
 #[derive(Debug, Clone, Copy)]
 pub struct ObjectHandle(CK_OBJECT_HANDLE);
 
@@ -48,10 +59,10 @@ impl std::fmt::UpperHex for ObjectHandle {
 pkcs11_type!(
     /// Identifies the classes (or types) of objects that Cryptoki recognizes.
     ///
-    /// Object classes are defined with the objects that use them. The type
-    /// is specified on an object through the
-    /// [`Attribute::Class`](crate::types::Attribute::Class)
-    /// attribute of the object.
+    /// Object classes are defined with the objects that use them. The type is
+    /// specified on an object through the [`Class`] attribute of the object.
+    ///
+    /// [`Class`]: crate::doc_links::Attribute::Class
     #[derive(AttributePodType, TryFromCkAttribute)]
     ObjectClass: CK_OBJECT_CLASS, naming = ScreamingSnakeCase;
     [
@@ -71,7 +82,9 @@ pkcs11_type!(
         CKO_DOMAIN_PARAMETERS,
         /// Mechanism objects provide information about mechanisms
         /// supported by a device beyond that given by
-        /// the CK_MECHANISM_INFO structure.
+        /// the [`MechanismInfo`] structure.
+        ///
+        /// [`MechanismInfo`]: crate::doc_links::MechanismInfo
         CKO_MECHANISM,
         /// OTP key object.
         CKO_OTP_KEY,
@@ -96,8 +109,9 @@ pkcs11_type!(
     ///
     /// Hardware feature types are defined with the objects that use them.
     /// The type is specified on an object through the
-    /// [`Attribute::HwFeatureType`](crate::types::Attribute::HwFeatureType)
-    /// attribute of the object.
+    /// [`HwFeatureType`] attribute of the object.
+    ///
+    /// [`HwFeatureType`]: crate::doc_links::Attribute::HwFeatureType
     #[derive(AttributePodType, TryFromCkAttribute)]
     HwFeatureType: CK_HW_FEATURE_TYPE, naming = ScreamingSnakeCase;
     [
@@ -110,7 +124,9 @@ pkcs11_type!(
 
         /// Clock objects represent real-time clocks that exist on the device.
         /// This represents the same clock source as the utcTime field
-        /// in the CK_TOKEN_INFO structure.
+        /// in the [`TokenInfo`] structure.
+        ///
+        /// [`TokenInfo`]: crate::doc_links::TokenInfo
         CKH_CLOCK,
 
         /// User interface objects represent the presentation
@@ -125,9 +141,10 @@ pkcs11_type!(
     /// Identifies a key type.
     ///
     /// Key types are defined with the objects and mechanisms that use them.
-    /// The key type is specified on an object through the
-    /// [`Attribute::KeyType`](crate::types::Attribute::KeyType)
+    /// The key type is specified on an object through the [`KeyType`]
     /// attribute of the object.
+    ///
+    /// [`KeyType`]: crate::doc_links::Attribute::KeyType
     #[derive(AttributePodType, TryFromCkAttribute)]
     KeyType: CK_KEY_TYPE, naming = ScreamingSnakeCase;
     [
@@ -233,14 +250,16 @@ pkcs11_type!(
     ///
     /// Certificate types are defined with the objects and mechanisms that use
     /// them. The certificate type is specified on an object through the
-    /// [`Attribute::CertificateType`](crate::types::Attribute::CertificateType)
-    /// attribute of the object.
+    /// [`CertificateType`] attribute of the object.
+    ///
+    /// [`CertificateType`]: crate::doc_links::Attribute::CertificateType
     #[derive(AttributePodType, TryFromCkAttribute)]
     CertificateType: CK_CERTIFICATE_TYPE, naming = ScreamingSnakeCase;
     [
         /// X.509 certificate objects hold X.509 public key certificates.
         CKC_X_509,
-        /// X.509 attribute certificate objects hold X.509 attribute certificates.
+        /// X.509 attribute certificate objects hold X.509 attribute
+        /// certificates.
         CKC_X_509_ATTR_CERT,
         /// WTLS certificate objects hold WTLS public key certificates.
         CKC_WTLS,
@@ -282,12 +301,12 @@ pkcs11_type!(
 );
 
 #[allow(clippy::len_without_is_empty)]
-pub trait AttributeValue {
+trait AttributeValue {
     fn as_ck_ptr(&self) -> CK_VOID_PTR;
     fn len(&self) -> CK_ULONG;
 }
 
-pub trait CkPodType: Sized {}
+pub(crate) trait CkPodType: Sized {}
 
 macro_rules! impl_ck_pod_type {
     ($($ty:ty),+ $(,)?) => {
@@ -329,13 +348,18 @@ impl AttributeValue for String {
     }
 }
 
+/// Attribute vendor defined type.
+///
+/// Attribute types are permanently reserved for token vendors. For
+/// interoperability, vendors should register their attribute types
+/// through the PKCS process.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorDefinedAttribute {
     pub attr_type: AttributeType,
     pub value: Vec<u8>,
 }
 
-pub trait TryFromCkAttribute: Sized {
+pub(crate) trait TryFromCkAttribute: Sized {
     fn try_from_ck_attr(attr: &CK_ATTRIBUTE) -> Result<Self>;
 }
 
@@ -453,8 +477,10 @@ impl TryFromCkAttribute for VendorDefinedAttribute {
 pkcs11_attribute_type!(
     /// Identifies an attribute.
     ///
-    /// An array of Attribute is called a "template" and is used for creating,
-    /// manipulating and searching for objects.
+    /// An array of Attribute is called a `template` and is used for creating,
+    /// manipulating and searching for objects. The order of the attributes in
+    /// a template never matters, even if the template contains vendor-specific
+    /// attributes.
     #[non_exhaustive]
     Attribute, naming = UpperCamelCase;
     [
@@ -481,12 +507,16 @@ pkcs11_attribute_type!(
         /// Serial number.
         CKA_SERIAL_NUMBER: Vec<u8>,
         /// DER-encoding of the attribute certificate's issuer field. This is
-        /// distinct from the `ISSUER` attribute contained in CKC_X_509
+        /// distinct from the [`Issuer`] attribute contained in CKC_X_509
         /// certificates because the ASN.1 syntax and encoding are different.
+        ///
+        /// [`Issuer`]: crate::doc_links::Attribute::Issuer
         CKA_AC_ISSUER: Vec<u8>,
         /// DER-encoding of the attribute certificate's subject field. This is
-        /// distinct from the `SUBJECT`attribute contained in CKC_X_509
+        /// distinct from the [`Subject`] attribute contained in CKC_X_509
         /// certificates because the ASN.1 syntax and encoding are different.
+        ///
+        /// [`Subject`]: crate::doc_links::Attribute::Subject
         CKA_OWNER: Vec<u8>,
         /// BER-encoding of a sequence of object identifier values corresponding
         /// to the attribute types contained in the certificate. When present,
@@ -508,14 +538,21 @@ pkcs11_attribute_type!(
         /// can be obtained.
         CKA_URL: String,
         /// Hash of the subject public key (default empty).
-        /// Hash algorithm is defined by `NAME_HASH_ALGORITHM`.
+        /// Hash algorithm is defined by [`NameHashAlgorithm`].
+        ///
+        /// [`NameHashAlgorithm`]: crate::doc_links::Attribute::NameHashAlgorithm
         CKA_HASH_OF_SUBJECT_PUBLIC_KEY: Vec<u8>,
         /// Hash of the issuer public key (default empty).
-        /// Hash algorithm is defined by `NAME_HASH_ALGORITHM`.
+        /// Hash algorithm is defined by [`NameHashAlgorithm`].
+        ///
+        /// [`NameHashAlgorithm`]: crate::doc_links::Attribute::NameHashAlgorithm
         CKA_HASH_OF_ISSUER_PUBLIC_KEY: Vec<u8>,
-        /// Defines the mechanism used to calculate `HASH_OF_SUBJECT_PUBLIC_KEY`
-        /// and `HASH_OF_ISSUER_PUBLIC_KEY`. If the attribute is not present then
+        /// Defines the mechanism used to calculate [`HashhOfSubjectPublicKey`]
+        /// and [`HashOfIssuerPublicKey`]. If the attribute is not present then
         /// the type defaults to SHA-1.
+        ///
+        /// [`HashhOfSubjectPublicKey`]: crate::doc_links::Attribute::HashOfSubjectPublicKey
+        /// [`HashOfIssuerPublicKey`]: crate::doc_links::Attribute::HashOfIssuerPublicKey
         CKA_NAME_HASH_ALGORITHM: MechanismType,
         /// Object checksum.
         CKA_CHECK_VALUE: Vec<u8>,
@@ -592,15 +629,27 @@ pkcs11_attribute_type!(
         CKA_EXTRACTABLE: bool,
         /// True only if object was either
         ///   * generated locally (i.e., on the token)
-        ///     with a `generate_key` or generate_key_pair call
-        ///   * created with a `copy_object` call as a copy of a key
-        ///     which had its `LOCAL` attribute set to true
+        ///     with a [`generate_key`] or [`generate_key_pair`] call
+        ///   * created with a [`copy_object`] call as a copy of a key
+        ///     which had its [`Local`] attribute set to `true`
+        ///
+        /// [`generate_key`]: crate::doc_links::Session::generate_key
+        /// [`generate_key_pair`]: crate::doc_links::Session::generate_key_pair
+        /// [`copy_object`]: crate::doc_links::Session::copy_object
+        /// [`Local`]: crate::doc_links::Attribute::Local
         CKA_LOCAL: bool,
-        /// Indicates if the key has never had the `EXTRACTABLE` attribute set to true.
+        /// Indicates if the key has never had the [`Extractable`] attribute
+        /// set to `true`.
+        ///
+        /// [`Extractable`]: crate::doc_links::Attribute::Extractable
         CKA_NEVER_EXTRACTABLE: bool,
-        /// Indicates if key has always had the `SENSITIVE` attribute set to true.
+        /// Indicates if key has always had the [`Sensitive`] attribute set to
+        /// `true`.
+        ///
+        /// [`Sensitive`]: crate::doc_links::Attribute::Sensitive
         CKA_ALWAYS_SENSITIVE: bool,
-        /// Identifies the key generation mechanism used to generate the key material.
+        /// Identifies the key generation mechanism used to generate the key
+        /// material.
         CKA_KEY_GEN_MECHANISM: MechanismType,
         /// Identifies whether the object can be modified.
         CKA_MODIFIABLE: bool,
@@ -617,53 +666,63 @@ pkcs11_attribute_type!(
         /// to provide a PIN) for each use of a private key.
         CKA_ALWAYS_AUTHENTICATE: bool,
         /// Identifies whether the key can only be wrapped with a wrapping key
-        /// CKA_TRUSTED,
+        /// that has [`Trusted`] attribute set to `true`.
+        ///
+        /// [`Trusted`]: crate::doc_links::Attribute::Trusted
         CKA_WRAP_WITH_TRUSTED: bool,
         /// For wrapping keys. The attribute template to match against any keys
         /// wrapped using this wrapping key. Keys that do not match cannot be
-        /// wrapped. The number of attributes in the array is the ulValueLen
-        /// component of the attribute divided by the size of `Attribute`.
+        /// wrapped. The number of attributes in the array is the *ulValueLen*
+        /// component of the attribute divided by the size of [`Attribute`].
+        ///
+        /// [`Attribute`]: crate::doc_links::Attribute
         CKA_WRAP_TEMPLATE,
         /// For wrapping keys. The attribute template to apply to any keys
         /// unwrapped using this wrapping key. Any user supplied template
         /// is applied after this template as if the object has already been
-        /// created. The number of attributes in the array is the ulValueLen
-        /// component of the attribute divided by the size of `Attribute`.
+        /// created. The number of attributes in the array is the *ulValueLen*
+        /// component of the attribute divided by the size of [`Attribute`].
+        ///
+        /// [`Attribute`]: crate::doc_links::Attribute
         CKA_UNWRAP_TEMPLATE,
         /// For deriving keys. The attribute template to match against any keys
         /// derived using this derivation key. Any user supplied template is
         /// applied after this template as if the object has already been
-        /// created. The number of attributes in the array is the ulValueLen
-        /// component of the attribute divided by the size of `Attribute`.
+        /// created. The number of attributes in the array is the *ulValueLen*
+        /// component of the attribute divided by the size of [`Attribute`].
+        ///
+        /// [`Attribute`]: crate::doc_links::Attribute
         CKA_DERIVE_TEMPLATE,
-        /// The format of the OTP value (e.g. decimal (default), hexadecimal, binary).
+        /// The format of the OTP value (e.g. decimal (default), hexadecimal,
+        /// binary).
         CKA_OTP_FORMAT: Ulong,
-        /// The length of the OTP value in digits or bytes, depending
-        /// on `OTP_FORMAT`.
+        /// The length of the OTP value in digits or bytes, depending on
+        /// [`OtpFormat`](crate::doc_links::Attribute::OtpFormat).
         CKA_OTP_LENGTH: Ulong,
         /// The time interval in seconds between OTP value refreshes.
         CKA_OTP_TIME_INTERVAL: Ulong,
-        /// Identifies whether the token is capable of returning OTPs suitable for
-        /// human consumption.
+        /// Identifies whether the token is capable of returning OTPs suitable
+        /// for human consumption.
         CKA_OTP_USER_FRIENDLY_MODE: bool,
-        /// Identifies challenge parameter requirements when generating or verifying
-        /// OTP values.
+        /// Identifies challenge parameter requirements when generating or
+        /// verifying OTP values.
         CKA_OTP_CHALLENGE_REQUIREMENT: Ulong,
         /// Identifies time parameter requirements when generating or verifying
         /// OTP values.
         CKA_OTP_TIME_REQUIREMENT: Ulong,
-        /// Identifies counter parameter requirements when generating or verifying
-        /// OTP values.
+        /// Identifies counter parameter requirements when generating or
+        /// verifying OTP values.
         CKA_OTP_COUNTER_REQUIREMENT: Ulong,
         /// Identifies pin parameter requirements when generating or verifying
         /// OTP values.
         CKA_OTP_PIN_REQUIREMENT: Ulong,
         /// Value of the associated internal counter.
         CKA_OTP_COUNTER: Vec<u8>,
-        /// Value of the associated internal UTC time in the form YYYYMMDDhhmmss.
+        /// Value of the associated internal UTC time in the form
+        /// YYYYMMDDhhmmss.
         CKA_OTP_TIME: Vec<u8>,
-        /// Text string that identifies a user associated with the OTP key (may be
-        /// used to enhance the user experience).
+        /// Text string that identifies a user associated with the OTP key (may
+        /// be used to enhance the user experience).
         CKA_OTP_USER_IDENTIFIER: Vec<u8>,
         /// Text string that identifies a service that may validate OTPs
         /// generated by this key.
@@ -671,7 +730,9 @@ pkcs11_attribute_type!(
         /// Logotype image that identifies a service that may validate OTPs
         /// generated by this key.
         CKA_OTP_SERVICE_LOGO: Vec<u8>,
-        /// MIME type of the `OTP_SERVICE_LOGO` attribute value.
+        /// MIME type of the [`OtpServiceLogo`] attribute value.
+        ///
+        /// [`OtpServiceLogo`]: crate::doc_links::Attribute::OtpServiceLogo
         CKA_OTP_SERVICE_LOGO_TYPE: Vec<u8>,
         /// Parameters that define GOST R 34.10.
         CKA_GOSTR3410_PARAMS: Vec<u8>,
@@ -681,8 +742,10 @@ pkcs11_attribute_type!(
         CKA_GOST28147_PARAMS: Vec<u8>,
         /// Identifies a hardware feature type of a device.
         CKA_HW_FEATURE_TYPE: HwFeatureType,
-        /// The value of the counter will reset to a previously returned value if
-        /// the token is initialized using C_InitToken.
+        /// The value of the counter will reset to a previously returned value
+        /// if the token is initialized using [`init_token`].
+        ///
+        /// [`init_token`]: crate::doc_links::Pkcs11Module::init_token
         CKA_RESET_ON_INIT: bool,
         /// The value of the counter has been reset at least once at some point
         /// in time.
@@ -693,30 +756,37 @@ pkcs11_attribute_type!(
         CKA_PIXEL_Y: Ulong,
         /// DPI, pixels per inch.
         CKA_RESOLUTION: Ulong,
-        /// For character-oriented displays; number of character rows (e.g. 24).
+        /// For character-oriented displays; number of character rows
+        /// (e.g. 24).
         CKA_CHAR_ROWS: Ulong,
-        /// For character-oriented displays: number of character columns (e.g. 80).
-        /// If display is of proportional-font type, this is the width of the
-        /// display in "em"-s (letter "M"), see CC/PP Struct.
+        /// For character-oriented displays: number of character columns
+        /// (e.g. 80). If display is of proportional-font type, this is the
+        /// width of the display in "em"-s (letter "M"), see CC/PP Struct.
         CKA_CHAR_COLUMNS: Ulong,
         /// Color support.
         CKA_COLOR: bool,
         /// The number of bits of color or grayscale information per pixel.
         CKA_BITS_PER_PIXEL: Ulong,
-        /// String indicating supported character sets, as defined by IANA MIBenum
-        /// sets (www.iana.org). Supported character sets are separated with ";".
-        /// E.g. a token supporting iso-8859-1 and US-ASCII would set the attribute
-        /// value to "4;3".
+        /// String indicating supported character sets, as defined by [`IANA`]
+        /// MIBenum sets. Supported character sets are separated with ";".
+        /// E.g. a token supporting iso-8859-1 and US-ASCII would set the
+        /// attribute value to "4;3".
+        ///
+        /// [`IANA`]: http://www.iana.org
         CKA_CHAR_SETS: Vec<u8>,
         /// String indicating supported content transfer encoding methods, as
-        /// defined by IANA (www.iana.org). Supported methods are separated
+        /// defined by [`IANA`]. Supported methods are separated
         /// with ";". E.g. a token supporting 7bit, 8bit and base64 could set
         /// the attribute value to "7bit;8bit;base64".
+        ///
+        /// [`IANA`]: http://www.iana.org
         CKA_ENCODING_METHODS: Vec<u8>,
         /// String indicating supported (presentable) MIME-types, as defined by
-        /// IANA (www.iana.org). Supported types are separated with ";".
+        /// [`IANA`]. Supported types are separated with ";".
         /// E.g. a token supporting MIME types "a/b", "a/c" and "a/d" would set
         /// the attribute value to "a/b;a/c;a/d".
+        ///
+        /// [`IANA`]: http://www.iana.org
         CKA_MIME_TYPES: Vec<u8>,
         /// The type of mechanism object.
         CKA_MECHANISM_TYPE: MechanismType,

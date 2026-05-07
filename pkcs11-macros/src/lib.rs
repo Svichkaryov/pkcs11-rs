@@ -16,9 +16,11 @@ pub fn derive_try_from_ck_attribute_impl(input: TokenStream) -> TokenStream {
 /// Generate rust newtype and traits for a PKCS#11 type based on a list of
 /// C-style constants.
 ///
-/// /// # Example:
+/// # Example:
 ///
-/// ```rust
+/// ```ignore
+/// use pkcs11_macros::pkcs11_type;
+///
 /// pkcs11_type!(
 ///     /// PKCS#11 object classes.
 ///     ObjectClass: u64, naming = ScreamingSnakeCase;
@@ -42,9 +44,11 @@ pub fn pkcs11_type(input: TokenStream) -> TokenStream {
 /// Generate rust newtype and traits for a PKCS#11 attribute type based on a
 /// list of C-style constants with type.
 ///
-/// /// # Example:
+/// # Example:
 ///
-/// ```rust
+/// ```ignore
+/// use pkcs11_macros::pkcs11_type;
+///
 /// pkcs11_attribute_type!(
 ///     /// Identifies an attribute.
 ///     ///
@@ -73,9 +77,11 @@ pub fn pkcs11_attribute_type(input: TokenStream) -> TokenStream {
 /// Generate rust newtype and traits for a PKCS#11 mechanism type based on a
 /// list of C-style constants with parameter.
 ///
-/// /// # Example:
+/// # Example:
 ///
-/// ```rust
+/// ```ignore
+/// use pkcs11_macros::pkcs11_mechanism_type;
+///
 /// pkcs11_mechanism_type!(
 ///     /// Specifies a particular mechanism and any parameters it requires.
 ///     #[non_exhaustive]
@@ -106,9 +112,11 @@ pub fn pkcs11_mechanism_type(input: TokenStream) -> TokenStream {
 /// Generate rust newtype and traits for a PKCS#11 return value type based on
 /// a list of C-style constants.
 ///
-/// /// # Example:
+/// # Example:
 ///
-/// ```rust
+/// ```ignore
+/// use pkcs11_macros::pkcs11_rv_type;
+///
 /// pkcs11_rv_type!(
 ///     /// Cryptoki function return values.
 ///     #[derive(Debug, Copy, Clone, PartialEq, Eq)]

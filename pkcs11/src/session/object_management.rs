@@ -11,13 +11,13 @@ use super::Session;
 impl Session {
     /// Creates a new object.
     ///
-    /// If a call to it cannot support the precise `template` supplied to it,
-    /// it will fail and return without creating any object.
+    /// If a call to [`create_object`] cannot support the precise `template`
+    /// supplied to it, it will fail and return without creating any object.
     ///
-    /// If it is used to create a key object, pass [`Attribute::Local(true)`]
-    /// in the `template`. If that key object is a secret or private key then
-    /// pass [`Attribute::AlwaysSensitive(false)`] and
-    /// [`Attribute::NeverExtractable(false)`].
+    /// If [`create_object`] is used to create a key object, pass
+    /// [`Attribute::Local(true)`] in the `template`. If that key object is a
+    /// secret or private key then pass [`Attribute::AlwaysSensitive(false)`]
+    /// and [`Attribute::NeverExtractable(false)`].
     ///
     /// Only session objects can be created during a read-only session. Only
     /// public objects can be created unless the normal user is logged in.
@@ -25,9 +25,10 @@ impl Session {
     /// Whenever an object is created, a value for [`Attribute::UniqueId`] is
     /// generated and assigned to the new object (See [`Section 4.4.1`]).
     ///
-    /// [`Attribute::Local(true)`]: crate::types::Attribute::Local
-    /// [`Attribute::AlwaysSensitive(false)`]: crate::types::Attribute::AlwaysSensitive
-    /// [`Attribute::NeverExtractable(false)`]: crate::types::Attribute::NeverExtractable
+    /// [`create_object`]: Self::create_object
+    /// [`Attribute::Local(true)`]: crate::doc_links::Attribute::Local
+    /// [`Attribute::AlwaysSensitive(false)`]: crate::doc_links::Attribute::AlwaysSensitive
+    /// [`Attribute::NeverExtractable(false)`]: crate::doc_links::Attribute::NeverExtractable
     /// [`Section 4.4.1`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693081
     pub fn create_object(&self, template: &[Attribute]) -> Result<ObjectHandle> {
         let template: Vec<CK_ATTRIBUTE> =
@@ -52,34 +53,40 @@ impl Session {
     ///
     /// The `template` may specify new values for any attributes of the
     /// `object` that can ordinarily be modified (e.g., in the course of
-    /// copying a secret key, a key's [`Extractable`](Attribute::Extractable)
-    /// attribute may be changed from `true` to `false`, but not the other way
-    /// around. If this change is made, the new key's
-    /// [`NeverExtractable`](Attribute::NeverExtractable) attribute will have
-    /// the value `false`. Similarly, the `template` may specify that the new
-    /// key's [`Sensitive`](Attribute::Sensitive) attribute be `true`; the new
-    /// key will have the same value for its
-    /// [`AlwaysSensitive`](Attribute::AlwaysSensitive) attribute as the
-    /// original key). It may also specify new values of the
-    /// [`Token`](Attribute::Token) and [`Private`](Attribute::Private)
-    /// attributes (e.g., to copy a session object to a token object). If the
-    /// `template` specifies a value of an attribute which is incompatible with
-    /// other existing attributes of the object, the call fails with the return
-    /// code [`TemplateInconsistent`](CryptokiRetVal::TemplateInconsistent).
+    /// copying a secret key, a key's [`Extractable`] attribute may be changed
+    /// from `true` to `false`, but not the other way around. If this change is
+    /// made, the new key's [`NeverExtractable`] attribute will have the value
+    /// `false`. Similarly, the `template` may specify that the new key's
+    /// [`Sensitive`] attribute be `true`; the new key will have the same value
+    /// for its [`AlwaysSensitive`] attribute as the original key). It may also
+    /// specify new values of the [`Token`] and [`Private`] attributes (e.g.,
+    /// to copy a session object to a token object). If the `template`
+    /// specifies a value of an attribute which is incompatible with other
+    /// existing attributes of the object, the call fails with the return
+    /// code [`TemplateInconsistent`].
     ///
-    /// If a call to it cannot support the precise `template` supplied to it,
-    /// it will fail and return without creating any object. If the object
-    /// indicated by `object` has its [`Copyable`](Attribute::Copyable)
-    /// attribute set to `false`, it will return
-    /// [`ActionProhibited`](CryptokiRetVal::ActionProhibited).
+    /// If a call to [`copy_object`] cannot support the precise `template`
+    /// supplied to it, it will fail and return without creating any object.
+    /// If the object indicated by `object` has its [`Copyable`] attribute set
+    /// to `false`, [`copy_object`] will return [`ActionProhibited`].
     ///
-    /// Whenever an object is copied, a new value for
-    /// [`UniqueId`](Attribute::UniqueId) is generated and assigned to the new
-    /// object (See [`Section 4.4.1`]).
+    /// Whenever an object is copied, a new value for [`UniqueId`] is generated
+    /// and assigned to the new object (See [`Section 4.4.1`]).
     ///
     /// Only session objects can be created during a read-only session. Only
     /// public objects can be created unless the normal user is logged in.
     ///
+    /// [`Extractable`]: crate::doc_links::Attribute::Extractable
+    /// [`NeverExtractable`]: crate::doc_links::Attribute::NeverExtractable
+    /// [`Sensitive`]: crate::doc_links::Attribute::Sensitive
+    /// [`AlwaysSensitive`]: crate::doc_links::Attribute::AlwaysSensitive
+    /// [`Token`]: crate::doc_links::Attribute::Token
+    /// [`Private`]: crate::doc_links::Attribute::Private
+    /// [`TemplateInconsistent`]: crate::doc_links::CryptokiRetVal::TemplateInconsistent
+    /// [`copy_object`]: Self::copy_object
+    /// [`Copyable`]: crate::doc_links::Attribute::Copyable
+    /// [`ActionProhibited`]: crate::doc_links::CryptokiRetVal::ActionProhibited
+    /// [`UniqueId`]: crate::doc_links::Attribute::UniqueId
     /// [`Section 4.4.1`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693081
     pub fn copy_object(
         &self,
@@ -134,8 +141,8 @@ impl Session {
     /// (returned by [`free_private_memory`]) of the token's [`TokenInfo`]
     /// structure increases by approximately S.
     ///
-    /// [`free_private_memory`]: crate::types::TokenInfo::free_private_memory
-    /// [`TokenInfo`]: crate::types::TokenInfo
+    /// [`free_private_memory`]: crate::doc_links::TokenInfo::free_private_memory
+    /// [`TokenInfo`]: crate::doc_links::TokenInfo
     pub fn get_object_size(&self, object: ObjectHandle) -> Result<usize> {
         let mut object_size: CK_ULONG = 0;
 
@@ -241,9 +248,8 @@ impl Session {
     /// Modifies the value of one or more attributes of an `object`.
     ///
     /// Certain objects may not be modified. Calling it on such objects will
-    /// result in the [`ActionProhibited`](CryptokiRetVal::ActionProhibited)
-    /// error code. An application can consult the object's
-    /// [`Modifiable`](Attribute::Modifiable) attribute to determine if an
+    /// result in the [`ActionProhibited`] error code. An application can
+    /// consult the object's [`Modifiable`] attribute to determine if an
     /// object may be modified or not.
     ///
     /// Only session objects can be modified during a read-only session.
@@ -252,11 +258,14 @@ impl Session {
     /// `object` that can be modified. If the `template` specifies a value of
     /// an attribute which is incompatible with other existing attributes of
     /// the `object`, the call fails with the return code
-    /// [`TemplateInconsistent`](CryptokiRetVal::TemplateInconsistent).
+    /// [`TemplateInconsistent`].
     ///
     /// Not all attributes can be modified; see [`Section 4.1.2`] for more
     /// details.
     ///
+    /// [`ActionProhibited`]: crate::doc_links::CryptokiRetVal::ActionProhibited
+    /// [`Modifiable`]: crate::doc_links::Attribute::Modifiable
+    /// [`TemplateInconsistent`]: crate::doc_links::CryptokiRetVal::TemplateInconsistent
     /// [`Section 4.1.2`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693065
     pub fn set_attribute_value(
         &self,

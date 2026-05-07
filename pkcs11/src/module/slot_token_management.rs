@@ -120,8 +120,8 @@ impl Pkcs11Module<Initialized> {
     /// is undefined if multiple threads of a single application make
     /// simultaneous calls to [`wait_for_slot_event`].
     ///
-    /// [`initialize`]: crate::module::general_purpose::Pkcs11Module::initialize
-    /// [`wait_for_slot_event`]: crate::module::slot_token_management::Pkcs11Module::wait_for_slot_event
+    /// [`initialize`]: crate::doc_links::Pkcs11Module::initialize
+    /// [`wait_for_slot_event`]: crate::doc_links::Pkcs11Module::wait_for_slot_event
     pub fn wait_for_slot_event(&self) -> Result<Option<Slot>> {
         let mut slot: CK_SLOT_ID = 0;
         match invoke_pkcs11!(
@@ -229,12 +229,11 @@ impl Pkcs11Module<Initialized> {
     /// A token cannot be initialized if Cryptoki detects that any application
     /// has an open session with it; when a call to [`init_token`] is made
     /// under such circumstances, the call fails with error
-    /// [`SessionExists`](CryptokiRetVal::SessionExists). Unfortunately, it may
-    /// happen when [`init_token`] is called that some other application does
-    /// have an open session with the token, but Cryptoki cannot detect this,
-    /// because it cannot detect anything about other applications using the
-    /// token. If this is the case, then the consequences of the [`init_token`]
-    /// call are undefined.
+    /// [`SessionExists`]. Unfortunately, it may happen when [`init_token`] is
+    /// called that some other application does have an open session with the
+    /// token, but Cryptoki cannot detect this, because it cannot detect
+    /// anything about other applications using the token. If this is the case,
+    /// then the consequences of the [`init_token`] call are undefined.
     ///
     /// The [`init_token`] function may not be sufficient to properly
     /// initialize complex tokens. In these situations, an initialization
@@ -242,8 +241,9 @@ impl Pkcs11Module<Initialized> {
     /// definition of "complex token" is product specific.
     ///
     /// [`init_token`]: Self::init_token
-    /// [`token_initialized`]: crate::types::TokenInfo::token_initialized
-    /// [`protected authentication path`]: TokenInfo::protected_authentication_path
+    /// [`token_initialized`]: crate::doc_links::TokenInfo::token_initialized
+    /// [`protected authentication path`]: crate::doc_links::TokenInfo::protected_authentication_path
+    /// [`SessionExists`]: crate::doc_links::CryptokiRetVal::SessionExists
     pub fn init_token(
         &self,
         slot: Slot,

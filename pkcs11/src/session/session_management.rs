@@ -26,8 +26,8 @@ impl Pkcs11Module<Initialized> {
     /// token fails with error code [`SessionReadWriteSoExists`]
     /// (see [`PKCS11-UG`] for further details).
     ///
-    /// [`write-protected`]: crate::types::TokenInfo::write_protected
-    /// [`SessionReadWriteSoExists`]: crate::error::CryptokiRetVal::SessionReadWriteSoExists
+    /// [`write-protected`]: crate::doc_links::TokenInfo::write_protected
+    /// [`SessionReadWriteSoExists`]: crate::doc_links::CryptokiRetVal::SessionReadWriteSoExists
     /// [`PKCS11-UG`]: http://docs.oasis-open.org/pkcs11/pkcs11-ug/v2.40/pkcs11-ug-v2.40.html
     pub fn open_session(&self, slot: Slot, rw: bool) -> Result<Session> {
         let mut session_handle = CK_SESSION_HANDLE::default();
@@ -116,7 +116,7 @@ impl Session {
 
     /// Restores the cryptographic operations state of a session
     /// from a string of bytes obtained with
-    /// [`get_operation_state`](Session::get_operation_state).
+    /// [`get_operation_state`](Self::get_operation_state).
     pub fn set_operation_state(
         &self,
         operation_state: Vec<u8>,
@@ -159,8 +159,7 @@ impl Session {
     /// When this function returns, whatever authentication method supported by
     /// the token will have been performed; a return value `Ok(())` means that
     /// the user was successfully authenticated, and a return value of
-    /// [`PinIncorrect`](CryptokiRetVal::PinIncorrect) means that the user was
-    /// denied access.
+    /// [`PinIncorrect`] means that the user was denied access.
     ///
     /// If there are any active cryptographic or object finding operations in
     /// an application's session, and then this function is successfully
@@ -178,18 +177,19 @@ impl Session {
     /// set to `true` exists, and the user needs to do cryptographic operation
     /// on this key. See further [`Section 4.10`].
     ///
-    /// [`So`]: crate::types::UserType::So
-    /// [`User`]: crate::types::UserType::User
-    /// [`RwSecurityOfficer`]: crate::types::SessionState::RwSecurityOfficer
-    /// [`RwUser`]: crate::types::SessionState::RwUser
-    /// [`RoUser`]: crate::types::SessionState::RoUser
-    /// [`ContextSpecific`]: crate::types::UserType::ContextSpecific
-    /// [`OperationNotInitialized`]: crate::error::CryptokiRetVal::OperationNotInitialized
-    /// [`protected authentication path`]: crate::types::TokenInfo::protected_authentication_path
+    /// [`So`]: crate::doc_links::UserType::So
+    /// [`User`]: crate::doc_links::UserType::User
+    /// [`RwSecurityOfficer`]: crate::doc_links::SessionState::RwSecurityOfficer
+    /// [`RwUser`]: crate::doc_links::SessionState::RwUser
+    /// [`RoUser`]: crate::doc_links::SessionState::RoUser
+    /// [`ContextSpecific`]: crate::doc_links::UserType::ContextSpecific
+    /// [`OperationNotInitialized`]: crate::doc_links::CryptokiRetVal::OperationNotInitialized
+    /// [`protected authentication path`]: crate::doc_links::TokenInfo::protected_authentication_path
     /// [`PKCS11-UG`]: http://docs.oasis-open.org/pkcs11/pkcs11-ug/v2.40/pkcs11-ug-v2.40.html
-    /// [`SessionReadOnlyExists`]: crate::error::CryptokiRetVal::SessionReadOnlyExists
+    /// [`PinIncorrect`]: crate::doc_links::CryptokiRetVal::PinIncorrect
+    /// [`SessionReadOnlyExists`]: crate::doc_links::CryptokiRetVal::SessionReadOnlyExists
     /// [`logout`]: Self::logout
-    /// [`AlwaysAuthenticate`]: crate::types::Attribute::AlwaysAuthenticate
+    /// [`AlwaysAuthenticate`]: crate::doc_links::Attribute::AlwaysAuthenticate
     /// [`Section 4.10`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693098
     pub fn login(&self, user_type: UserType, pin: Option<&SecretPin>) -> Result<()> {
         let (pin_ptr, pin_len) = match pin {
@@ -229,8 +229,8 @@ impl Session {
     /// operations are still active. Therefore, before logging out, any active
     /// operations should be finished.
     ///
-    /// [`RwPublic`]: crate::types::SessionState::RwPublic
-    /// [`RoPublic`]: crate::types::SessionState::RoPublic
+    /// [`RwPublic`]: crate::doc_links::SessionState::RwPublic
+    /// [`RoPublic`]: crate::doc_links::SessionState::RoPublic
     pub fn logout(&self) -> Result<()> {
         CryptokiRetVal::from(invoke_pkcs11!(
             self.module(),

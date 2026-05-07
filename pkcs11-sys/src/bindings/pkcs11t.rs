@@ -1502,7 +1502,7 @@ cryptoki_aligned! {
     ///
     /// Each Cryptoki library has a static CK_FUNCTION_LIST structure, and
     /// a pointer to it (or to a copy of it which is also owned by the library)
-    ///  may be obtained by the C_GetFunctionList function (see Section 5.2).
+    /// may be obtained by the C_GetFunctionList function (see Section 5.2).
     /// The value that this pointer points to can be used by an application
     /// to quickly find out where the executable code for each function in
     /// the Cryptoki API is located. Every function in the Cryptoki API

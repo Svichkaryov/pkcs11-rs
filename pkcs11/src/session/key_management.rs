@@ -19,22 +19,25 @@ impl Session {
     /// Since the type of key or domain parameters to be generated is implicit
     /// in the generation `mechanism`, the `template` does not need to supply a
     /// key type. If it does supply a key type which is inconsistent with the
-    /// generation `mechanism`, it fails and returns the error code
-    /// [`TemplateInconsistent`]. The [`Class`] attribute is treated similarly.
+    /// generation `mechanism`, [`generate_key`] fails and returns the error
+    /// code [`TemplateInconsistent`]. The [`Class`] attribute is treated
+    /// similarly.
     ///
-    /// If a call to it cannot support the precise `template` supplied to it,
-    /// it will fail and return without creating an object.
+    /// If a call to [`generate_key`] cannot support the precise `template`
+    /// supplied to it, it will fail and return without creating an object.
     ///
-    /// The object created by a successful call to it will have its [`Local`]
-    /// attribute set to `true`. In addition, the object created will have a
-    /// value for [`UniqueId`] generated and assigned (See [`Section 4.4.1`]).
+    /// The object created by a successful call to [`generate_key`] will have
+    /// its [`Local`] attribute set to `true`. In addition, the object created
+    /// will have a value for [`UniqueId`] generated and assigned (See
+    /// [`Section 4.4.1`]).
     ///
-    /// [`Class`]: crate::types::Attribute::Class
-    /// [`DOMAIN_PARAMETERS`]: crate::types::ObjectClass::DOMAIN_PARAMETERS
-    /// [`SECRET_KEY`]: crate::types::ObjectClass::SECRET_KEY
-    /// [`TemplateInconsistent`]: crate::error::CryptokiRetVal::TemplateInconsistent
-    /// [`Local`]: crate::types::Attribute::Local
-    /// [`UniqueId`]: crate::types::Attribute::UniqueId
+    /// [`Class`]: crate::doc_links::Attribute::Class
+    /// [`DOMAIN_PARAMETERS`]: crate::doc_links::ObjectClass::DOMAIN_PARAMETERS
+    /// [`SECRET_KEY`]: crate::doc_links::ObjectClass::SECRET_KEY
+    /// [`generate_key`]: Self::generate_key
+    /// [`TemplateInconsistent`]: crate::doc_links::CryptokiRetVal::TemplateInconsistent
+    /// [`Local`]: crate::doc_links::Attribute::Local
+    /// [`UniqueId`]: crate::doc_links::Attribute::UniqueId
     /// [`Section 4.4.1`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693081
     pub fn generate_key(
         &self,
@@ -66,28 +69,33 @@ impl Session {
     /// Since the types of keys to be generated are implicit in the key pair
     /// generation `mechanism`, the templates do not need to supply key types.
     /// If one of the templates does supply a key type which is inconsistent
-    /// with the key generation `mechanism`, it fails and returns the error
-    /// code [`TemplateInconsistent`](CryptokiRetVal::TemplateInconsistent).
-    /// The [`Class`](Attribute::Class) attribute is treated similarly.
+    /// with the key generation `mechanism`, [`generate_key_pair`] fails and
+    /// returns the error code [`TemplateInconsistent`]. The [`Class`]
+    /// attribute is treated similarly.
     ///
-    /// If a call to it cannot support the precise templates supplied to it,
-    /// it will fail and return without creating any key objects.
+    /// If a call to [`generate_key_pair`] cannot support the precise templates
+    /// supplied to it, it will fail and return without creating any key
+    /// objects.
     ///
-    /// A call to it will never create just one key and return. A call can
-    /// fail, and create no keys; or it can succeed, and create a matching
-    /// public/private key pair.
+    /// A call to [`generate_key_pair`] will never create just one key and
+    /// return. A call can fail, and create no keys; or it can succeed, and
+    /// create a matching public/private key pair.
     ///
-    /// The key objects created by a successful call to it will have their
-    /// [`Local`](Attribute::Local) attributes set to `true`. In addition,
-    /// the key objects created will both have values for
-    /// [`UniqueId`](Attribute::UniqueId) generated and assigned
-    /// (See [`Section 4.4.1`]).
+    /// The key objects created by a successful call to [`generate_key_pair`]
+    /// will have their [`Local`] attributes set to `true`. In addition, the
+    /// key objects created will both have values for [`UniqueId`] generated
+    /// and assigned (See [`Section 4.4.1`]).
     ///
-    /// Note carefully the order of the arguments to it. The last two arguments
-    /// do not have the same order as they did in the original Cryptoki
-    /// Version 1.0 document. The order of these two arguments has caused some
-    /// unfortunate confusion.
+    /// Note carefully the order of the arguments to [`generate_key_pair`]. The
+    /// last two arguments do not have the same order as they did in the
+    /// original Cryptoki Version 1.0 document. The order of these two
+    /// arguments has caused some unfortunate confusion.
     ///
+    /// [`generate_key_pair`]: Self::generate_key_pair
+    /// [`TemplateInconsistent`]: crate::doc_links::CryptokiRetVal::TemplateInconsistent
+    /// [`Class`]: crate::doc_links::Attribute::Class
+    /// [`UniqueId`]: crate::doc_links::Attribute::UniqueId
+    /// [`Local`]: crate::doc_links::Attribute::Local
     /// [`Section 4.4.1`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693081
     pub fn generate_key_pair(
         &self,
@@ -125,20 +133,18 @@ impl Session {
 
     /// Wraps (i.e., encrypts) a private or secret `key`.
     ///
-    /// The [`Wrap`](Attribute::Wrap) attribute of the `wrapping_key`, which
-    /// indicates whether the key supports wrapping, MUST be `true`. The
-    /// [`Extractable`](Attribute::Extractable) attribute of the `key` to be
-    /// wrapped MUST also be `true`.
+    /// The [`Wrap`] attribute of the `wrapping_key`, which indicates whether
+    /// the key supports wrapping, MUST be `true`. The [`Extractable`]
+    /// attribute of the `key` to be wrapped MUST also be `true`.
     ///
     /// If the `key` to be wrapped cannot be wrapped for some token-specific
-    /// reason, despite it having its [`Extractable`](Attribute::Extractable)
-    /// attribute set to `true`, then it fails with error code
-    /// [`KeyNotWrappable`](CryptokiRetVal::KeyNotWrappable). If it cannot be
+    /// reason, despite it having its [`Extractable`] attribute set to `true`,
+    /// then it fails with error code [`KeyNotWrappable`]. If it cannot be
     /// wrapped with the specified `wrapping_key` and `mechanism` solely
-    /// because of its length, then it fails with error code
-    /// [`KeySizeRange`](CryptokiRetVal::KeySizeRange).
+    /// because of its length, then [`wrap_key`] fails with error code
+    /// [`KeySizeRange`].
     ///
-    /// It can be used in the following situations:
+    /// [`wrap_key`] can be used in the following situations:
     ///   - To wrap any secret key with a public key that supports encryption
     ///     and decryption.
     ///   - To wrap any secret key with any other secret key. Consideration
@@ -148,6 +154,12 @@ impl Session {
     ///
     /// Of course, tokens vary in which types of keys can actually be wrapped
     /// with which mechanisms.
+    ///
+    /// [`Wrap`]: crate::doc_links::Attribute::Wrap
+    /// [`Extractable`]: crate::doc_links::Attribute::Extractable
+    /// [`KeyNotWrappable`]: crate::doc_links::CryptokiRetVal::KeyNotWrappable
+    /// [`wrap_key`]: Self::wrap_key
+    /// [`KeySizeRange`]: crate::doc_links::CryptokiRetVal::KeySizeRange
     pub fn wrap_key(
         &self,
         mechanism: &Mechanism,
@@ -192,37 +204,44 @@ impl Session {
     /// Unwraps (i.e. decrypts) a `wrapped_key`, creating a new private key
     /// or secret key object.
     ///
-    /// The [`Unwrap`](Attribute::Unwrap) attribute of the `unwrapping_key`,
+    /// The [`Unwrap`] attribute of the `unwrapping_key`,
     /// which indicates whether the key supports unwrapping, MUST be `true`.
     ///
-    /// The `template` for the new key SHALL specify
-    /// [`ValueLen`](Attribute::ValueLen) when neither the key type of the
-    /// unwrapped key nor the unwrapping `mechanism` unambiguously determine
-    /// the length of the unwrapped key; otherwise, the function SHALL return
-    /// [`TemplateIncomplete`](CryptokiRetVal::TemplateIncomplete).
+    /// The `template` for the new key SHALL specify [`ValueLen`] when neither
+    /// the key type of the unwrapped key nor the unwrapping `mechanism`
+    /// unambiguously determine the length of the unwrapped key; otherwise, the
+    /// function SHALL return [`TemplateIncomplete`].
     ///
-    /// The `template` for the new key MAY specify
-    /// [`ValueLen`](Attribute::ValueLen) when the key type of the unwrapped
-    /// key or the unwrapping `mechanism` unambiguously determine the length of
-    /// the unwrapped key. If any length conflict occurs between the key type
-    /// of the unwrapped key, the output from the unwrapping `mechanism`, or
-    /// the specified [`ValueLen`](Attribute::ValueLen), then the function
-    /// SHALL return [`WrappedKeyLenRange`](CryptokiRetVal::WrappedKeyLenRange).
+    /// The `template` for the new key MAY specify [`ValueLen`] when the key
+    /// type of the unwrapped key or the unwrapping `mechanism` unambiguously
+    /// determine the length of the unwrapped key. If any length conflict
+    /// occurs between the key type of the unwrapped key, the output from the
+    /// unwrapping `mechanism`, or the specified [`ValueLen`], then the
+    /// function SHALL return [`WrappedKeyLenRange`].
     ///
-    /// The new key will have the
-    /// [`AlwaysSensitive`](Attribute::AlwaysSensitive) attribute set to
-    /// `false`, and the [`NeverExtractable`](Attribute::NeverExtractable)
-    /// attribute set to `false`. The [`Extractable`](Attribute::Extractable)
-    /// attribute is by default set to `true`.
+    /// The new key will have the [`AlwaysSensitive`] attribute set to `false`,
+    /// and the [`NeverExtractable`] attribute set to `false`. The
+    /// [`Extractable`] attribute is by default set to `true`.
     ///
-    /// If a call to it cannot support the precise `template` supplied to it,
-    /// it will fail and return without creating any key object.
+    /// If a call to [`unwrap_key`] cannot support the precise `template`
+    /// supplied to it, it will fail and return without creating any key
+    /// object.
     ///
-    /// The key object created by a successful call to it will have its
-    /// [`Local`](Attribute::Local) attribute set to `false`. In addition, the
-    /// object created will have a value for [`UniqueId`](Attribute::UniqueId)
-    /// generated and assigned (See [`Section 4.4.1`]).
+    /// The key object created by a successful call to [`unwrap_key`] will have
+    /// its [`Local`] attribute set to `false`. In addition, the object created
+    /// will have a value for [`UniqueId`] generated and assigned (See
+    /// [`Section 4.4.1`]).
     ///
+    /// [`Unwrap`]: crate::doc_links::Attribute::Unwrap
+    /// [`ValueLen`]: crate::doc_links::Attribute::ValueLen
+    /// [`TemplateIncomplete`]: crate::doc_links::CryptokiRetVal::TemplateIncomplete
+    /// [`WrappedKeyLenRange`]: crate::doc_links::CryptokiRetVal::WrappedKeyLenRange
+    /// [`AlwaysSensitive`]: crate::doc_links::Attribute::AlwaysSensitive
+    /// [`NeverExtractable`]: crate::doc_links::Attribute::NeverExtractable
+    /// [`Extractable`]: crate::doc_links::Attribute::Extractable
+    /// [`unwrap_key`]: Self::unwrap_key
+    /// [`Local`]: crate::doc_links::Attribute::Local
+    /// [`UniqueId`]: crate::doc_links::Attribute::UniqueId
     /// [`Section 4.4.1`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693081
     pub fn unwrap_key(
         &self,
@@ -256,23 +275,28 @@ impl Session {
 
     /// Derives a key from a `base_key`, creating a new key object.
     ///
-    /// The values of the [`Sensitive`](Attribute::Sensitive),
-    /// [`AlwaysSensitive`](Attribute::AlwaysSensitive),
-    /// [`Extractable`](Attribute::Extractable), and
-    /// [`NeverExtractable`](Attribute::NeverExtractable) attributes for the
-    /// `base_key` affect the values that these attributes can hold for the
-    /// newly-derived key. See the description of each particular
-    /// key-derivation `mechanism` in [`Section 6.42`] and [`Section 6.43`] for
-    /// any constraints of this type.
+    /// The values of the [`Sensitive`], [`AlwaysSensitive`], [`Extractable`],
+    /// and [`NeverExtractable`] attributes for the `base_key` affect the
+    /// values that these attributes can hold for the newly-derived key. See
+    /// the description of each particular key-derivation `mechanism` in
+    /// [`Section 6.42`] and [`Section 6.43`] for any constraints of this type.
     ///
-    /// If a call to it cannot support the precise `template` supplied to it,
-    /// it will fail and return without creating any key object.
+    /// If a call to [`derive_key`] cannot support the precise `template`
+    /// supplied to it, it will fail and return without creating any key
+    /// object.
     ///
-    /// The key object created by a successful call to it will have its
-    /// [`Local`](Attribute::Local) attribute set to `false`. In addition, the
-    /// object created will have a value for [`UniqueId`](Attribute::UniqueId)
-    /// generated and assigned (See [`Section 4.4.1`]).
+    /// The key object created by a successful call to [`derive_key`] will have
+    /// its [`Local`] attribute set to `false`. In addition, the object created
+    /// will have a value for [`UniqueId`] generated and assigned (See
+    /// [`Section 4.4.1`]).
     ///
+    /// [`Sensitive`]: crate::doc_links::Attribute::Sensitive
+    /// [`AlwaysSensitive`]: crate::doc_links::Attribute::AlwaysSensitive
+    /// [`Extractable`]: crate::doc_links::Attribute::Extractable
+    /// [`NeverExtractable`]: crate::doc_links::Attribute::NeverExtractable
+    /// [`derive_key`]: Self::derive_key
+    /// [`Local`]: crate::doc_links::Attribute::Local
+    /// [`UniqueId`]: crate::doc_links::Attribute::UniqueId
     /// [`Section 6.42`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693562
     /// [`Section 6.43`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693575
     /// [`Section 4.4.1`]: https://docs.oasis-open.org/pkcs11/pkcs11-spec/v3.2/pkcs11-spec-v3.2.html#_Toc195693081

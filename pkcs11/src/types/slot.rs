@@ -4,6 +4,14 @@ use pkcs11_sys::*;
 
 use crate::{ck_util::string_from_blank_padded, types::Version};
 
+/// Identifies a slot.
+///
+/// A list of slots is returned by [`get_all_slots`], [`get_slots_with_token`] or
+/// [`get_slots_with_initialized_token`].
+///
+/// [`get_all_slots`]: crate::doc_links::Pkcs11Module::get_all_slots
+/// [`get_slots_with_token`]: crate::doc_links::Pkcs11Module::get_slots_with_token
+/// [`get_slots_with_initialized_token`]: crate::doc_links::Pkcs11Module::get_slots_with_initialized_token
 #[derive(Debug, Clone, Copy)]
 pub struct Slot(CK_SLOT_ID);
 
@@ -41,7 +49,7 @@ impl std::fmt::UpperHex for Slot {
 
 bitflags! {
     #[derive(Debug, Clone)]
-    /// Slot information flags for [`CK_SLOT_INFO`]
+    /// Slot information flags for [`CK_SLOT_INFO`](crate::doc_links::CK_SLOT_INFO)
     struct SlotInfoFlags: CK_FLAGS {
         const TOKEN_PRESENT = CKF_TOKEN_PRESENT;
         const REMOVABLE_DEVICE = CKF_REMOVABLE_DEVICE;

@@ -134,7 +134,7 @@ pub(crate) fn pkcs11_rv_type_impl(input: TokenStream) -> TokenStream {
         impl #type_name {
             /// Convert the return value into a standard [`Result`].
             ///
-            /// [`Result`]: crate::error::Result
+            /// [`Result`]: crate::doc_links::Result
             pub fn into_result(self) -> ::std::result::Result<(), crate::error::Error> {
                 match self {
                     #type_name::#ok_variant => ::std::result::Result::Ok(()),

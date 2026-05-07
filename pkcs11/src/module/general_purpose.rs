@@ -42,9 +42,11 @@ impl Drop for Pkcs11ModuleImpl {
     }
 }
 
+/// The library module state before Cryptoki has been initialized.
 #[derive(Debug, Clone)]
 pub struct Uninitialized;
 
+/// The library module state after Cryptoki has been initialized.
 #[derive(Debug, Clone)]
 pub struct Initialized;
 
@@ -57,6 +59,36 @@ pub trait ModuleState: private::Sealed {}
 impl ModuleState for Uninitialized {}
 impl ModuleState for Initialized {}
 
+/// A handle to a loaded PKCS#11 library.
+///
+/// The module uses the typestate to represent whether the library has been
+/// initialized. A `Pkcs11Module<Uninitialized>` can be created from a shared
+/// library path and is then transitioned into `Pkcs11Module<Initialized>`
+/// by calling [`initialize`].
+///
+/// The underlying library is finalized automatically when the last clone of
+/// the module handle is dropped.
+///
+/// # Example
+///
+/// ```no_run
+/// use pkcs11::module::Pkcs11Module;
+/// use pkcs11::types::InitializeArgs;
+///
+/// fn main() -> pkcs11::error::Result<()> {
+///     let pkcs11 = Pkcs11Module::new("/usr/lib/libpkcs11.so")?;
+///     let pkcs11 = pkcs11.initialize(InitializeArgs::OsLocking)?;
+///     
+///     let slots = pkcs11.get_all_slots()?;
+///     for slot in slots {
+///         println!("slot: {}", slot);
+///     }
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// [`initialize`]: crate::doc_links::Pkcs11Module::initialize
 #[derive(Debug, Clone)]
 pub struct Pkcs11Module<S: ModuleState> {
     pub(crate) impl_: Arc<Pkcs11ModuleImpl>,
@@ -71,13 +103,20 @@ impl<S: ModuleState> Pkcs11Module<S> {
 }
 
 impl Pkcs11Module<Uninitialized> {
-    pub fn new<P>(filename: P) -> Result<Self>
+    /// Load a PKCS#11 library from the given `path`.
+    ///
+    /// This returns an uninitialized module and does not perform Cryptoki
+    /// initialization. The library is not ready for token or slot
+    /// operations until it is transitioned with [`initialize`].
+    ///
+    /// [`initialize`]: crate::doc_links::Pkcs11Module::initialize
+    pub fn new<P>(path: P) -> Result<Self>
     where
         P: AsRef<Path>,
     {
         unsafe {
-            let lib = libloading::Library::new(filename.as_ref())
-                .map_err(Error::LibraryLoading)?;
+            let lib =
+                libloading::Library::new(path.as_ref()).map_err(Error::LibraryLoading)?;
             let func_list_sym: libloading::Symbol<C_GetFunctionList> =
                 lib.get(b"C_GetFunctionList")?;
             let mut ck_func_list =
@@ -100,7 +139,23 @@ impl Pkcs11Module<Uninitialized> {
         }
     }
 
-    /// Initializes the Cryptoki library.
+    /// Initializes the loaded Cryptoki library.
+    ///
+    /// Return initialized module that supports all slot and token
+    /// operations.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use pkcs11::module::Pkcs11Module;
+    /// use pkcs11::types::InitializeArgs;
+    ///
+    /// # fn main() -> pkcs11::error::Result<()> {
+    /// let pkcs11 = Pkcs11Module::new("/usr/lib/libpkcs11.so")?;
+    /// let pkcs11 = pkcs11.initialize(InitializeArgs::OsLocking)?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn initialize(
         self,
         init_args: InitializeArgs,
@@ -121,7 +176,9 @@ impl Pkcs11Module<Uninitialized> {
 }
 
 impl Pkcs11Module<Initialized> {
-    /// Stub
+    /// Stub function. The library is automatically finalized when the module
+    /// handle is dropped.
+    #[allow(dead_code)]
     pub fn finalize(self) {}
 
     /// Returns general information about Cryptoki.
@@ -132,11 +189,3 @@ impl Pkcs11Module<Initialized> {
         Info::try_from(info)
     }
 }
-
-// impl Drop for Pkcs11Module {
-//     fn drop(&mut self) {
-//         println!("Drop from Pkcs11Module");
-//         // There is no `initialized` flag reset as it is not logically required
-//         // after library finalization.
-//     }
-// }

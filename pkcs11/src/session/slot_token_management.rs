@@ -30,9 +30,9 @@ impl Session {
     /// then it is token-dependent whether or not this function can be used to
     /// initialize the normal user's token access.
     ///
-    /// [`RwSecurityOfficer`]: crate::types::SessionState::RwSecurityOfficer
-    /// [`UserNotLoggedIn`]: crate::error::CryptokiRetVal::UserNotLoggedIn
-    /// [`protected authentication path`]: crate::types::TokenInfo::protected_authentication_path
+    /// [`RwSecurityOfficer`]: crate::doc_links::SessionState::RwSecurityOfficer
+    /// [`UserNotLoggedIn`]: crate::doc_links::CryptokiRetVal::UserNotLoggedIn
+    /// [`protected authentication path`]: crate::doc_links::TokenInfo::protected_authentication_path
     pub fn init_pin(&self, pin: Option<&SecretPin>) -> Result<()> {
         let (pin_ptr, pin_len) = match pin {
             Some(pin) => (
@@ -74,12 +74,12 @@ impl Session {
     /// then it is token-dependent whether or not this function can be used to
     /// modify the current user's PIN.
     ///
-    /// [`SessionReadOnly`]: crate::error::CryptokiRetVal::SessionReadOnly
-    /// [`User`]: crate::types::UserType::User
-    /// [`RwPublic`]: crate::types::SessionState::RwPublic
-    /// [`RwSecurityOfficer`]: crate::types::SessionState::RwSecurityOfficer
-    /// [`RwUser`]: crate::types::SessionState::RwUser
-    /// [`protected authentication path`]: crate::types::TokenInfo::protected_authentication_path
+    /// [`SessionReadOnly`]: crate::doc_links::CryptokiRetVal::SessionReadOnly
+    /// [`User`]: crate::doc_links::UserType::User
+    /// [`RwPublic`]: crate::doc_links::SessionState::RwPublic
+    /// [`RwSecurityOfficer`]: crate::doc_links::SessionState::RwSecurityOfficer
+    /// [`RwUser`]: crate::doc_links::SessionState::RwUser
+    /// [`protected authentication path`]: crate::doc_links::TokenInfo::protected_authentication_path
     pub fn set_pin(
         &self,
         old_pin: Option<&SecretPin>,

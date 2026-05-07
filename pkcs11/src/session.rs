@@ -1,3 +1,40 @@
+//! Session management for tokens.
+//!
+//! This module provides the [`Session`] type and related operations for
+//! interacting with PKCS#11 tokens. Sessions are created from initialized
+//! modules and provide access to cryptographic operations, key management,
+//! and token information.
+//!
+//! [`Session`] is created using methods on [`Pkcs11Module<Initialized>`] and
+//! are automatically closed when dropped.
+//!
+//! # Thread Safety
+//!
+//! According to the PKCS#11 specification a single session can, in general,
+//! perform only one operation at a time. The application should never make
+//! multiple simultaneous function calls which use a common session.
+//!
+//! To enforce this requirement at the type level, the [`Session`] type does
+//! not implement [`Send`] or [`Sync`]. This means that a session handle cannot
+//! be shared or moved between threads. If your application needs concurrent
+//! access to a token, each thread should open its own dedicated session.
+//!
+//! # Example
+//!
+//! ```no_run
+//! use pkcs11::module::Pkcs11Module;
+//! use pkcs11::types::{InitializeArgs, Slot};
+//!
+//! fn action(slot: Slot) -> pkcs11::error::Result<()> {
+//!     let pkcs11 = Pkcs11Module::new("/usr/lib/libpkcs11.so")?;
+//!     let pkcs11 = pkcs11.initialize(InitializeArgs::OsLocking)?;
+//!
+//!     let session = pkcs11.open_ro_session(slot)?;
+//!     // ... use session
+//!     Ok(())
+//! }
+//! ```
+
 mod crypto;
 mod crypto_raw;
 mod key_management;

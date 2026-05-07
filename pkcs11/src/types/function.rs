@@ -9,11 +9,12 @@ pub enum InitializeArgs {
     Null,
 
     /// The application will be performing multi-threaded Cryptoki access, and
-    /// the library needs to use the native operating system primitives
-    /// to ensure safe multi-threaded access. If the library is unable
-    /// to do this, [`initialize`](crate::module::Pkcs11Module::initialize)
-    /// should return with the value
-    /// [`CantLock`](crate::error::CryptokiRetVal::CantLock).
+    /// the library needs to use the native operating system primitives to
+    /// ensure safe multi-threaded access. If the library is unable to do this,
+    /// [`initialize`] should return with the value [`CantLock`].
+    ///
+    /// [`initialize`]: crate::doc_links::Pkcs11Module::initialize
+    /// [`CantLock`]: crate::doc_links::CryptokiRetVal::CantLock
     OsLocking,
 }
 
