@@ -3,11 +3,37 @@ use proc_macro::TokenStream;
 mod naming;
 mod types;
 
+/// Derives the `CkPodType` marker trait for a type.
+///
+/// The type must have a valid `#[repr(...)]` attribute:
+/// `C`, `transparent` or any primitive integer repr.
+///
+/// # Example
+///
+/// ```ignore
+/// #[derive(AttributePodType)]
+/// #[repr(C)]
+/// pub struct ObjectClass(CK_OBJECT_CLASS);
+/// ```
 #[proc_macro_derive(AttributePodType)]
 pub fn derive_attribute_value(input: TokenStream) -> TokenStream {
     types::derive_attribute_pod_type_impl(input)
 }
 
+/// Derives the `TryFromCkAttribute` impl for a type, allowing it to be
+/// deserialized from a raw `CK_ATTRIBUTE`.
+///
+/// The type must be a struct with exactly one unnamed field, where the field
+/// type implements `TryFromCkAttribute`. It must also have a valid
+/// `#[repr(...)]` attribute: `C`, `transparent` or any primitive integer repr.
+///
+/// # Example
+///
+/// ```ignore
+/// #[derive(TryFromCkAttribute)]
+/// #[repr(transparent)]
+/// pub struct ObjectClass(CK_OBJECT_CLASS);
+/// ```
 #[proc_macro_derive(TryFromCkAttribute)]
 pub fn derive_try_from_ck_attribute_impl(input: TokenStream) -> TokenStream {
     types::derive_try_from_ck_attribute_impl(input)

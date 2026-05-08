@@ -387,6 +387,12 @@ impl TryFromCkAttribute for Ulong {
     }
 }
 
+impl TryFromCkAttribute for CK_ULONG {
+    fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
+        Ulong::try_from_ck_attr(ck_attribute).map(Into::into)
+    }
+}
+
 impl TryFromCkAttribute for Date {
     fn try_from_ck_attr(ck_attribute: &CK_ATTRIBUTE) -> Result<Self> {
         let value: CK_DATE =
@@ -875,3 +881,20 @@ pkcs11_attribute_type!(
         CKA_VENDOR_DEFINED,
     ]
 );
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_trait_try_from_ck_attr() {
+        let mut ck_attr_val: CK_ULONG = CKH_CLOCK;
+        let attr = CK_ATTRIBUTE {
+            attrType: CKA_HW_FEATURE_TYPE,
+            pValue: &mut ck_attr_val as *mut _ as CK_VOID_PTR,
+            ulValueLen: std::mem::size_of_val(&mut ck_attr_val) as CK_ULONG,
+        };
+        let hw_feature_type = HwFeatureType::try_from_ck_attr(&attr).unwrap();
+        assert_eq!(hw_feature_type, HwFeatureType::CLOCK);
+    }
+}

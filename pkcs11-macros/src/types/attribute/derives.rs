@@ -64,16 +64,40 @@ pub(crate) fn derive_try_from_ck_attribute_impl(input: TokenStream) -> TokenStre
         return syn::Error::new_spanned(
             &input.ident,
             "TryFromCkAttribute derive requires #[repr(C)], \
-            #[repr(transparent)], etc and Ulong inner type",
+            #[repr(transparent)], etc.",
         )
         .to_compile_error()
         .into();
     }
 
+    let inner_ty = match &input.data {
+        syn::Data::Struct(data) => match &data.fields {
+            syn::Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
+                &fields.unnamed[0].ty
+            }
+            _ => {
+                return syn::Error::new_spanned(
+                    &input.ident,
+                    "TryFromCkAttribute derive requires a struct with exactly one unnamed field",
+                )
+                .to_compile_error()
+                .into();
+            }
+        },
+        _ => {
+            return syn::Error::new_spanned(
+                &input.ident,
+                "TryFromCkAttribute derive only supports structs",
+            )
+            .to_compile_error()
+            .into();
+        }
+    };
+
     quote! {
         impl TryFromCkAttribute for #type_name {
             fn try_from_ck_attr(attr: &CK_ATTRIBUTE) -> Result<Self> {
-                <#type_name as TryFromCkAttribute>::try_from_ck_attr(&attr)
+                Ok(Self(<#inner_ty as TryFromCkAttribute>::try_from_ck_attr(attr)?))
             }
         }
     }
