@@ -40,10 +40,6 @@ macro_rules! cryptoki_aligned {
     }
 }
 
-pub(super) use cryptoki_aligned;
-pub(super) use cryptoki_type_default;
-
-
 pub const CRYPTOKI_VERSION_MAJOR: CK_BYTE = 2;
 pub const CRYPTOKI_VERSION_MINOR: CK_BYTE = 40;
 pub const CRYPTOKI_VERSION_AMENDMENT: CK_BYTE = 0;

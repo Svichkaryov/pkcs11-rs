@@ -4,24 +4,49 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
-  docs:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1.16.0
+
+      - name: Build documentation
+        run: cargo doc --no-deps --all-features
+
+      - name: Prepare index redirect and disable Jekyll
+        run: |
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=pkcs11\">" > target/doc/index.html
+          touch target/doc/.nojekyll
+
+      - name: Upload page artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: target/doc
+
+  deploy:
+    needs: build
+
+    runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo doc --no-deps --all-features
-      - run: |
-          echo "<meta http-equiv=\"refresh\" content=\"0; url=pkcs11\">" > target/doc/index.html
-          touch target/doc/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: target/doc
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
